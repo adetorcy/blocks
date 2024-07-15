@@ -1,0 +1,12 @@
+<svg viewBox="-1 -1 102 152" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <rect id="square" width="50" height="50" stroke="black" fill="lime" stroke-width="2" />
+  </defs>
+
+  <use href="#square" x="0" y="0" />
+  <use href="#square" x="0" y="50" />
+  <use href="#square" x="50" y="50" />
+  <use href="#square" x="50" y="100" />
+
+</svg>
