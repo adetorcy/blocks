@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "./Playfield.css";
 
 export default function Playfield() {
   const [content, setContent] = useState(null);
