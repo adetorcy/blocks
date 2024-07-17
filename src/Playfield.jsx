@@ -1,4 +1,5 @@
 import { useState } from "react";
+import StartMenu from "./StartMenu";
 
 export default function Playfield() {
   const [content, setContent] = useState(null);
@@ -22,15 +23,15 @@ export default function Playfield() {
         </div>
       );
     case "game":
+      console.log("START");
+    // eslint-disable-next-line no-fallthrough
     default:
       // Show start menu
       return (
-        <div className="playfield playfield-menu startmenu">
-          <button className="btn">START</button>
-          <button className="btn" onClick={() => setContent("controls")}>
-            CONTROLS
-          </button>
-        </div>
+        <StartMenu
+          startButtonCallback={() => setContent("game")}
+          controlsButtonCallback={() => setContent("controls")}
+        />
       );
   }
 }
