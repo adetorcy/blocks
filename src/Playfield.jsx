@@ -8,8 +8,8 @@ export default function Playfield() {
     // Show controls menu
     case "controls":
       return (
-        <div className="playfield playfield-menu">
-          <div className="controls">
+        <div className="card stack playfield">
+          <div className="stack">
             {controls.map(([keyName, action], i) => (
               <div key={i} className="controlsline">
                 <span>{keyName}:</span>
@@ -17,7 +17,7 @@ export default function Playfield() {
               </div>
             ))}
           </div>
-          <button className="btn ok-btn blink" onClick={() => setContent(null)}>
+          <button autoFocus onClick={() => setContent(null)}>
             OK
           </button>
         </div>

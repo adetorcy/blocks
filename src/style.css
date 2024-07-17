@@ -1,87 +1,93 @@
 html {
-  font-family: "Micro 5", system-ui;
-  font-size: 44px;
+  font: 44px "Micro 5", system-ui;
   font-synthesis: none;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 #app {
   display: flex;
-  margin-top: 16px;
+  justify-content: center;
+  column-gap: 16px;
+  margin: 16px auto 0;
   color: white;
   user-select: none;
   --square-size: 40px;
 }
 
-/*** PLAYFIELD ***/
-.playfield {
-  width: calc(10 * var(--square-size));
-  height: calc(20 * var(--square-size));
+/**********/
+/*** UI ***/
+/**********/
+
+button {
+  border: none;
+  background-color: inherit;
+  font: inherit;
+  color: inherit;
+  padding: 0 12px;
+  cursor: pointer;
+
+  &:focus {
+    animation: blinker 0.6s step-start infinite;
+    outline: none;
+  }
+}
+
+.card {
   background-color: black;
   box-shadow: 8px 8px gray;
 }
 
-.playfield-menu {
+.stack {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+}
 
-  &.startmenu {
-    row-gap: 12px;
+@keyframes blinker {
+  50% {
+    color: coral;
   }
 }
 
-.controls {
-  display: flex;
-  flex-direction: column;
+/*****************/
+/*** PLAYFIELD ***/
+/*****************/
+
+.playfield {
+  width: calc(10 * var(--square-size));
+  height: calc(20 * var(--square-size));
+
+  &.stack {
+    justify-content: center;
+    align-items: center;
+    row-gap: 24px;
+  }
 }
 
 .controlsline {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  column-gap: 44px;
 }
 
+/*****************/
 /*** DASHBOARD ***/
+/*****************/
+
 .dashboard {
-  display: flex;
-  flex-direction: column;
-  margin-left: 16px;
+  row-gap: 32px;
 }
 
 .scorebox {
-  display: flex;
-  flex-direction: column;
-
   width: auto;
   height: fit-content;
-
-  background-color: black;
-  box-shadow: 8px 8px gray;
-
-  padding-left: 12px;
-  padding-right: 12px;
+  padding: 0 12px;
 }
 
 .nextbox {
-  display: flex;
-  flex-direction: column;
-  margin-top: 24px;
-
-  background-color: black;
-  box-shadow: 8px 8px gray;
-
-  padding-left: 12px;
-  padding-right: 12px;
-  padding-bottom: 12px;
+  padding: 0 12px 12px;
 }
 
 #nextpiece {
@@ -93,29 +99,4 @@ body {
 #level,
 #lines {
   margin-top: -16px;
-}
-
-/*** MISC ***/
-.btn {
-  border: none;
-  background-color: inherit;
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-  padding: 0 12px;
-  cursor: pointer;
-}
-
-.ok-btn {
-  margin-top: 0.5rem;
-}
-
-.blink {
-  animation: blinker 0.6s step-start infinite;
-}
-
-@keyframes blinker {
-  50% {
-    color: coral;
-  }
 }

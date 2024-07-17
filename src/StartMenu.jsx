@@ -20,13 +20,9 @@ export default function StartMenu({
   }, []);
 
   return (
-    <div className="playfield playfield-menu startmenu">
-      <button className="btn" onClick={startButtonCallback}>
-        START
-      </button>
-      <button className="btn" onClick={controlsButtonCallback}>
-        CONTROLS
-      </button>
+    <div className="card stack playfield">
+      <button onClick={startButtonCallback}>START</button>
+      <button onClick={controlsButtonCallback}>CONTROLS</button>
     </div>
   );
 }
