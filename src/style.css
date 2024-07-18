@@ -14,7 +14,7 @@ body {
   margin: 16px auto 0;
   color: white;
   user-select: none;
-  --square-size: 40px;
+  --block-size: 40px;
 }
 
 /**********/
@@ -56,8 +56,8 @@ button {
 /*****************/
 
 .playfield {
-  width: calc(10 * var(--square-size));
-  height: calc(20 * var(--square-size));
+  width: calc(10 * var(--block-size));
+  height: calc(20 * var(--block-size));
 
   &.stack {
     justify-content: center;
@@ -91,8 +91,8 @@ button {
 }
 
 #nextpiece {
-  width: calc(4 * var(--square-size));
-  height: calc(4 * var(--square-size));
+  width: calc(4 * var(--block-size));
+  height: calc(4 * var(--block-size));
 }
 
 #score,

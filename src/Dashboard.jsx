@@ -1,3 +1,7 @@
+import { useEffect, useRef } from "react";
+import { clearCanvas, drawPiece } from "./drawing";
+import { randomPiece } from "./pieces";
+
 export default function Dashboard() {
   return (
     <div className="stack dashboard">
@@ -17,8 +21,28 @@ export default function Dashboard() {
       </div>
       <div className="card stack nextbox">
         <div>NEXT</div>
-        <canvas id="nextpiece"></canvas>
+        <NextPiece />
       </div>
     </div>
+  );
+}
+
+// Mockup with random piece
+function NextPiece() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    drawPiece(randomPiece(), canvas);
+
+    return () => {
+      // cleanup
+      clearCanvas(canvas);
+    };
+  }, []);
+
+  return (
+    <canvas height="160" width="160" ref={canvasRef} id="nextpiece"></canvas>
   );
 }
