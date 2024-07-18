@@ -1,28 +1,46 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { autoFocusRef } from "./utils";
 
 export default function StartMenu({
   startButtonCallback,
   controlsButtonCallback,
 }) {
+  const [focusedButtonIndex, setFocusedButtonIndex] = useState(0);
+
   useEffect(() => {
+    // Callback for keydown event listener
     function handleKeydown(event) {
-      console.log(`KeyboardEvent: key='${event.key}' | code='${event.code}'`);
+      if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+        setFocusedButtonIndex((index) => (index + 1) % 2);
+      }
     }
 
+    // Add event listener
     window.addEventListener("keydown", handleKeydown);
-    console.log("added event listener");
 
     return () => {
-      // cleanup
-      console.log("removing event listener");
+      // Remove event listener
       window.removeEventListener("keydown", handleKeydown);
     };
   }, []);
 
+  // Array of callback-label pairs
+  const buttons = [
+    [startButtonCallback, "START"],
+    [controlsButtonCallback, "CONTROLS"],
+  ];
+
   return (
     <div className="card stack playfield">
-      <button onClick={startButtonCallback}>START</button>
-      <button onClick={controlsButtonCallback}>CONTROLS</button>
+      {buttons.map(([callback, label], i) => (
+        <button
+          key={i}
+          onClick={callback}
+          ref={i === focusedButtonIndex ? autoFocusRef : null}
+        >
+          {label}
+        </button>
+      ))}
     </div>
   );
 }

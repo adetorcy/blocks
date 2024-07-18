@@ -1,5 +1,6 @@
 import { useState } from "react";
 import StartMenu from "./StartMenu";
+import { autoFocusRef } from "./utils";
 
 export default function Playfield() {
   const [content, setContent] = useState(null);
@@ -17,7 +18,7 @@ export default function Playfield() {
               </div>
             ))}
           </div>
-          <button autoFocus onClick={() => setContent(null)}>
+          <button ref={autoFocusRef} onClick={() => setContent(null)}>
             OK
           </button>
         </div>
