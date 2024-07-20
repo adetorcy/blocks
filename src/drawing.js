@@ -1,4 +1,4 @@
-const BLOCK_SIZE = 40;
+export const BLOCK_SIZE = 40;
 
 export function clearCanvas(canvas) {
   canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);

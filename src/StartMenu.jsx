@@ -31,7 +31,7 @@ export default function StartMenu({
   ];
 
   return (
-    <div className="card stack playfield">
+    <div className="card stack startmenu">
       {buttons.map(([callback, label], i) => (
         <button
           key={i}

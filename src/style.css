@@ -55,15 +55,13 @@ button {
 /*** PLAYFIELD ***/
 /*****************/
 
-.playfield {
+.startmenu,
+.controls {
   width: calc(10 * var(--block-size));
   height: calc(20 * var(--block-size));
-
-  &.stack {
-    justify-content: center;
-    align-items: center;
-    row-gap: 24px;
-  }
+  justify-content: center;
+  align-items: center;
+  row-gap: 24px;
 }
 
 .controlsline {
@@ -88,11 +86,6 @@ button {
 
 .nextbox {
   padding: 0 12px 12px;
-}
-
-#nextpiece {
-  width: calc(4 * var(--block-size));
-  height: calc(4 * var(--block-size));
 }
 
 #score,

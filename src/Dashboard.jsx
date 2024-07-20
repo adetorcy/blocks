@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { clearCanvas, drawPiece } from "./drawing";
+import { BLOCK_SIZE, clearCanvas, drawPiece } from "./drawing";
 import { randomPiece } from "./pieces";
 
 export default function Dashboard() {
@@ -43,6 +43,11 @@ function NextPiece() {
   }, []);
 
   return (
-    <canvas height="160" width="160" ref={canvasRef} id="nextpiece"></canvas>
+    <canvas
+      height={4 * BLOCK_SIZE}
+      width={4 * BLOCK_SIZE}
+      ref={canvasRef}
+      id="nextpiece"
+    ></canvas>
   );
 }

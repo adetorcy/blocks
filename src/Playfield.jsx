@@ -1,15 +1,16 @@
 import { useState } from "react";
 import StartMenu from "./StartMenu";
+import Game from "./game";
 import { autoFocusRef } from "./utils";
 
 export default function Playfield() {
   const [content, setContent] = useState(null);
 
   switch (content) {
-    // Show controls menu
     case "controls":
+      // Controls menu
       return (
-        <div className="card stack playfield">
+        <div className="card stack controls">
           <div className="stack">
             {controls.map(([keyName, action], i) => (
               <div key={i} className="controlsline">
@@ -23,11 +24,11 @@ export default function Playfield() {
           </button>
         </div>
       );
+
     case "game":
-      console.log("START");
-    // eslint-disable-next-line no-fallthrough
+      return <Game escButtonCallback={() => setContent(null)} />;
+
     default:
-      // Show start menu
       return (
         <StartMenu
           startButtonCallback={() => setContent("game")}
