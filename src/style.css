@@ -14,7 +14,7 @@ body {
   margin: 16px auto 0;
   color: white;
   user-select: none;
-  --block-size: 40px;
+  /* --block-size: 40px; */
 }
 
 /**********/
@@ -55,13 +55,28 @@ button {
 /*** PLAYFIELD ***/
 /*****************/
 
-.startmenu,
-.controls {
-  width: calc(10 * var(--block-size));
-  height: calc(20 * var(--block-size));
-  justify-content: center;
+.gamearea {
+  display: grid;
+  padding: 2px;
+}
+
+.baselayer,
+.toplayer {
+  grid-area: 1/1;
+}
+
+.menu {
+  align-self: center;
+  justify-self: center;
   align-items: center;
   row-gap: 24px;
+}
+
+.menu-pause {
+  outline: 4px solid black;
+  border: 4px solid white;
+  padding: 24px;
+  background-color: black;
 }
 
 .controlsline {
@@ -79,17 +94,13 @@ button {
 }
 
 .scorebox {
-  width: auto;
-  height: fit-content;
   padding: 0 12px;
+}
+
+.scorevalue {
+  margin-top: -16px;
 }
 
 .nextbox {
   padding: 0 12px 12px;
-}
-
-#score,
-#level,
-#lines {
-  margin-top: -16px;
 }

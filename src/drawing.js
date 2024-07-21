@@ -1,3 +1,5 @@
+import { randomPiece } from "./pieces";
+
 export const BLOCK_SIZE = 40;
 
 export function clearCanvas(canvas) {
@@ -26,13 +28,25 @@ function drawBlock(ctx, x, y) {
 }
 
 // stub
-export function drawPiece(piece, canvas) {
-  const ctx = canvas.getContext("2d");
-
+export function drawPiece(piece, ctx) {
   ctx.fillStyle = piece.color;
 
   piece.rotation[0].map((value) => {
     const [column, row] = [value % 4, Math.trunc(value / 4)];
     drawBlock(ctx, column * BLOCK_SIZE, row * BLOCK_SIZE);
   });
+}
+
+// testing
+export function randomFill(ctx) {
+  console.log("Painting canvas");
+
+  for (let i = 0; i < 200; i++) {
+    // get random piece color
+    ctx.fillStyle = randomPiece().color;
+
+    // draw block
+    const [column, row] = [i % 10, Math.trunc(i / 10)];
+    drawBlock(ctx, column * BLOCK_SIZE, row * BLOCK_SIZE);
+  }
 }

@@ -1,5 +1,4 @@
 // https://harddrop.com/wiki/Nintendo_Rotation_System
-// Start with GB style aka left handed
 
 /*
 
@@ -16,19 +15,22 @@ y = value // 4
 */
 
 export const I_PIECE = {
+  name: "i",
   color: "cyan",
   rotation: [
-    [4, 5, 6, 7],
-    [1, 5, 9, 13],
+    [8, 9, 10, 11],
+    [2, 6, 10, 14],
   ],
 };
 
 export const O_PIECE = {
+  name: "o",
   color: "yellow",
   rotation: [[5, 6, 9, 10]],
 };
 
 export const J_PIECE = {
+  name: "j",
   color: "blue",
   rotation: [
     [4, 5, 6, 10],
@@ -39,6 +41,7 @@ export const J_PIECE = {
 };
 
 export const L_PIECE = {
+  name: "l",
   color: "orange",
   rotation: [
     [4, 5, 6, 8],
@@ -49,14 +52,16 @@ export const L_PIECE = {
 };
 
 export const S_PIECE = {
+  name: "s",
   color: "lime",
   rotation: [
     [5, 6, 8, 9],
-    [0, 4, 5, 9],
+    [1, 5, 6, 10],
   ],
 };
 
 export const T_PIECE = {
+  name: "t",
   color: "magenta",
   rotation: [
     [4, 5, 6, 9],
@@ -67,10 +72,11 @@ export const T_PIECE = {
 };
 
 export const Z_PIECE = {
+  name: "z",
   color: "red",
   rotation: [
     [4, 5, 9, 10],
-    [1, 4, 5, 8],
+    [2, 5, 6, 9],
   ],
 };
 

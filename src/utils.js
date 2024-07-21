@@ -2,3 +2,7 @@
 // We make our own using a ref callback
 // https://react.dev/reference/react-dom/components/common#ref-callback
 export const autoFocusRef = (node) => node?.focus();
+
+export function padScore(score) {
+  return score.toString().padStart(3, "0");
+}
