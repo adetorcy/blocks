@@ -1,6 +1,7 @@
-import { randomFill, drawPiece, clearCanvas } from "./drawing";
-import { randomPiece } from "./pieces";
+import { randomFill, drawBoard, drawPieceInBox } from "./drawing";
+import Piece from "./piece";
 import { SCORE_UPDATE_EVENT } from "./constants";
+import { clearCanvas } from "./utils";
 
 /**  Useful links
  *
@@ -10,7 +11,10 @@ import { SCORE_UPDATE_EVENT } from "./constants";
  **/
 
 // Game board aka playfield
-const board = new Array(22).fill(new Array(10).fill(0));
+// x: board index
+// i: playfield row number
+// x = 22 - i
+const board = Array.from({ length: 22 }, () => new Array(10).fill(0));
 
 // Game data
 let intervalID,
@@ -19,19 +23,19 @@ let intervalID,
   nextPieceCanvas,
   nextPieceCanvasCtx,
   frameCount = 0,
-  score = 0,
-  level = 0,
-  lines = 0,
+  // score = 0,
+  // level = 0,
+  // lines = 0,
   currentPiece,
   nextPiece,
-  position;
+  hasChanged = false;
 
 // Game loop stub
 function frame() {
   // testing
-  console.log(frameCount);
+  // console.log(frameCount);
 
-  // testing
+  // testing: update score every 60 frames
   if (frameCount % 60 === 0) {
     window.dispatchEvent(
       new CustomEvent(SCORE_UPDATE_EVENT, {
@@ -40,26 +44,48 @@ function frame() {
     );
   }
 
+  // testing: update position every 48 frames
+  if (frameCount % 48 === 0) {
+    // try to move piece down
+  }
+
+  // Needs repaint?
+  if (hasChanged) {
+    requestAnimationFrame(repaint);
+  }
+
   // Increment frame count
   frameCount++;
 }
 
 export function init() {
+  // Set up playfield
   gameCanvas = document.getElementById("gameCanvas");
   gameCanvasCtx = gameCanvas.getContext("2d");
 
-  currentPiece = randomPiece();
-  nextPiece = randomPiece();
+  // Pick first piece
+  currentPiece = Piece.getRandom();
 
+  // Add piece to board
+  addPieceToBoard(currentPiece, board);
+
+  console.log(board);
+
+  // Set up next piece box
   nextPieceCanvas = document.getElementById("nextPieceCanvas");
   nextPieceCanvasCtx = nextPieceCanvas.getContext("2d");
 
-  drawNextPiece();
+  // Pick next piece
+  nextPiece = Piece.getRandom();
 
-  position = spawn(currentPiece);
+  // Show next piece
+  drawPieceInBox(nextPieceCanvasCtx, nextPiece);
 
   // testing
-  randomFill(gameCanvasCtx);
+  // randomFill(gameCanvasCtx);
+
+  // Request repaint
+  hasChanged = true;
 }
 
 // Both NES and GameBoy run at roughly 60 frames per second
@@ -78,19 +104,22 @@ export function stop() {
 
 export function reset() {
   frameCount = 0;
-  score = 0;
-  level = 0;
-  lines = 0;
+  // score = 0;
+  // level = 0;
+  // lines = 0;
   clearCanvas(gameCanvas);
   clearCanvas(nextPieceCanvas);
+  board.forEach((row) => row.fill(0));
 }
 
-function spawn(piece) {
-  // Our indices are 0 based hence 1 less than what is usually mentioned
-  return piece.name === "i" ? [3, 21] : [4, 20];
+function repaint() {
+  clearCanvas(gameCanvas);
+  drawBoard(gameCanvasCtx, board);
 }
 
-function drawNextPiece() {
-  clearCanvas(nextPieceCanvas);
-  drawPiece(nextPiece, nextPieceCanvasCtx);
+function addPieceToBoard(piece, board) {
+  piece.rotationState.forEach((value) => {
+    const [column, row] = [value % 4, Math.trunc(value / 4)];
+    board[row + piece.y][column + piece.x] = piece.name;
+  });
 }

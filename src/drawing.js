@@ -1,10 +1,15 @@
-import { randomPiece } from "./pieces";
-
 export const BLOCK_SIZE = 40;
 
-export function clearCanvas(canvas) {
-  canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-}
+// Piece colors
+const COLORS = {
+  i: "cyan",
+  o: "yellow",
+  j: "blue",
+  l: "orange",
+  s: "lime",
+  t: "magenta",
+  z: "red",
+};
 
 function drawBlock(ctx, x, y) {
   // offset for border effect
@@ -27,14 +32,40 @@ function drawBlock(ctx, x, y) {
   ctx.fillRect(x + 4, y + 4, 4, 4);
 }
 
-// stub
-export function drawPiece(piece, ctx) {
-  ctx.fillStyle = piece.color;
+// Draw piece in next piece box
+export function drawPieceInBox(ctx, piece) {
+  // Set color
+  ctx.fillStyle = COLORS[piece.name];
 
-  piece.rotation[0].map((value) => {
+  // Center piece in box
+  const [x, y] = piece.offset;
+
+  // Draw piece
+  piece.rotationState.forEach((value) => {
     const [column, row] = [value % 4, Math.trunc(value / 4)];
-    drawBlock(ctx, column * BLOCK_SIZE, row * BLOCK_SIZE);
+    drawBlock(ctx, (column + x) * BLOCK_SIZE, (row + y) * BLOCK_SIZE);
   });
+}
+
+function drawRowElement(ctx, value, columnIdx, y) {
+  ctx.fillStyle = COLORS[value];
+  drawBlock(ctx, columnIdx * BLOCK_SIZE, y);
+}
+
+function drawBoardRow(ctx, row, rowIdx) {
+  // Canvas y value for that row
+  const y = rowIdx * BLOCK_SIZE;
+
+  // Skip falsy values
+  row.forEach((value, i) => value && drawRowElement(ctx, value, i, y));
+}
+
+// Draw board matrix onto canvas
+export function drawBoard(ctx, board) {
+  // Top 2 rows are hidden
+  for (let i = 2; i < board.length; i++) {
+    drawBoardRow(ctx, board[i], i - 2);
+  }
 }
 
 // testing
@@ -43,7 +74,7 @@ export function randomFill(ctx) {
 
   for (let i = 0; i < 200; i++) {
     // get random piece color
-    ctx.fillStyle = randomPiece().color;
+    ctx.fillStyle = Object.values(COLORS)[Math.trunc(Math.random() * 7)];
 
     // draw block
     const [column, row] = [i % 10, Math.trunc(i / 10)];
