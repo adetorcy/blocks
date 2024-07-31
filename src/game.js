@@ -1,6 +1,6 @@
-import { randomFill, drawBoard, drawPieceInBox } from "./drawing";
+import { drawBoard, drawPieceInBox } from "./drawing";
 import Piece from "./piece";
-import { SCORE_UPDATE_EVENT } from "./constants";
+import { BOARD_SIZE } from "./constants";
 import { clearCanvas } from "./utils";
 
 /**  Useful links
@@ -10,82 +10,104 @@ import { clearCanvas } from "./utils";
  *
  **/
 
+// Frames per drop by level
+const GRAVITY_TABLE = [
+  48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 1,
+];
+
 // Game board aka playfield
-// x: board index
-// i: playfield row number
-// x = 22 - i
-const board = Array.from({ length: 22 }, () => new Array(10).fill(0));
+const board = new Array(BOARD_SIZE).fill(0);
 
 // Game data
 let intervalID,
   gameCanvas,
   gameCanvasCtx,
-  nextPieceCanvas,
-  nextPieceCanvasCtx,
-  frameCount = 0,
-  // score = 0,
-  // level = 0,
+  previewCanvas,
+  previewCanvasCtx,
+  cycleLength,
+  framesRemaining,
+  level,
   // lines = 0,
+  // score = 0,
+  // DAS = 0,
   currentPiece,
   nextPiece,
   hasChanged = false;
 
 // Game loop stub
 function frame() {
-  // testing
-  // console.log(frameCount);
-
   // testing: update score every 60 frames
-  if (frameCount % 60 === 0) {
-    window.dispatchEvent(
-      new CustomEvent(SCORE_UPDATE_EVENT, {
-        detail: frameCount,
-      })
-    );
-  }
-
-  // testing: update position every 48 frames
-  if (frameCount % 48 === 0) {
-    // try to move piece down
-  }
+  // if (frameCount % 60 === 0) {
+  //   window.dispatchEvent(
+  //     new CustomEvent(SCORE_UPDATE_EVENT, {
+  //       detail: frameCount,
+  //     })
+  //   );
+  // }
 
   // Needs repaint?
   if (hasChanged) {
     requestAnimationFrame(repaint);
   }
 
-  // Increment frame count
-  frameCount++;
+  if (!framesRemaining) {
+    // PIECE DISAPPEARS IF REACHES BOTTOM
+    if (currentPiece.position > BOARD_SIZE) {
+      clearPieceFromBoard(currentPiece, board);
+      getNewPiece();
+    } else {
+      // Save current state
+      const previous = snapshot(currentPiece);
+
+      // Piece drops one row
+      currentPiece.moveDown();
+
+      // Update board
+      clearPieceFromBoard(previous, board);
+      addPieceToBoard(currentPiece, board);
+    }
+
+    // Reset cycle
+    framesRemaining = cycleLength;
+
+    hasChanged = true;
+  }
+
+  // Cycle frame counter
+  framesRemaining--;
 }
 
-export function init() {
+function init() {
   // Set up playfield
-  gameCanvas = document.getElementById("gameCanvas");
+  gameCanvas = document.getElementById("playfield");
   gameCanvasCtx = gameCanvas.getContext("2d");
 
-  // Pick first piece
-  currentPiece = Piece.getRandom();
-
-  // Add piece to board
-  addPieceToBoard(currentPiece, board);
-
-  console.log(board);
-
   // Set up next piece box
-  nextPieceCanvas = document.getElementById("nextPieceCanvas");
-  nextPieceCanvasCtx = nextPieceCanvas.getContext("2d");
+  previewCanvas = document.getElementById("preview");
+  previewCanvasCtx = previewCanvas.getContext("2d");
+}
 
-  // Pick next piece
-  nextPiece = Piece.getRandom();
+export function start(startingLevel = 0) {
+  // Init if needed
+  !gameCanvas && init();
 
-  // Show next piece
-  drawPieceInBox(nextPieceCanvasCtx, nextPiece);
+  // Set up level and speed
+  level = startingLevel;
+  cycleLength = GRAVITY_TABLE[level] || 1;
+  framesRemaining = cycleLength;
+
+  // Set up pieces
+  getNewPiece();
 
   // testing
   // randomFill(gameCanvasCtx);
 
   // Request repaint
   hasChanged = true;
+
+  // Go!
+  run();
 }
 
 // Both NES and GameBoy run at roughly 60 frames per second
@@ -93,23 +115,32 @@ export function run() {
   intervalID = setInterval(frame, 1000 / 60);
 }
 
-export function start() {
-  init();
-  run();
-}
-
 export function stop() {
   clearInterval(intervalID);
 }
 
 export function reset() {
-  frameCount = 0;
   // score = 0;
   // level = 0;
   // lines = 0;
   clearCanvas(gameCanvas);
-  clearCanvas(nextPieceCanvas);
-  board.forEach((row) => row.fill(0));
+  clearCanvas(previewCanvas);
+  board.fill(0);
+}
+
+function getNewPiece() {
+  // Pick current piece
+  currentPiece = nextPiece || Piece.getRandom();
+
+  // Add piece to board
+  addPieceToBoard(currentPiece, board);
+
+  // Pick next piece
+  nextPiece = Piece.getRandom();
+
+  // Show next piece
+  clearCanvas(previewCanvas);
+  drawPieceInBox(previewCanvasCtx, nextPiece);
 }
 
 function repaint() {
@@ -118,8 +149,55 @@ function repaint() {
 }
 
 function addPieceToBoard(piece, board) {
-  piece.rotationState.forEach((value) => {
-    const [column, row] = [value % 4, Math.trunc(value / 4)];
-    board[row + piece.y][column + piece.x] = piece.name;
+  piece.state.forEach((index) => {
+    board[piece.position + index] = piece.name;
   });
+}
+
+function clearPieceFromBoard(piece, board) {
+  piece.state.forEach((index) => {
+    board[piece.position + index] = 0;
+  });
+}
+
+function snapshot(piece) {
+  return {
+    position: piece.position,
+    state: piece.state,
+  };
+}
+
+// Rough draft, will need to add checks, etc...
+export function move(keyCode) {
+  // Save current state
+  const previous = snapshot(currentPiece);
+
+  switch (keyCode) {
+    case "KeyZ":
+      currentPiece.canSpin() && currentPiece.rotateCCW();
+      break;
+    case "KeyX":
+    case "ArrowUp":
+      currentPiece.canSpin() && currentPiece.rotateCW();
+      break;
+    case "ArrowLeft":
+      !currentPiece.touchesLeftWall() && currentPiece.moveLeft();
+      break;
+    case "ArrowDown":
+      currentPiece.moveDown();
+      break;
+    case "ArrowRight":
+      !currentPiece.touchesRightWall() && currentPiece.moveRight();
+      break;
+    default:
+      // Do nothing
+      console.log(`${keyCode} not supported`);
+      return;
+  }
+
+  // Update board
+  clearPieceFromBoard(previous, board);
+  addPieceToBoard(currentPiece, board);
+
+  hasChanged = true;
 }

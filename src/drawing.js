@@ -1,4 +1,4 @@
-export const BLOCK_SIZE = 40;
+import { BOARD_COLS, BLOCK_SIZE } from "./constants";
 
 // Piece colors
 const COLORS = {
@@ -41,30 +41,29 @@ export function drawPieceInBox(ctx, piece) {
   const [x, y] = piece.offset;
 
   // Draw piece
-  piece.rotationState.forEach((value) => {
-    const [column, row] = [value % 4, Math.trunc(value / 4)];
+  piece.state.forEach((value) => {
+    const [column, row] = [value % BOARD_COLS, Math.trunc(value / BOARD_COLS)];
     drawBlock(ctx, (column + x) * BLOCK_SIZE, (row + y) * BLOCK_SIZE);
   });
-}
-
-function drawRowElement(ctx, value, columnIdx, y) {
-  ctx.fillStyle = COLORS[value];
-  drawBlock(ctx, columnIdx * BLOCK_SIZE, y);
-}
-
-function drawBoardRow(ctx, row, rowIdx) {
-  // Canvas y value for that row
-  const y = rowIdx * BLOCK_SIZE;
-
-  // Skip falsy values
-  row.forEach((value, i) => value && drawRowElement(ctx, value, i, y));
 }
 
 // Draw board matrix onto canvas
 export function drawBoard(ctx, board) {
   // Top 2 rows are hidden
-  for (let i = 2; i < board.length; i++) {
-    drawBoardRow(ctx, board[i], i - 2);
+  for (let i = 20; i < board.length; i++) {
+    const pieceName = board[i];
+
+    // Skip empty blocks
+    if (!pieceName) {
+      continue;
+    }
+
+    // Get playfield coordinates
+    const [col, row] = [i % BOARD_COLS, Math.trunc((i - 20) / BOARD_COLS)];
+
+    // Draw block
+    ctx.fillStyle = COLORS[pieceName];
+    drawBlock(ctx, col * BLOCK_SIZE, row * BLOCK_SIZE);
   }
 }
 

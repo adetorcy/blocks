@@ -7,7 +7,7 @@ export default function PauseMenu({ runGame, quitGame }) {
   useEffect(() => {
     // Callback for keydown event listener
     function handleKeydown(event) {
-      if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+      if (["ArrowUp", "ArrowDown"].includes(event.code)) {
         setFocusedButtonIndex((index) => (index + 1) % 2);
       }
     }

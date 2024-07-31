@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { BLOCK_SIZE } from "./drawing";
+import { BLOCK_SIZE } from "./constants";
+import { MOVE_KEY_CODES } from "./constants";
 import Score from "./Score";
 import Level from "./Level";
 import Lines from "./Lines";
@@ -33,7 +34,9 @@ function App() {
     if (menu) return;
 
     function handleKeydown(event) {
-      if (event.key === "Escape") {
+      if (MOVE_KEY_CODES.has(event.code)) {
+        game.move(event.code);
+      } else if (event.code === "Escape") {
         game.stop();
         setMenu("pause");
       }
@@ -52,7 +55,7 @@ function App() {
     <>
       <div className="card gamearea">
         <canvas
-          id="gameCanvas"
+          id="playfield"
           className="baselayer"
           height={20 * BLOCK_SIZE}
           width={10 * BLOCK_SIZE}
@@ -76,7 +79,7 @@ function App() {
         <div className="card stack nextbox">
           <div>NEXT</div>
           <canvas
-            id="nextPieceCanvas"
+            id="preview"
             height={4 * BLOCK_SIZE}
             width={4 * BLOCK_SIZE}
           ></canvas>
