@@ -1,203 +1,305 @@
-import { drawBoard, drawPieceInBox } from "./drawing";
+import { drawBoard, drawPiece } from "./drawing";
 import Piece from "./piece";
-import { BOARD_SIZE } from "./constants";
-import { clearCanvas } from "./utils";
+import {
+  BOARD_COLS,
+  BOARD_SIZE,
+  GRAVITY_TABLE,
+  ARE,
+  SCORE_UPDATE_EVENT,
+  LEVEL_UPDATE_EVENT,
+  LINES_UPDATE_EVENT,
+  GAME_OVER_EVENT,
+} from "./constants";
+import { clearCanvas, occupied, logBoard } from "./utils";
 
 /**  Useful links
  *
  * https://harddrop.com/wiki/Tetris_(NES,_Nintendo)
  * https://harddrop.com/wiki/Tetris_(Game_Boy)
+ * https://tetris.wiki/Tetris_(NES,_Nintendo)
+ * https://tetris.wiki/Tetris_(Game_Boy)
  *
  **/
 
-// Frames per drop by level
-const GRAVITY_TABLE = [
-  48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 1,
-];
-
-// Game board aka playfield
-const board = new Array(BOARD_SIZE).fill(0);
-
-// Game data
-let intervalID,
-  gameCanvas,
-  gameCanvasCtx,
-  previewCanvas,
-  previewCanvasCtx,
-  cycleLength,
-  framesRemaining,
-  level,
-  // lines = 0,
-  // score = 0,
-  // DAS = 0,
-  currentPiece,
-  nextPiece,
-  hasChanged = false;
-
-// Game loop stub
-function frame() {
-  // testing: update score every 60 frames
-  // if (frameCount % 60 === 0) {
-  //   window.dispatchEvent(
-  //     new CustomEvent(SCORE_UPDATE_EVENT, {
-  //       detail: frameCount,
-  //     })
-  //   );
-  // }
-
-  // Needs repaint?
-  if (hasChanged) {
-    requestAnimationFrame(repaint);
+export default class Game {
+  constructor() {
+    this.board = new Array(BOARD_SIZE); // Uint8Array for multiplayer/webSocket?
   }
 
-  if (!framesRemaining) {
-    // PIECE DISAPPEARS IF REACHES BOTTOM
-    if (currentPiece.position > BOARD_SIZE) {
-      clearPieceFromBoard(currentPiece, board);
-      getNewPiece();
-    } else {
-      // Save current state
-      const previous = snapshot(currentPiece);
-
-      // Piece drops one row
-      currentPiece.moveDown();
-
-      // Update board
-      clearPieceFromBoard(previous, board);
-      addPieceToBoard(currentPiece, board);
+  start(gameCanvas, previewCanvas, level = 0) {
+    // First game?
+    if (!this.gameCanvas) {
+      // Canvas elements should be in the DOM by the time this method is called
+      this.gameCanvas = gameCanvas;
+      this.gameCanvasCtx = gameCanvas.getContext("2d"); // do we need?
+      this.previewCanvas = previewCanvas;
     }
 
-    // Reset cycle
-    framesRemaining = cycleLength;
+    // Zero out board
+    this.board.fill(0);
 
-    hasChanged = true;
+    // Set up level and speed
+    this.score = 0;
+    this.lines = 0;
+    this.level = level;
+    this.delay = GRAVITY_TABLE[level] || 1; // Frames between drops
+    this.framesRemaining = this.delay;
+
+    // Get first 2 pieces
+    this.livePiece = Piece.random();
+    this.nextPiece = Piece.random();
+
+    // Add 1st piece to the board
+    this.livePiece.add(this.board);
+
+    // Preview 2nd piece
+    this.preview(this.nextPiece);
+
+    // Start game loop
+    this.run();
   }
 
-  // Cycle frame counter
-  framesRemaining--;
-}
+  run() {
+    // Both NES and GameBoy run at roughly 60 frames per second
+    this.intervalID = setInterval(() => this.frame(), 1000 / 60);
 
-function init() {
-  // Set up playfield
-  gameCanvas = document.getElementById("playfield");
-  gameCanvasCtx = gameCanvas.getContext("2d");
+    console.log("running");
+  }
 
-  // Set up next piece box
-  previewCanvas = document.getElementById("preview");
-  previewCanvasCtx = previewCanvas.getContext("2d");
-}
+  stop() {
+    clearInterval(this.intervalID);
 
-export function start(startingLevel = 0) {
-  // Init if needed
-  !gameCanvas && init();
+    console.log("stopped");
+  }
 
-  // Set up level and speed
-  level = startingLevel;
-  cycleLength = GRAVITY_TABLE[level] || 1;
-  framesRemaining = cycleLength;
+  reset() {
+    // Clear canvas for start menu
+    clearCanvas(this.gameCanvas);
+    clearCanvas(this.previewCanvas);
 
-  // Set up pieces
-  getNewPiece();
+    // Reset scores
+    this.score = 0;
+    this.level = 0;
+    this.lines = 0;
 
-  // testing
-  // randomFill(gameCanvasCtx);
+    this.broadcastAll();
 
-  // Request repaint
-  hasChanged = true;
+    console.log("reset");
+  }
 
-  // Go!
-  run();
-}
+  frame() {
+    requestAnimationFrame(() => this.refresh());
 
-// Both NES and GameBoy run at roughly 60 frames per second
-export function run() {
-  intervalID = setInterval(frame, 1000 / 60);
-}
+    // Nothing to do while we have frames to burn
+    if (this.framesRemaining--) return;
 
-export function stop() {
-  clearInterval(intervalID);
-}
+    /** No more frames. One of the following happens:
+     * Live piece falls down one row
+     * Live piece locks
+     * A new piece spawns
+     * The game ends
+     **/
 
-export function reset() {
-  // score = 0;
-  // level = 0;
-  // lines = 0;
-  clearCanvas(gameCanvas);
-  clearCanvas(previewCanvas);
-  board.fill(0);
-}
+    // No live piece
+    if (!this.livePiece) {
+      this.livePiece = this.nextPiece;
+      this.nextPiece = Piece.random();
 
-function getNewPiece() {
-  // Pick current piece
-  currentPiece = nextPiece || Piece.getRandom();
+      // If piece can't spawn, game over
+      if (occupied(this.board, this.livePiece.state, this.livePiece.position)) {
+        console.log("Game Over");
+        this.stop();
 
-  // Add piece to board
-  addPieceToBoard(currentPiece, board);
+        // Notify UI
+        window.dispatchEvent(new CustomEvent(GAME_OVER_EVENT));
 
-  // Pick next piece
-  nextPiece = Piece.getRandom();
+        return;
+      }
 
-  // Show next piece
-  clearCanvas(previewCanvas);
-  drawPieceInBox(previewCanvasCtx, nextPiece);
-}
+      // Add 1st piece to board
+      this.livePiece.add(this.board);
 
-function repaint() {
-  clearCanvas(gameCanvas);
-  drawBoard(gameCanvasCtx, board);
-}
+      // Preview 2nd piece
+      this.preview(this.nextPiece);
 
-function addPieceToBoard(piece, board) {
-  piece.state.forEach((index) => {
-    board[piece.position + index] = piece.name;
-  });
-}
+      // Reset delay
+      this.framesRemaining = this.delay;
 
-function clearPieceFromBoard(piece, board) {
-  piece.state.forEach((index) => {
-    board[piece.position + index] = 0;
-  });
-}
-
-function snapshot(piece) {
-  return {
-    position: piece.position,
-    state: piece.state,
-  };
-}
-
-// Rough draft, will need to add checks, etc...
-export function move(keyCode) {
-  // Save current state
-  const previous = snapshot(currentPiece);
-
-  switch (keyCode) {
-    case "KeyZ":
-      currentPiece.canSpin() && currentPiece.rotateCCW();
-      break;
-    case "KeyX":
-    case "ArrowUp":
-      currentPiece.canSpin() && currentPiece.rotateCW();
-      break;
-    case "ArrowLeft":
-      !currentPiece.touchesLeftWall() && currentPiece.moveLeft();
-      break;
-    case "ArrowDown":
-      currentPiece.moveDown();
-      break;
-    case "ArrowRight":
-      !currentPiece.touchesRightWall() && currentPiece.moveRight();
-      break;
-    default:
-      // Do nothing
-      console.log(`${keyCode} not supported`);
       return;
+    }
+
+    // Live piece tries to fall down one level
+    this.moveDown();
+
+    // Reset delay
+    this.framesRemaining = this.delay;
   }
 
-  // Update board
-  clearPieceFromBoard(previous, board);
-  addPieceToBoard(currentPiece, board);
+  refresh() {
+    clearCanvas(this.gameCanvas);
+    drawBoard(this.gameCanvasCtx, this.board);
+  }
 
-  hasChanged = true;
+  freezeLivePiece(row) {
+    this.livePiece = null;
+    this.framesRemaining = ARE[row];
+  }
+
+  preview(piece) {
+    clearCanvas(this.previewCanvas);
+    drawPiece(this.previewCanvas.getContext("2d"), piece, ...piece.offset);
+  }
+
+  rotateCW() {
+    if (this.livePiece.cannotSpin()) return;
+
+    this.livePiece.remove(this.board);
+
+    // New rotation index
+    const i = (this.livePiece.stateIdx + 1) % 4;
+
+    // Rotate if we can
+    occupied(this.board, this.livePiece.states[i], this.livePiece.position) ||
+      (this.livePiece.stateIdx = i);
+
+    this.livePiece.add(this.board);
+  }
+
+  rotateCCW() {
+    if (this.livePiece.cannotSpin()) return;
+
+    this.livePiece.remove(this.board);
+
+    // New rotation index
+    const i = (this.livePiece.stateIdx + 3) % 4;
+
+    // Rotate if we can
+    occupied(this.board, this.livePiece.states[i], this.livePiece.position) ||
+      (this.livePiece.stateIdx = i);
+
+    this.livePiece.add(this.board);
+  }
+
+  moveLeft() {
+    if (this.livePiece.touchesLeftWall()) return;
+
+    this.livePiece.remove(this.board);
+
+    // Move, check, rollback
+    if (occupied(this.board, this.livePiece.state, --this.livePiece.position)) {
+      ++this.livePiece.position;
+    }
+
+    this.livePiece.add(this.board);
+  }
+
+  moveRight() {
+    if (this.livePiece.touchesRightWall()) return;
+
+    this.livePiece.remove(this.board);
+
+    // Move, check, rollback
+    if (occupied(this.board, this.livePiece.state, ++this.livePiece.position)) {
+      --this.livePiece.position;
+    }
+
+    this.livePiece.add(this.board);
+  }
+
+  moveDown() {
+    // More work to do in this method
+
+    // Are we at the bottom?
+    if (this.livePiece.touchesBottom()) {
+      this.freezeLivePiece(21);
+
+      // LINE CLEAR CHECK
+
+      return;
+    }
+
+    // Try to move down on row
+    this.livePiece.remove(this.board);
+    if (
+      !occupied(
+        this.board,
+        this.livePiece.state,
+        (this.livePiece.position += BOARD_COLS)
+      )
+    ) {
+      this.livePiece.add(this.board);
+
+      // Success, nothing else to do
+      return;
+    }
+
+    // Rollback
+    this.livePiece.position -= BOARD_COLS;
+
+    // Add piece before locking it
+    this.livePiece.add(this.board);
+
+    this.freezeLivePiece(this.livePiece.lowestRow);
+
+    // LINE CLEAR CHECK
+  }
+
+  // Handle key events
+  move(keyCode) {
+    // ARE
+    if (!this.livePiece) return;
+
+    switch (keyCode) {
+      case "KeyZ":
+        this.rotateCCW();
+        break;
+      case "KeyX":
+      case "ArrowUp":
+        this.rotateCW();
+        break;
+      case "ArrowLeft":
+        this.moveLeft();
+        break;
+      case "ArrowDown":
+        this.moveDown();
+        break;
+      case "ArrowRight":
+        this.moveRight();
+        break;
+      default:
+        // Do nothing
+        console.log(`${keyCode} key not supported`);
+        return;
+    }
+  }
+
+  broadcastScore() {
+    window.dispatchEvent(
+      new CustomEvent(SCORE_UPDATE_EVENT, {
+        detail: this.score,
+      })
+    );
+  }
+
+  broadcastLevel() {
+    window.dispatchEvent(
+      new CustomEvent(LEVEL_UPDATE_EVENT, {
+        detail: this.level,
+      })
+    );
+  }
+
+  broadcastLines() {
+    window.dispatchEvent(
+      new CustomEvent(LINES_UPDATE_EVENT, {
+        detail: this.lines,
+      })
+    );
+  }
+
+  broadcastAll() {
+    this.broadcastScore();
+    this.broadcastLevel();
+    this.broadcastLines();
+  }
 }

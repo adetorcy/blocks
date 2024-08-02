@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { BLOCK_SIZE } from "./constants";
+import { useEffect, useRef, useState } from "react";
+import { BLOCK_SIZE, GAME_OVER_EVENT } from "./constants";
 import { MOVE_KEY_CODES } from "./constants";
 import Score from "./Score";
 import Level from "./Level";
@@ -7,24 +7,28 @@ import Lines from "./Lines";
 import StartMenu from "./StartMenu";
 import ControlsMenu from "./ControlsMenu";
 import PauseMenu from "./PauseMenu";
-import * as game from "./game";
+import GameOverMenu from "./GameOverMenu";
+import Game from "./game";
 
 function App() {
   const [menu, setMenu] = useState("start");
+  const playfieldRef = useRef(null);
+  const previewRef = useRef(null);
+  const gameRef = useRef(new Game());
 
   // User action callbacks
   const showStartMenu = () => setMenu("start");
   const showControlsMenu = () => setMenu("controls");
   const runGame = () => {
-    game.run();
+    gameRef.current.run();
     setMenu(null);
   };
   const startGame = () => {
-    game.start();
+    gameRef.current.start(playfieldRef.current, previewRef.current);
     setMenu(null);
   };
   const quitGame = () => {
-    game.reset();
+    gameRef.current.reset();
     setMenu("start");
   };
 
@@ -35,9 +39,9 @@ function App() {
 
     function handleKeydown(event) {
       if (MOVE_KEY_CODES.has(event.code)) {
-        game.move(event.code);
+        gameRef.current.move(event.code);
       } else if (event.code === "Escape") {
-        game.stop();
+        gameRef.current.stop();
         setMenu("pause");
       }
     }
@@ -51,11 +55,26 @@ function App() {
     };
   }, [menu]);
 
+  // Game event listeners
+  useEffect(() => {
+    function handleGameOver() {
+      setMenu("gameOver");
+    }
+
+    // Add event listener
+    window.addEventListener(GAME_OVER_EVENT, handleGameOver);
+
+    return () => {
+      // Remove event listener
+      window.removeEventListener(GAME_OVER_EVENT, handleGameOver);
+    };
+  }, []);
+
   return (
     <>
       <div className="card gamearea">
         <canvas
-          id="playfield"
+          ref={playfieldRef}
           className="baselayer"
           height={20 * BLOCK_SIZE}
           width={10 * BLOCK_SIZE}
@@ -66,6 +85,7 @@ function App() {
             start: <StartMenu {...{ showControlsMenu, startGame }} />,
             controls: <ControlsMenu {...{ showStartMenu }} />,
             pause: <PauseMenu {...{ runGame, quitGame }} />,
+            gameOver: <GameOverMenu {...{ quitGame }} />,
           }[menu] || null
         }
       </div>
@@ -79,7 +99,7 @@ function App() {
         <div className="card stack nextbox">
           <div>NEXT</div>
           <canvas
-            id="preview"
+            ref={previewRef}
             height={4 * BLOCK_SIZE}
             width={4 * BLOCK_SIZE}
           ></canvas>

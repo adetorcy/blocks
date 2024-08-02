@@ -20,10 +20,10 @@ export default function ControlsMenu({ showStartMenu }) {
 
 const controls = [
   ["LEFT/RIGHT", "MOVE"],
-  ["UP", "ROTATE CW"],
+  ["UP", "ROTATE RIGHT"],
   ["DOWN", "SOFT DROP"],
   ["SPACE", "HARD DROP"],
-  ["Z", "ROTATE CCW"],
-  ["X", "ROTATE CW"],
+  ["Z", "ROTATE LEFT"],
+  ["X", "ROTATE RIGHT"],
   ["ESC", "PAUSE GAME"],
 ];

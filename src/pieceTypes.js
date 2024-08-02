@@ -18,9 +18,13 @@ y = index // 10
 
 */
 
+// Repeat rotation for I, O, Z and S so that rotation length can be hardcoded to 4
+
 const I_PIECE = {
-  name: "i",
+  key: 1,
   states: [
+    [20, 21, 22, 23],
+    [2, 12, 22, 32],
     [20, 21, 22, 23],
     [2, 12, 22, 32],
   ],
@@ -30,15 +34,20 @@ const I_PIECE = {
 };
 
 const O_PIECE = {
-  name: "o",
-  states: [[11, 12, 21, 22]],
-  spawn: 14,
+  key: 2,
+  states: [
+    [11, 12, 21, 22],
+    [11, 12, 21, 22],
+    [11, 12, 21, 22],
+    [11, 12, 21, 22],
+  ],
+  spawn: 13,
   noSpinZone: [],
   offset: [0, 0],
 };
 
 const J_PIECE = {
-  name: "j",
+  key: 3,
   states: [
     [10, 11, 12, 22],
     [1, 11, 20, 21],
@@ -51,7 +60,7 @@ const J_PIECE = {
 };
 
 const L_PIECE = {
-  name: "l",
+  key: 4,
   states: [
     [10, 11, 12, 20],
     [0, 1, 11, 21],
@@ -64,8 +73,10 @@ const L_PIECE = {
 };
 
 const S_PIECE = {
-  name: "s",
+  key: 5,
   states: [
+    [11, 12, 20, 21],
+    [1, 11, 12, 22],
     [11, 12, 20, 21],
     [1, 11, 12, 22],
   ],
@@ -75,7 +86,7 @@ const S_PIECE = {
 };
 
 const T_PIECE = {
-  name: "t",
+  key: 6,
   states: [
     [10, 11, 12, 21],
     [1, 10, 11, 21],
@@ -88,8 +99,10 @@ const T_PIECE = {
 };
 
 const Z_PIECE = {
-  name: "z",
+  key: 7,
   states: [
+    [10, 11, 21, 22],
+    [2, 11, 12, 21],
     [10, 11, 21, 22],
     [2, 11, 12, 21],
   ],
@@ -98,7 +111,7 @@ const Z_PIECE = {
   offset: [0.5, 0],
 };
 
-const PIECE_TYPES = [
+export const PIECE_TYPES = [
   I_PIECE,
   O_PIECE,
   J_PIECE,
@@ -108,4 +121,12 @@ const PIECE_TYPES = [
   Z_PIECE,
 ];
 
-export default PIECE_TYPES;
+export const PIECE_COLORS = {
+  [I_PIECE.key]: "cyan",
+  [O_PIECE.key]: "yellow",
+  [J_PIECE.key]: "blue",
+  [L_PIECE.key]: "orange",
+  [S_PIECE.key]: "lime",
+  [T_PIECE.key]: "magenta",
+  [Z_PIECE.key]: "red",
+};

@@ -1,13 +1,17 @@
 import { BOARD_COLS } from "./constants";
-import PIECE_TYPES from "./pieceTypes";
+import { PIECE_TYPES } from "./pieceTypes";
+import { clearCanvas } from "./utils";
+import { drawPiece } from "./drawing";
 
 export default class Piece {
-  static getRandom() {
+  static random() {
     return new Piece(PIECE_TYPES[Math.trunc(Math.random() * 7)]);
   }
 
-  constructor({ name, states, spawn, noSpinZone, offset }) {
-    this.name = name;
+  constructor({ key, states, spawn, noSpinZone, offset }) {
+    this.key = key;
+
+    // Rotation
     this.states = states;
     this.stateIdx = 0;
 
@@ -29,32 +33,36 @@ export default class Piece {
     return this.state.some((i) => (i + this.position + 1) % BOARD_COLS === 0);
   }
 
-  canSpin() {
+  touchesBottom() {
+    return this.state.some(
+      (i) => Math.trunc((i + this.position) / BOARD_COLS) === 21
+    );
+  }
+
+  cannotSpin() {
     // Add BOARD_COLS to avoid negative values in 1st row
-    return !this.noSpinZone.includes((this.position + BOARD_COLS) % BOARD_COLS);
-  }
-
-  rotateCW() {
-    this.stateIdx++;
-  }
-
-  rotateCCW() {
-    this.stateIdx--;
-  }
-
-  moveLeft() {
-    this.position--;
-  }
-
-  moveRight() {
-    this.position++;
-  }
-
-  moveDown() {
-    this.position += BOARD_COLS;
+    return this.noSpinZone.includes((this.position + BOARD_COLS) % BOARD_COLS);
   }
 
   get state() {
-    return this.states.at(this.stateIdx % this.states.length);
+    return this.states[this.stateIdx];
+  }
+
+  get lowestRow() {
+    // 4th block is always on "lowest" row
+    return Math.trunc((this.state[3] + this.position) / BOARD_COLS);
+  }
+
+  add(board) {
+    this.state.forEach((index) => {
+      board[this.position + index] = this.key;
+    });
+  }
+
+  // Remove before move to avoid self-collision
+  remove(board) {
+    this.state.forEach((index) => {
+      board[this.position + index] = 0;
+    });
   }
 }

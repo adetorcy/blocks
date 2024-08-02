@@ -1,16 +1,7 @@
-import { BOARD_COLS, BLOCK_SIZE } from "./constants";
+import { BOARD_COLS, BOARD_SIZE, BLOCK_SIZE } from "./constants";
+import { PIECE_COLORS } from "./pieceTypes";
 
-// Piece colors
-const COLORS = {
-  i: "cyan",
-  o: "yellow",
-  j: "blue",
-  l: "orange",
-  s: "lime",
-  t: "magenta",
-  z: "red",
-};
-
+// Draw a single block
 function drawBlock(ctx, x, y) {
   // offset for border effect
   [x, y] = [x + 2, y + 2];
@@ -32,13 +23,10 @@ function drawBlock(ctx, x, y) {
   ctx.fillRect(x + 4, y + 4, 4, 4);
 }
 
-// Draw piece in next piece box
-export function drawPieceInBox(ctx, piece) {
+// Draw a piece (for preview)
+export function drawPiece(ctx, piece, x, y) {
   // Set color
-  ctx.fillStyle = COLORS[piece.name];
-
-  // Center piece in box
-  const [x, y] = piece.offset;
+  ctx.fillStyle = PIECE_COLORS[piece.key];
 
   // Draw piece
   piece.state.forEach((value) => {
@@ -47,14 +35,14 @@ export function drawPieceInBox(ctx, piece) {
   });
 }
 
-// Draw board matrix onto canvas
+// Draw the entire board
 export function drawBoard(ctx, board) {
   // Top 2 rows are hidden
-  for (let i = 20; i < board.length; i++) {
-    const pieceName = board[i];
+  for (let i = 20; i < BOARD_SIZE; i++) {
+    const key = board[i];
 
     // Skip empty blocks
-    if (!pieceName) {
+    if (!key) {
       continue;
     }
 
@@ -62,7 +50,7 @@ export function drawBoard(ctx, board) {
     const [col, row] = [i % BOARD_COLS, Math.trunc((i - 20) / BOARD_COLS)];
 
     // Draw block
-    ctx.fillStyle = COLORS[pieceName];
+    ctx.fillStyle = PIECE_COLORS[key];
     drawBlock(ctx, col * BLOCK_SIZE, row * BLOCK_SIZE);
   }
 }
@@ -73,7 +61,7 @@ export function randomFill(ctx) {
 
   for (let i = 0; i < 200; i++) {
     // get random piece color
-    ctx.fillStyle = Object.values(COLORS)[Math.trunc(Math.random() * 7)];
+    ctx.fillStyle = Object.values(PIECE_COLORS)[Math.trunc(Math.random() * 7)];
 
     // draw block
     const [column, row] = [i % 10, Math.trunc(i / 10)];
