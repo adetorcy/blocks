@@ -1,4 +1,4 @@
-import { drawBoard, drawPiece } from "./drawing";
+import { drawBoard, drawPiece, drawPreview } from "./drawing";
 import Piece from "./piece";
 import {
   BOARD_COLS,
@@ -31,8 +31,9 @@ export default class Game {
     if (!this.gameCanvas) {
       // Canvas elements should be in the DOM by the time this method is called
       this.gameCanvas = gameCanvas;
-      this.gameCanvasCtx = gameCanvas.getContext("2d"); // do we need?
+      this.gameCanvasCtx = gameCanvas.getContext("2d");
       this.previewCanvas = previewCanvas;
+      this.previewCanvasCtx = previewCanvas.getContext("2d");
     }
 
     // Zero out board
@@ -46,14 +47,7 @@ export default class Game {
     this.framesRemaining = this.delay;
 
     // Get first 2 pieces
-    this.livePiece = Piece.random();
-    this.nextPiece = Piece.random();
-
-    // Add 1st piece to the board
-    this.livePiece.add(this.board);
-
-    // Preview 2nd piece
-    this.preview(this.nextPiece);
+    this.getPiece();
 
     // Start game loop
     this.run();
@@ -88,7 +82,7 @@ export default class Game {
   }
 
   frame() {
-    requestAnimationFrame(() => this.refresh());
+    this.refresh();
 
     // Nothing to do while we have frames to burn
     if (this.framesRemaining--) return;
@@ -102,8 +96,7 @@ export default class Game {
 
     // No live piece
     if (!this.livePiece) {
-      this.livePiece = this.nextPiece;
-      this.nextPiece = Piece.random();
+      this.getPiece();
 
       // If piece can't spawn, game over
       if (occupied(this.board, this.livePiece.state, this.livePiece.position)) {
@@ -115,12 +108,6 @@ export default class Game {
 
         return;
       }
-
-      // Add 1st piece to board
-      this.livePiece.add(this.board);
-
-      // Preview 2nd piece
-      this.preview(this.nextPiece);
 
       // Reset delay
       this.framesRemaining = this.delay;
@@ -136,24 +123,38 @@ export default class Game {
   }
 
   refresh() {
-    clearCanvas(this.gameCanvas);
-    drawBoard(this.gameCanvasCtx, this.board);
+    requestAnimationFrame(() => {
+      clearCanvas(this.gameCanvas);
+      drawBoard(this.gameCanvasCtx, this.board);
+      if (this.livePiece) drawPiece(this.gameCanvasCtx, this.livePiece);
+    });
   }
 
-  freezeLivePiece(row) {
+  lock(row) {
+    // Add live piece to board
+    this.livePiece.state.forEach((i) => {
+      this.board[this.livePiece.position + i] = this.livePiece.key;
+    });
+
     this.livePiece = null;
     this.framesRemaining = ARE[row];
   }
 
-  preview(piece) {
-    clearCanvas(this.previewCanvas);
-    drawPiece(this.previewCanvas.getContext("2d"), piece, ...piece.offset);
+  preview() {
+    requestAnimationFrame(() => {
+      clearCanvas(this.previewCanvas);
+      drawPreview(this.previewCanvasCtx, this.nextPiece);
+    });
+  }
+
+  getPiece() {
+    this.livePiece = this.nextPiece || Piece.random();
+    this.nextPiece = Piece.random();
+    this.preview();
   }
 
   rotateCW() {
     if (this.livePiece.cannotSpin()) return;
-
-    this.livePiece.remove(this.board);
 
     // New rotation index
     const i = (this.livePiece.stateIdx + 1) % 4;
@@ -161,14 +162,10 @@ export default class Game {
     // Rotate if we can
     occupied(this.board, this.livePiece.states[i], this.livePiece.position) ||
       (this.livePiece.stateIdx = i);
-
-    this.livePiece.add(this.board);
   }
 
   rotateCCW() {
     if (this.livePiece.cannotSpin()) return;
-
-    this.livePiece.remove(this.board);
 
     // New rotation index
     const i = (this.livePiece.stateIdx + 3) % 4;
@@ -176,34 +173,24 @@ export default class Game {
     // Rotate if we can
     occupied(this.board, this.livePiece.states[i], this.livePiece.position) ||
       (this.livePiece.stateIdx = i);
-
-    this.livePiece.add(this.board);
   }
 
   moveLeft() {
     if (this.livePiece.touchesLeftWall()) return;
 
-    this.livePiece.remove(this.board);
-
     // Move, check, rollback
     if (occupied(this.board, this.livePiece.state, --this.livePiece.position)) {
       ++this.livePiece.position;
     }
-
-    this.livePiece.add(this.board);
   }
 
   moveRight() {
     if (this.livePiece.touchesRightWall()) return;
 
-    this.livePiece.remove(this.board);
-
     // Move, check, rollback
     if (occupied(this.board, this.livePiece.state, ++this.livePiece.position)) {
       --this.livePiece.position;
     }
-
-    this.livePiece.add(this.board);
   }
 
   moveDown() {
@@ -211,7 +198,7 @@ export default class Game {
 
     // Are we at the bottom?
     if (this.livePiece.touchesBottom()) {
-      this.freezeLivePiece(21);
+      this.lock(21);
 
       // LINE CLEAR CHECK
 
@@ -219,7 +206,7 @@ export default class Game {
     }
 
     // Try to move down on row
-    this.livePiece.remove(this.board);
+
     if (
       !occupied(
         this.board,
@@ -227,8 +214,6 @@ export default class Game {
         (this.livePiece.position += BOARD_COLS)
       )
     ) {
-      this.livePiece.add(this.board);
-
       // Success, nothing else to do
       return;
     }
@@ -237,9 +222,8 @@ export default class Game {
     this.livePiece.position -= BOARD_COLS;
 
     // Add piece before locking it
-    this.livePiece.add(this.board);
 
-    this.freezeLivePiece(this.livePiece.lowestRow);
+    this.lock(this.livePiece.lowestRow);
 
     // LINE CLEAR CHECK
   }

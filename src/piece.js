@@ -1,7 +1,5 @@
 import { BOARD_COLS } from "./constants";
 import { PIECE_TYPES } from "./pieceTypes";
-import { clearCanvas } from "./utils";
-import { drawPiece } from "./drawing";
 
 export default class Piece {
   static random() {
@@ -51,18 +49,5 @@ export default class Piece {
   get lowestRow() {
     // 4th block is always on "lowest" row
     return Math.trunc((this.state[3] + this.position) / BOARD_COLS);
-  }
-
-  add(board) {
-    this.state.forEach((index) => {
-      board[this.position + index] = this.key;
-    });
-  }
-
-  // Remove before move to avoid self-collision
-  remove(board) {
-    this.state.forEach((index) => {
-      board[this.position + index] = 0;
-    });
   }
 }

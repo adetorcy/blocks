@@ -23,14 +23,32 @@ function drawBlock(ctx, x, y) {
   ctx.fillRect(x + 4, y + 4, 4, 4);
 }
 
-// Draw a piece (for preview)
-export function drawPiece(ctx, piece, x, y) {
+// Draw live piece in main canvas
+export function drawPiece(ctx, piece) {
   // Set color
   ctx.fillStyle = PIECE_COLORS[piece.key];
 
+  // Draw piece (shifted two rows up)
+  piece.state.forEach((i) => {
+    const [column, row] = [
+      (i + piece.position) % BOARD_COLS,
+      Math.trunc((i + piece.position - 20) / BOARD_COLS),
+    ];
+    drawBlock(ctx, column * BLOCK_SIZE, row * BLOCK_SIZE);
+  });
+}
+
+// Draw next piece in preview canvas
+export function drawPreview(ctx, piece) {
+  // Set color
+  ctx.fillStyle = PIECE_COLORS[piece.key];
+
+  // Center piece
+  const [x, y] = piece.offset;
+
   // Draw piece
-  piece.state.forEach((value) => {
-    const [column, row] = [value % BOARD_COLS, Math.trunc(value / BOARD_COLS)];
+  piece.states[0].forEach((i) => {
+    const [column, row] = [i % BOARD_COLS, Math.trunc(i / BOARD_COLS)];
     drawBlock(ctx, (column + x) * BLOCK_SIZE, (row + y) * BLOCK_SIZE);
   });
 }
