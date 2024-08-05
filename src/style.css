@@ -14,7 +14,6 @@ body {
   margin: 16px auto 0;
   color: white;
   user-select: none;
-  /* --block-size: 40px; */
 }
 
 /**********/
@@ -90,17 +89,28 @@ button {
 /*****************/
 
 .dashboard {
+  justify-content: space-between;
+}
+
+.cards {
   row-gap: 32px;
 }
 
-.scorebox {
+.score {
   padding: 0 12px;
 }
 
-.scorevalue {
+.digits {
   margin-top: -16px;
 }
 
-.nextbox {
+.preview {
   padding: 0 12px 12px;
+}
+
+.fps {
+  display: flex;
+  flex-direction: row;
+  column-gap: 12px;
+  padding: 0 12px;
 }

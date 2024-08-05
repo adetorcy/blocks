@@ -23,7 +23,7 @@ export default function Score() {
   return (
     <div>
       <div>SCORE</div>
-      <div className="scorevalue">{padScore(score)}</div>
+      <div className="digits">{padScore(score)}</div>
     </div>
   );
 }

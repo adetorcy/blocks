@@ -11,10 +11,14 @@ import GameOverMenu from "./GameOverMenu";
 import Game from "./game";
 
 function App() {
+  // UI
   const [menu, setMenu] = useState("start");
+
+  // Game
+  const gameRef = useRef(new Game());
   const playfieldRef = useRef(null);
   const previewRef = useRef(null);
-  const gameRef = useRef(new Game());
+  const fpsRef = useRef(0);
 
   // User action callbacks
   const showStartMenu = () => setMenu("start");
@@ -24,7 +28,7 @@ function App() {
     setMenu(null);
   };
   const startGame = () => {
-    gameRef.current.start(playfieldRef.current, previewRef.current);
+    gameRef.current.start(playfieldRef.current, previewRef.current, fpsRef.current);
     setMenu(null);
   };
   const quitGame = () => {
@@ -91,18 +95,24 @@ function App() {
       </div>
 
       <div className="stack dashboard">
-        <div className="card stack scorebox">
-          <Score />
-          <Level />
-          <Lines />
+        <div className="stack cards">
+          <div className="card stack score">
+            <Score />
+            <Level />
+            <Lines />
+          </div>
+          <div className="card stack preview">
+            <div>NEXT</div>
+            <canvas
+              ref={previewRef}
+              height={4 * BLOCK_SIZE}
+              width={4 * BLOCK_SIZE}
+            ></canvas>
+          </div>
         </div>
-        <div className="card stack nextbox">
-          <div>NEXT</div>
-          <canvas
-            ref={previewRef}
-            height={4 * BLOCK_SIZE}
-            width={4 * BLOCK_SIZE}
-          ></canvas>
+        <div className="card fps">
+          <div ref={fpsRef}>0</div>
+          <div>FPS</div>
         </div>
       </div>
     </>

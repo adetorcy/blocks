@@ -23,7 +23,7 @@ export default function Level() {
   return (
     <div>
       <div>LEVEL</div>
-      <div className="scorevalue">{padScore(level)}</div>
+      <div className="digits">{padScore(level)}</div>
     </div>
   );
 }

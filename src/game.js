@@ -26,14 +26,15 @@ export default class Game {
     this.board = new Array(BOARD_SIZE); // Uint8Array for multiplayer/webSocket?
   }
 
-  start(gameCanvas, previewCanvas, level = 0) {
+  start(gameCanvas, previewCanvas, fpsElement, level = 0) {
     // First game?
     if (!this.gameCanvas) {
-      // Canvas elements should be in the DOM by the time this method is called
+      // Referenced elements should be in the DOM by the time this method is called
       this.gameCanvas = gameCanvas;
       this.gameCanvasCtx = gameCanvas.getContext("2d");
       this.previewCanvas = previewCanvas;
       this.previewCanvasCtx = previewCanvas.getContext("2d");
+      this.fpsElement = fpsElement;
     }
 
     // Zero out board
@@ -100,6 +101,7 @@ export default class Game {
 
       // If piece can't spawn, game over
       if (occupied(this.board, this.livePiece.state, this.livePiece.position)) {
+        this.livePiece = null;
         console.log("Game Over");
         this.stop();
 
@@ -122,11 +124,29 @@ export default class Game {
     this.framesRemaining = this.delay;
   }
 
+  // Very rough FPS counter that only updates about once per second
+  fpsCounter(now) {
+    if (!this.timeStamp) {
+      this.timeStamp = now;
+      this.frameCount = 0;
+      return;
+    }
+
+    if (now - this.timeStamp >= 1000) {
+      this.fpsElement.textContent = this.frameCount;
+      this.frameCount = 0;
+      this.timeStamp = now;
+    } else {
+      this.frameCount++;
+    }
+  }
+
   refresh() {
-    requestAnimationFrame(() => {
+    requestAnimationFrame((now) => {
       clearCanvas(this.gameCanvas);
       drawBoard(this.gameCanvasCtx, this.board);
       if (this.livePiece) drawPiece(this.gameCanvasCtx, this.livePiece);
+      this.fpsCounter(now);
     });
   }
 

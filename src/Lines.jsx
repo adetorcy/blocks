@@ -23,7 +23,7 @@ export default function Lines() {
   return (
     <div>
       <div>LINES</div>
-      <div className="scorevalue">{padScore(lines)}</div>
+      <div className="digits">{padScore(lines)}</div>
     </div>
   );
 }
