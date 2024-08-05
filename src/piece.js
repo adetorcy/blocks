@@ -1,9 +1,9 @@
 import { BOARD_COLS } from "./constants";
-import { PIECE_TYPES } from "./pieceTypes";
+import PIECE_TYPES from "./pieceTypes";
 
 export default class Piece {
   static random() {
-    return new Piece(PIECE_TYPES[Math.trunc(Math.random() * 7)]);
+    return new Piece(Object.values(PIECE_TYPES)[Math.trunc(Math.random() * 7)]);
   }
 
   constructor({ key, states, spawn, noSpinZone, offset }) {
@@ -31,12 +31,6 @@ export default class Piece {
     return this.state.some((i) => (i + this.position + 1) % BOARD_COLS === 0);
   }
 
-  touchesBottom() {
-    return this.state.some(
-      (i) => Math.trunc((i + this.position) / BOARD_COLS) === 21
-    );
-  }
-
   cannotSpin() {
     // Add BOARD_COLS to avoid negative values in 1st row
     return this.noSpinZone.includes((this.position + BOARD_COLS) % BOARD_COLS);
@@ -46,8 +40,8 @@ export default class Piece {
     return this.states[this.stateIdx];
   }
 
-  get lowestRow() {
-    // 4th block is always on "lowest" row
+  get baseRow() {
+    // State indices are sorted so 4th block is always on "lowest" row
     return Math.trunc((this.state[3] + this.position) / BOARD_COLS);
   }
 }

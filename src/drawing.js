@@ -1,5 +1,5 @@
 import { BOARD_COLS, BOARD_SIZE, BLOCK_SIZE } from "./constants";
-import { PIECE_COLORS } from "./pieceTypes";
+import PIECE_TYPES from "./pieceTypes";
 
 // Draw a single block
 function drawBlock(ctx, x, y) {
@@ -25,8 +25,7 @@ function drawBlock(ctx, x, y) {
 
 // Draw live piece in main canvas
 export function drawPiece(ctx, piece) {
-  // Set color
-  ctx.fillStyle = PIECE_COLORS[piece.key];
+  setColor(ctx, piece.key);
 
   // Draw piece (shifted two rows up)
   piece.state.forEach((i) => {
@@ -40,8 +39,7 @@ export function drawPiece(ctx, piece) {
 
 // Draw next piece in preview canvas
 export function drawPreview(ctx, piece) {
-  // Set color
-  ctx.fillStyle = PIECE_COLORS[piece.key];
+  setColor(ctx, piece.key);
 
   // Center piece
   const [x, y] = piece.offset;
@@ -68,9 +66,14 @@ export function drawBoard(ctx, board) {
     const [col, row] = [i % BOARD_COLS, Math.trunc((i - 20) / BOARD_COLS)];
 
     // Draw block
-    ctx.fillStyle = PIECE_COLORS[key];
+    setColor(ctx, key);
     drawBlock(ctx, col * BLOCK_SIZE, row * BLOCK_SIZE);
   }
+}
+
+// Set canvas context fillStyle to piece color
+function setColor(ctx, key) {
+  ctx.fillStyle = PIECE_TYPES[key].color;
 }
 
 // testing
@@ -79,7 +82,8 @@ export function randomFill(ctx) {
 
   for (let i = 0; i < 200; i++) {
     // get random piece color
-    ctx.fillStyle = Object.values(PIECE_COLORS)[Math.trunc(Math.random() * 7)];
+    ctx.fillStyle =
+      Object.values(PIECE_TYPES)[Math.trunc(Math.random() * 7)].color;
 
     // draw block
     const [column, row] = [i % 10, Math.trunc(i / 10)];

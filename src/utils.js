@@ -22,8 +22,3 @@ export function logBoard(board) {
 
   console.log(strings.join("\n").replaceAll("0", "."));
 }
-
-// Returns true if state/position would collide with existing blocks
-export function occupied(board, state, position) {
-  return state.some((i) => board[i + position]);
-}

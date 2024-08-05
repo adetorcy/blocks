@@ -10,7 +10,7 @@ import {
   LINES_UPDATE_EVENT,
   GAME_OVER_EVENT,
 } from "./constants";
-import { clearCanvas, occupied, logBoard } from "./utils";
+import { clearCanvas } from "./utils";
 
 /**  Useful links
  *
@@ -55,16 +55,13 @@ export default class Game {
   }
 
   run() {
-    // Both NES and GameBoy run at roughly 60 frames per second
+    // Both NES and GameBoy run at 60 frames per second (very close)
+    // This will likely be off by a few frames (https://stackoverflow.com/a/15216501)
     this.intervalID = setInterval(() => this.frame(), 1000 / 60);
-
-    console.log("running");
   }
 
   stop() {
     clearInterval(this.intervalID);
-
-    console.log("stopped");
   }
 
   reset() {
@@ -78,8 +75,6 @@ export default class Game {
     this.lines = 0;
 
     this.broadcastAll();
-
-    console.log("reset");
   }
 
   frame() {
@@ -99,45 +94,41 @@ export default class Game {
     if (!this.livePiece) {
       this.getPiece();
 
-      // If piece can't spawn, game over
-      if (occupied(this.board, this.livePiece.state, this.livePiece.position)) {
+      // New piece spawns
+      if (this.hasRoom(this.livePiece.state, this.livePiece.position)) {
+        this.framesRemaining = this.delay;
+      } else {
+        // GAME OVER
         this.livePiece = null;
-        console.log("Game Over");
         this.stop();
 
         // Notify UI
         window.dispatchEvent(new CustomEvent(GAME_OVER_EVENT));
-
-        return;
       }
-
-      // Reset delay
-      this.framesRemaining = this.delay;
-
       return;
     }
 
-    // Live piece tries to fall down one level
+    // Live piece tries to move down
     this.moveDown();
 
-    // Reset delay
+    // Reset cycle
     this.framesRemaining = this.delay;
   }
 
   // Very rough FPS counter that only updates about once per second
   fpsCounter(now) {
-    if (!this.timeStamp) {
-      this.timeStamp = now;
-      this.frameCount = 0;
+    if (!this.fpsCounterStart) {
+      this.fpsCounterStart = now;
+      this.fpsCount = 0;
       return;
     }
 
-    if (now - this.timeStamp >= 1000) {
-      this.fpsElement.textContent = this.frameCount;
-      this.frameCount = 0;
-      this.timeStamp = now;
+    if (now - this.fpsCounterStart >= 1000) {
+      this.fpsElement.textContent = this.fpsCount;
+      this.fpsCount = 0;
+      this.fpsCounterStart = now;
     } else {
-      this.frameCount++;
+      this.fpsCount++;
     }
   }
 
@@ -173,79 +164,80 @@ export default class Game {
     this.preview();
   }
 
+  hasRoom(state, position) {
+    // Check state and position for collision with existing blocks
+    return state.every((i) => this.board[i + position] === 0);
+  }
+
+  isComplete(rowIdx) {
+    // Line clear check
+    const start = rowIdx * BOARD_COLS;
+    for (let i = start; i < start + BOARD_COLS; i++) {
+      if (this.board[i] === 0) return false;
+    }
+    return true;
+  }
+
   rotateCW() {
     if (this.livePiece.cannotSpin()) return;
 
-    // New rotation index
     const i = (this.livePiece.stateIdx + 1) % 4;
-
-    // Rotate if we can
-    occupied(this.board, this.livePiece.states[i], this.livePiece.position) ||
-      (this.livePiece.stateIdx = i);
+    if (this.hasRoom(this.livePiece.states[i], this.livePiece.position))
+      this.livePiece.stateIdx = i;
   }
 
   rotateCCW() {
     if (this.livePiece.cannotSpin()) return;
 
-    // New rotation index
     const i = (this.livePiece.stateIdx + 3) % 4;
-
-    // Rotate if we can
-    occupied(this.board, this.livePiece.states[i], this.livePiece.position) ||
-      (this.livePiece.stateIdx = i);
+    if (this.hasRoom(this.livePiece.states[i], this.livePiece.position))
+      this.livePiece.stateIdx = i;
   }
 
   moveLeft() {
     if (this.livePiece.touchesLeftWall()) return;
 
-    // Move, check, rollback
-    if (occupied(this.board, this.livePiece.state, --this.livePiece.position)) {
-      ++this.livePiece.position;
-    }
+    const p = this.livePiece.position - 1;
+    if (this.hasRoom(this.livePiece.state, p)) this.livePiece.position = p;
   }
 
   moveRight() {
     if (this.livePiece.touchesRightWall()) return;
 
-    // Move, check, rollback
-    if (occupied(this.board, this.livePiece.state, ++this.livePiece.position)) {
-      --this.livePiece.position;
-    }
+    const p = this.livePiece.position + 1;
+    if (this.hasRoom(this.livePiece.state, p)) this.livePiece.position = p;
   }
 
   moveDown() {
-    // More work to do in this method
+    // Index of piece's "base" row
+    const row = this.livePiece.baseRow;
 
-    // Are we at the bottom?
-    if (this.livePiece.touchesBottom()) {
-      this.lock(21);
+    // If live piece is not at the bottom, try to move it down
+    if (row !== 21) {
+      const p = this.livePiece.position + BOARD_COLS;
 
-      // LINE CLEAR CHECK
-
-      return;
+      if (this.hasRoom(this.livePiece.state, p)) {
+        this.livePiece.position = p;
+        return;
+      }
     }
 
-    // Try to move down on row
+    // Lock piece and check for cleared lines
+    this.lock(row);
+    const cleared = [];
 
-    if (
-      !occupied(
-        this.board,
-        this.livePiece.state,
-        (this.livePiece.position += BOARD_COLS)
-      )
-    ) {
-      // Success, nothing else to do
-      return;
+    // Check line indices top to row (including)
+    const top = Math.max(0, row - 3);
+
+    for (let rowIdx = top; rowIdx <= row; rowIdx++) {
+      if (this.isComplete(rowIdx)) {
+        cleared.push(rowIdx);
+      }
     }
 
-    // Rollback
-    this.livePiece.position -= BOARD_COLS;
-
-    // Add piece before locking it
-
-    this.lock(this.livePiece.lowestRow);
-
-    // LINE CLEAR CHECK
+    if (cleared.length) {
+      // Line clearing animation
+    }
   }
 
   // Handle key events

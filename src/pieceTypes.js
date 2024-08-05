@@ -1,27 +1,29 @@
 import { BOARD_COLS } from "./constants";
 
-// https://harddrop.com/wiki/Nintendo_Rotation_System
-
 /*
 
-Picture blocks on the board:
+One flat array represents the 10x22 board:
 
 0   1   2   3   4   5   6   7   8   9
 10  11  12  13  14  15  16  17  18  19
 20  21  22  23  24  25  26  27  28  29
 30  31  32  33  34  35  36  37  38  39
-40  41  42  43  44  45  46  47  48  49
 ...
 
-x = index % 10
-y = index // 10
+column = index % 10
+row = index // 10
+
+
+Rotation states: https://harddrop.com/wiki/Nintendo_Rotation_System
+
+Repeat rotation states for I, O, Z and S so rotation length can be hardcoded to 4
+List state indices in ascending order so last block is always on base row
 
 */
 
-// Repeat rotation for I, O, Z and S so that rotation length can be hardcoded to 4
-
 const I_PIECE = {
   key: 1,
+  color: "cyan",
   states: [
     [20, 21, 22, 23],
     [2, 12, 22, 32],
@@ -35,6 +37,7 @@ const I_PIECE = {
 
 const O_PIECE = {
   key: 2,
+  color: "yellow",
   states: [
     [11, 12, 21, 22],
     [11, 12, 21, 22],
@@ -48,6 +51,7 @@ const O_PIECE = {
 
 const J_PIECE = {
   key: 3,
+  color: "blue",
   states: [
     [10, 11, 12, 22],
     [1, 11, 20, 21],
@@ -61,6 +65,7 @@ const J_PIECE = {
 
 const L_PIECE = {
   key: 4,
+  color: "orange",
   states: [
     [10, 11, 12, 20],
     [0, 1, 11, 21],
@@ -74,6 +79,7 @@ const L_PIECE = {
 
 const S_PIECE = {
   key: 5,
+  color: "lime",
   states: [
     [11, 12, 20, 21],
     [1, 11, 12, 22],
@@ -87,6 +93,7 @@ const S_PIECE = {
 
 const T_PIECE = {
   key: 6,
+  color: "magenta",
   states: [
     [10, 11, 12, 21],
     [1, 10, 11, 21],
@@ -100,6 +107,7 @@ const T_PIECE = {
 
 const Z_PIECE = {
   key: 7,
+  color: "red",
   states: [
     [10, 11, 21, 22],
     [2, 11, 12, 21],
@@ -111,22 +119,14 @@ const Z_PIECE = {
   offset: [0.5, 0],
 };
 
-export const PIECE_TYPES = [
-  I_PIECE,
-  O_PIECE,
-  J_PIECE,
-  L_PIECE,
-  S_PIECE,
-  T_PIECE,
-  Z_PIECE,
-];
-
-export const PIECE_COLORS = {
-  [I_PIECE.key]: "cyan",
-  [O_PIECE.key]: "yellow",
-  [J_PIECE.key]: "blue",
-  [L_PIECE.key]: "orange",
-  [S_PIECE.key]: "lime",
-  [T_PIECE.key]: "magenta",
-  [Z_PIECE.key]: "red",
+const PIECE_TYPES = {
+  [I_PIECE.key]: I_PIECE,
+  [O_PIECE.key]: O_PIECE,
+  [J_PIECE.key]: J_PIECE,
+  [L_PIECE.key]: L_PIECE,
+  [S_PIECE.key]: S_PIECE,
+  [T_PIECE.key]: T_PIECE,
+  [Z_PIECE.key]: Z_PIECE,
 };
+
+export default PIECE_TYPES;
