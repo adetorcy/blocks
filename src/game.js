@@ -47,6 +47,10 @@ export default class Game {
     this.delay = GRAVITY_TABLE[level] || 1; // Frames between drops
     this.framesRemaining = this.delay;
 
+    // Line clearing
+    this.cleared = []; // Indices of cleared lines
+    this.lineClearAnimationStep = 0;
+
     // Get first 2 pieces
     this.getPiece();
 
@@ -86,16 +90,25 @@ export default class Game {
     /** No more frames. One of the following happens:
      * Live piece falls down one row
      * Live piece locks
+     * Line clear animation moves one step
      * A new piece spawns
      * The game ends
      **/
 
     // No live piece
     if (!this.livePiece) {
-      this.getPiece();
+      if (this.lineClearAnimationStep) {
+        this.lineClearAnimation();
+        return;
+      }
 
-      // New piece spawns
+      // Remove any cleared lines from the board
+      while (this.cleared.length) this.clearLine(this.cleared.pop());
+
+      // Update current and next piece
+      this.getPiece();
       if (this.hasRoom(this.livePiece.state, this.livePiece.position)) {
+        // New piece spawns
         this.framesRemaining = this.delay;
       } else {
         // GAME OVER
@@ -109,10 +122,7 @@ export default class Game {
     }
 
     // Live piece tries to move down
-    this.moveDown();
-
-    // Reset cycle
-    this.framesRemaining = this.delay;
+    if (this.moveDown()) this.resetCycle();
   }
 
   // Very rough FPS counter that only updates about once per second
@@ -132,6 +142,10 @@ export default class Game {
     }
   }
 
+  resetCycle() {
+    this.framesRemaining = this.delay;
+  }
+
   refresh() {
     requestAnimationFrame((now) => {
       clearCanvas(this.gameCanvas);
@@ -141,13 +155,53 @@ export default class Game {
     });
   }
 
-  lock() {
-    // Add live piece to board
+  lock(row) {
+    // Add live piece to the board
     this.livePiece.state.forEach((i) => {
       this.board[this.livePiece.position + i] = this.livePiece.key;
     });
 
+    // Kill live piece
     this.livePiece = null;
+
+    // See if we cleared any lines
+    const top = Math.max(0, row - 3);
+    for (let rowIdx = row; rowIdx >= top; rowIdx--) {
+      if (this.isComplete(rowIdx)) {
+        // Store line indices bottom up
+        this.cleared.push(rowIdx);
+      }
+    }
+
+    // If no lines were cleared just set spawn delay
+    if (!this.cleared.length) {
+      this.framesRemaining = ARE[row];
+      return;
+    }
+
+    // Update game data
+    this.lines += this.cleared.length;
+    this.broadcastLines();
+
+    // Start line clear animation immediately
+    this.framesRemaining = 0;
+    this.lineClearAnimationStep = 5;
+  }
+
+  lineClearAnimation() {
+    // Middle out block clear, for each row
+    // Step goes from 5 through 1
+    this.cleared.forEach((row) => {
+      const [left, right] = [
+        row * BOARD_COLS + this.lineClearAnimationStep - 1,
+        (row + 1) * BOARD_COLS - this.lineClearAnimationStep,
+      ];
+      this.board[left] = 0;
+      this.board[right] = 0;
+    });
+
+    this.framesRemaining = 5;
+    this.lineClearAnimationStep--;
   }
 
   preview() {
@@ -220,12 +274,12 @@ export default class Game {
     if (this.hasRoom(this.livePiece.state, p)) this.livePiece.position = p;
   }
 
+  // Move down or lock
   moveDown() {
-    // Index of piece's "base" row
     const row = this.livePiece.baseRow;
 
     // If live piece is not at the bottom, try to move it down
-    if (row !== 21) {
+    if (row < 21) {
       const p = this.livePiece.position + BOARD_COLS;
 
       if (this.hasRoom(this.livePiece.state, p)) {
@@ -234,29 +288,8 @@ export default class Game {
       }
     }
 
-    // Lock piece and check for cleared lines
-    this.lock();
-    this.framesRemaining = ARE[row];
-    const cleared = [];
-
-    // Check line indices top to row (including)
-    const top = Math.max(0, row - 3);
-
-    for (let rowIdx = top; rowIdx <= row; rowIdx++) {
-      if (this.isComplete(rowIdx)) {
-        cleared.push(rowIdx);
-      }
-    }
-
-    if (cleared.length) {
-      // Line clearing animation
-      console.log(cleared);
-
-      cleared.forEach((i) => this.clearLine(i));
-
-      this.lines += cleared.length;
-      this.broadcastLines();
-    }
+    this.lock(row);
+    return false;
   }
 
   // Handle key events
