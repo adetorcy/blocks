@@ -141,14 +141,13 @@ export default class Game {
     });
   }
 
-  lock(row) {
+  lock() {
     // Add live piece to board
     this.livePiece.state.forEach((i) => {
       this.board[this.livePiece.position + i] = this.livePiece.key;
     });
 
     this.livePiece = null;
-    this.framesRemaining = ARE[row];
   }
 
   preview() {
@@ -164,18 +163,31 @@ export default class Game {
     this.preview();
   }
 
+  // Check state and position for collision with existing blocks
   hasRoom(state, position) {
-    // Check state and position for collision with existing blocks
     return state.every((i) => this.board[i + position] === 0);
   }
 
+  // Line clear check
   isComplete(rowIdx) {
-    // Line clear check
     const start = rowIdx * BOARD_COLS;
     for (let i = start; i < start + BOARD_COLS; i++) {
       if (this.board[i] === 0) return false;
     }
     return true;
+  }
+
+  // Clear a completed line
+  clearLine(rowIdx) {
+    // Everything before the beginning of that line shifts by 1 row
+    for (let i = rowIdx * BOARD_COLS - 1; i >= 0; i--) {
+      this.board[i + BOARD_COLS] = this.board[i];
+    }
+
+    // Zero out 1st row
+    for (let i = 0; i < BOARD_COLS; i++) {
+      this.board[i] = 0;
+    }
   }
 
   rotateCW() {
@@ -223,7 +235,8 @@ export default class Game {
     }
 
     // Lock piece and check for cleared lines
-    this.lock(row);
+    this.lock();
+    this.framesRemaining = ARE[row];
     const cleared = [];
 
     // Check line indices top to row (including)
@@ -237,6 +250,12 @@ export default class Game {
 
     if (cleared.length) {
       // Line clearing animation
+      console.log(cleared);
+
+      cleared.forEach((i) => this.clearLine(i));
+
+      this.lines += cleared.length;
+      this.broadcastLines();
     }
   }
 
