@@ -230,7 +230,7 @@ export default class Game {
 
       if (this.hasRoom(this.livePiece.state, p)) {
         this.livePiece.position = p;
-        return;
+        return true;
       }
     }
 
@@ -280,6 +280,10 @@ export default class Game {
         break;
       case "ArrowRight":
         this.moveRight();
+        break;
+      case "Space":
+        // Hard drop
+        while (this.moveDown());
         break;
       default:
         // Do nothing
