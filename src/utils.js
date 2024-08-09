@@ -23,6 +23,14 @@ export function logBoard(board) {
   console.log(strings.join("\n").replaceAll("0", "."));
 }
 
+export function broadcast(event, value) {
+  window.dispatchEvent(
+    new CustomEvent(event, {
+      detail: value,
+    })
+  );
+}
+
 // Rough simulation of the piece selection algorithm
 // https://tetrissuomi.wordpress.com/wp-content/uploads/2020/04/nes_tetris_rng.pdf
 export function* sequence() {
@@ -39,5 +47,18 @@ export function* sequence() {
     }
 
     yield roll;
+  }
+}
+
+// https://tetris.wiki/Tetris_(NES,_Nintendo)
+export function* levelUpThresholds(startLevel) {
+  let lines = Math.min(
+    startLevel * 10 + 10,
+    Math.max(100, startLevel * 10 - 50)
+  );
+  yield lines;
+
+  while (true) {
+    yield (lines += 10);
   }
 }

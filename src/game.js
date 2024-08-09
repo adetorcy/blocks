@@ -10,7 +10,7 @@ import {
   LINES_UPDATE_EVENT,
   GAME_OVER_EVENT,
 } from "./constants";
-import { clearCanvas, sequence } from "./utils";
+import { sequence, levelUpThresholds, broadcast, clearCanvas } from "./utils";
 
 /**  Useful links
  *
@@ -45,6 +45,8 @@ export default class Game {
     this.score = 0;
     this.lines = 0;
     this.level = level;
+    this.levelUpThresholds = levelUpThresholds(level);
+    this.nextLevelUp = this.levelUpThresholds.next().value;
     this.delay = GRAVITY_TABLE[level] || 1; // Frames between drops
     this.framesRemaining = this.delay;
 
@@ -79,7 +81,9 @@ export default class Game {
     this.level = 0;
     this.lines = 0;
 
-    this.broadcastAll();
+    broadcast(SCORE_UPDATE_EVENT, 0);
+    broadcast(LEVEL_UPDATE_EVENT, 0);
+    broadcast(LINES_UPDATE_EVENT, 0);
   }
 
   frame() {
@@ -117,7 +121,7 @@ export default class Game {
         this.stop();
 
         // Notify UI
-        window.dispatchEvent(new CustomEvent(GAME_OVER_EVENT));
+        broadcast(GAME_OVER_EVENT);
       }
       return;
     }
@@ -180,13 +184,21 @@ export default class Game {
       return;
     }
 
-    // Update game data
-    this.lines += this.cleared.length;
-    this.broadcastLines();
+    // Update player progress
+    this.reward(this.cleared.length);
 
     // Start line clear animation immediately
     this.framesRemaining = 0;
     this.lineClearAnimationStep = 5;
+  }
+
+  reward(lines) {
+    broadcast(LINES_UPDATE_EVENT, (this.lines += lines));
+
+    if (this.lines >= this.nextLevelUp) {
+      broadcast(LEVEL_UPDATE_EVENT, ++this.level);
+      this.nextLevelUp = this.levelUpThresholds.next().value;
+    }
   }
 
   lineClearAnimation() {
@@ -325,35 +337,5 @@ export default class Game {
         console.log(`${keyCode} key not supported`);
         return;
     }
-  }
-
-  broadcastScore() {
-    window.dispatchEvent(
-      new CustomEvent(SCORE_UPDATE_EVENT, {
-        detail: this.score,
-      })
-    );
-  }
-
-  broadcastLevel() {
-    window.dispatchEvent(
-      new CustomEvent(LEVEL_UPDATE_EVENT, {
-        detail: this.level,
-      })
-    );
-  }
-
-  broadcastLines() {
-    window.dispatchEvent(
-      new CustomEvent(LINES_UPDATE_EVENT, {
-        detail: this.lines,
-      })
-    );
-  }
-
-  broadcastAll() {
-    this.broadcastScore();
-    this.broadcastLevel();
-    this.broadcastLines();
   }
 }
