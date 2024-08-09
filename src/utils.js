@@ -22,3 +22,22 @@ export function logBoard(board) {
 
   console.log(strings.join("\n").replaceAll("0", "."));
 }
+
+// Rough simulation of the piece selection algorithm
+// https://tetrissuomi.wordpress.com/wp-content/uploads/2020/04/nes_tetris_rng.pdf
+export function* sequence() {
+  let roll = Math.trunc(Math.random() * 7);
+
+  yield roll;
+
+  while (true) {
+    let previous = roll;
+
+    roll = Math.trunc(Math.random() * 8);
+    if (roll === 7 || roll === previous) {
+      roll = Math.trunc(Math.random() * 7);
+    }
+
+    yield roll;
+  }
+}

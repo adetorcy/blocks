@@ -10,7 +10,7 @@ import {
   LINES_UPDATE_EVENT,
   GAME_OVER_EVENT,
 } from "./constants";
-import { clearCanvas } from "./utils";
+import { clearCanvas, sequence } from "./utils";
 
 /**  Useful links
  *
@@ -24,6 +24,7 @@ import { clearCanvas } from "./utils";
 export default class Game {
   constructor() {
     this.board = new Array(BOARD_SIZE); // Uint8Array for multiplayer/webSocket?
+    this.sequence = sequence(); // Pseudo random integers between 0 and 6
   }
 
   start(gameCanvas, previewCanvas, fpsElement, level = 0) {
@@ -212,8 +213,9 @@ export default class Game {
   }
 
   getPiece() {
-    this.livePiece = this.nextPiece || Piece.random();
-    this.nextPiece = Piece.random();
+    this.livePiece =
+      this.nextPiece || Piece.fromInt(this.sequence.next().value);
+    this.nextPiece = Piece.fromInt(this.sequence.next().value);
     this.preview();
   }
 

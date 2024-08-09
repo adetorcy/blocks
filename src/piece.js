@@ -2,8 +2,8 @@ import { BOARD_COLS } from "./constants";
 import PIECE_TYPES from "./pieceTypes";
 
 export default class Piece {
-  static random() {
-    return new Piece(Object.values(PIECE_TYPES)[Math.trunc(Math.random() * 7)]);
+  static fromInt(i) {
+    return new Piece(Object.values(PIECE_TYPES)[i]);
   }
 
   constructor({ key, states, spawn, noSpinZone, offset }) {
