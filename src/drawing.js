@@ -27,13 +27,15 @@ function drawBlock(ctx, x, y) {
 export function drawPiece(ctx, piece) {
   setColor(ctx, piece.key);
 
-  // Draw piece (shifted two rows up)
+  // Draw piece, shifted two rows up
   piece.state.forEach((i) => {
     const [column, row] = [
       (i + piece.position) % BOARD_COLS,
-      Math.trunc((i + piece.position - 20) / BOARD_COLS),
+      Math.trunc((i + piece.position) / BOARD_COLS),
     ];
-    drawBlock(ctx, column * BLOCK_SIZE, row * BLOCK_SIZE);
+
+    // Blocks on top two rows will be clipped. NBD
+    drawBlock(ctx, column * BLOCK_SIZE, (row - 2) * BLOCK_SIZE);
   });
 }
 
@@ -63,11 +65,11 @@ export function drawBoard(ctx, board) {
     }
 
     // Get playfield coordinates
-    const [col, row] = [i % BOARD_COLS, Math.trunc((i - 20) / BOARD_COLS)];
+    const [col, row] = [i % BOARD_COLS, Math.trunc(i / BOARD_COLS)];
 
     // Draw block
     setColor(ctx, key);
-    drawBlock(ctx, col * BLOCK_SIZE, row * BLOCK_SIZE);
+    drawBlock(ctx, col * BLOCK_SIZE, (row - 2) * BLOCK_SIZE);
   }
 }
 
