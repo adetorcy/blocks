@@ -5,6 +5,7 @@ import {
   BOARD_SIZE,
   GRAVITY_TABLE,
   ARE,
+  LINE_CLEAR_STEP_FRAMES,
   SCORE_UPDATE_EVENT,
   LEVEL_UPDATE_EVENT,
   LINES_UPDATE_EVENT,
@@ -187,8 +188,8 @@ export default class Game {
     // Update player progress
     this.reward(this.cleared.length);
 
-    // Start line clear animation immediately
-    this.framesRemaining = 0;
+    // Start line clear animation
+    this.framesRemaining = LINE_CLEAR_STEP_FRAMES;
     this.lineClearAnimationStep = 5;
   }
 
@@ -222,7 +223,7 @@ export default class Game {
       this.board[right] = 0;
     });
 
-    this.framesRemaining = 5;
+    this.framesRemaining = LINE_CLEAR_STEP_FRAMES;
     this.lineClearAnimationStep--;
   }
 

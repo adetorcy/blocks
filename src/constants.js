@@ -12,6 +12,9 @@ export const LEVEL_UPDATE_EVENT = "blocks:level-update";
 export const LINES_UPDATE_EVENT = "blocks:lines-update";
 export const GAME_OVER_EVENT = "blocks:game-over";
 
+// Line clear animation
+export const LINE_CLEAR_STEP_FRAMES = 4;
+
 // Valid key presses
 export const MOVE_KEY_CODES = new Set([
   "KeyZ",
