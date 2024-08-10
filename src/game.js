@@ -193,8 +193,17 @@ export default class Game {
   }
 
   reward(lines) {
+    // Score
+    // https://tetris.wiki/Scoring
+    broadcast(
+      SCORE_UPDATE_EVENT,
+      (this.score += (this.level + 1) * [40, 100, 300, 1200][lines - 1])
+    );
+
+    // Lines
     broadcast(LINES_UPDATE_EVENT, (this.lines += lines));
 
+    // Level
     if (this.lines >= this.nextLevelUp) {
       broadcast(LEVEL_UPDATE_EVENT, ++this.level);
       this.nextLevelUp = this.levelUpThresholds.next().value;
