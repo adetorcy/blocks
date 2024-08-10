@@ -11,14 +11,13 @@ import {
   LINES_UPDATE_EVENT,
   GAME_OVER_EVENT,
 } from "./constants";
-import { sequence, levelUpThresholds, broadcast, clearCanvas } from "./utils";
+import { sequence, broadcast, clearCanvas } from "./utils";
 
 /**  Useful links
  *
- * https://harddrop.com/wiki/Tetris_(NES,_Nintendo)
- * https://harddrop.com/wiki/Tetris_(Game_Boy)
- * https://tetris.wiki/Tetris_(NES,_Nintendo)
- * https://tetris.wiki/Tetris_(Game_Boy)
+ * https://tetris.fandom.com/wiki/Tetris_Wiki
+ * https://harddrop.com/wiki/Tetris_Wiki
+ * https://tetris.wiki/Tetris.wiki
  *
  **/
 
@@ -46,10 +45,15 @@ export default class Game {
     this.score = 0;
     this.lines = 0;
     this.level = level;
-    this.levelUpThresholds = levelUpThresholds(level);
-    this.nextLevelUp = this.levelUpThresholds.next().value;
     this.delay = GRAVITY_TABLE[level] || 1; // Frames between drops
     this.framesRemaining = this.delay;
+
+    // 1st level up, after that every 10 lines
+    // https://tetris.wiki/Tetris_(NES,_Nintendo)
+    this.nextLevelUp = Math.min(
+      level * 10 + 10,
+      Math.max(100, level * 10 - 50)
+    );
 
     // Line clearing
     this.cleared = []; // Indices of cleared lines
@@ -207,7 +211,7 @@ export default class Game {
     // Level
     if (this.lines >= this.nextLevelUp) {
       broadcast(LEVEL_UPDATE_EVENT, ++this.level);
-      this.nextLevelUp = this.levelUpThresholds.next().value;
+      this.nextLevelUp += 10;
     }
   }
 
@@ -316,9 +320,8 @@ export default class Game {
     return false;
   }
 
-  // Handle key events
-  move(keyCode) {
-    // ARE
+  // Handle keyboard events
+  keydown(keyCode) {
     if (!this.livePiece) return;
 
     switch (keyCode) {
@@ -342,10 +345,19 @@ export default class Game {
         // Hard drop
         while (this.moveDown());
         break;
+      case "Escape":
+        // Pause
+        this.stop();
+        break;
       default:
         // Do nothing
         console.log(`${keyCode} key not supported`);
         return;
     }
+  }
+
+  // stub
+  keyup(keyCode) {
+    console.log("Keyup: %s", keyCode);
   }
 }

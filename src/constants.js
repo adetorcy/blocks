@@ -15,17 +15,6 @@ export const GAME_OVER_EVENT = "blocks:game-over";
 // Line clear animation
 export const LINE_CLEAR_STEP_FRAMES = 4;
 
-// Valid key presses
-export const MOVE_KEY_CODES = new Set([
-  "KeyZ",
-  "KeyX",
-  "Space",
-  "ArrowUp",
-  "ArrowLeft",
-  "ArrowDown",
-  "ArrowRight",
-]);
-
 // Frames per drop by level
 export const GRAVITY_TABLE = [
   48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2,

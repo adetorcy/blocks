@@ -49,16 +49,3 @@ export function* sequence() {
     yield roll;
   }
 }
-
-// https://tetris.wiki/Tetris_(NES,_Nintendo)
-export function* levelUpThresholds(startLevel) {
-  let lines = Math.min(
-    startLevel * 10 + 10,
-    Math.max(100, startLevel * 10 - 50)
-  );
-  yield lines;
-
-  while (true) {
-    yield (lines += 10);
-  }
-}

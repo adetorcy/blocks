@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { BLOCK_SIZE, GAME_OVER_EVENT } from "./constants";
-import { MOVE_KEY_CODES } from "./constants";
 import Score from "./Score";
 import Level from "./Level";
 import Lines from "./Lines";
@@ -28,7 +27,11 @@ function App() {
     setMenu(null);
   };
   const startGame = () => {
-    gameRef.current.start(playfieldRef.current, previewRef.current, fpsRef.current);
+    gameRef.current.start(
+      playfieldRef.current,
+      previewRef.current,
+      fpsRef.current
+    );
     setMenu(null);
   };
   const quitGame = () => {
@@ -36,30 +39,34 @@ function App() {
     setMenu("start");
   };
 
-  // Keyboard event listeners
+  // Listen for keyboard events
   useEffect(() => {
-    // Enable pause button if game is running
+    // Only if game is running
     if (menu) return;
 
     function handleKeydown(event) {
-      if (MOVE_KEY_CODES.has(event.code)) {
-        gameRef.current.move(event.code);
-      } else if (event.code === "Escape") {
-        gameRef.current.stop();
+      gameRef.current.keydown(event.code);
+      if (event.code === "Escape") {
         setMenu("pause");
       }
     }
 
-    // Add event listener
+    function handleKeyup(event) {
+      gameRef.current.keyup(event.code);
+    }
+
+    // Add event listeners
     window.addEventListener("keydown", handleKeydown);
+    window.addEventListener("keyup", handleKeyup);
 
     return () => {
-      // Remove event listener
+      // Remove event listeners
       window.removeEventListener("keydown", handleKeydown);
+      window.removeEventListener("keyup", handleKeyup);
     };
   }, [menu]);
 
-  // Game event listeners
+  // Listen for game events
   useEffect(() => {
     function handleGameOver() {
       setMenu("gameOver");
