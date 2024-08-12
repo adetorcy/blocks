@@ -1,15 +1,23 @@
-// Playfield
-export const BOARD_COLS = 10;
-export const BOARD_ROWS = 22;
-export const BOARD_SIZE = BOARD_COLS * BOARD_ROWS;
+// Game
+export const ROWS = 22;
+export const COLUMNS = 10;
+export const BOARD_SIZE = ROWS * COLUMNS;
 
 // Block size in pixels
 export const BLOCK_SIZE = 40;
 
+// Playfield
+export const PLAYFIELD_ROWS = 20;
+export const PLAYFIELD_HEIGHT = PLAYFIELD_ROWS * BLOCK_SIZE;
+export const PLAYFIELD_WIDTH = COLUMNS * BLOCK_SIZE;
+
+// Preview box
+export const PREVIEW_BOX_SIZE = 4 * BLOCK_SIZE;
+
 // Game events
-export const SCORE_UPDATE_EVENT = "blocks:score-update";
-export const LEVEL_UPDATE_EVENT = "blocks:level-update";
-export const LINES_UPDATE_EVENT = "blocks:lines-update";
+export const SCORE_UPDATE_EVENT = "blocks:score";
+export const LEVEL_UPDATE_EVENT = "blocks:level";
+export const LINES_UPDATE_EVENT = "blocks:lines";
 export const GAME_OVER_EVENT = "blocks:game-over";
 
 // Line clear animation

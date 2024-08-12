@@ -1,4 +1,4 @@
-import { BOARD_COLS, BOARD_SIZE } from "./constants";
+import { ROWS, COLUMNS, BOARD_SIZE } from "./constants";
 
 // Cannot rely on autoFocus JSX param (?)
 // We make our own using a ref callback
@@ -9,15 +9,11 @@ export function padScore(score) {
   return score.toString().padStart(3, "0");
 }
 
-export function clearCanvas(canvas) {
-  canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-}
-
 export function logBoard(board) {
   const strings = [];
 
-  for (let i = 0; i < BOARD_SIZE; i += BOARD_COLS) {
-    strings.push(board.slice(i, i + BOARD_COLS).join("\t"));
+  for (let i = 0; i < BOARD_SIZE; i += COLUMNS) {
+    strings.push(board.slice(i, i + COLUMNS).join("\t"));
   }
 
   console.log(strings.join("\n").replaceAll("0", "."));
@@ -28,6 +24,21 @@ export function broadcast(event, value) {
     new CustomEvent(event, {
       detail: value,
     })
+  );
+}
+
+// Check if a piece can move or rotate
+export function validate(board, column, row, state) {
+  return state.every(([x, y]) => emptySquare(board, column + x, row + y));
+}
+
+// Check if a board position is empty and not out of bounds
+function emptySquare(board, column, row) {
+  return (
+    column >= 0 &&
+    column < COLUMNS &&
+    row < ROWS &&
+    board[row * COLUMNS + column] === 0
   );
 }
 

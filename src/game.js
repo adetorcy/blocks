@@ -1,8 +1,17 @@
-import { drawBoard, drawPiece, drawPreview } from "./drawing";
-import Piece from "./piece";
 import {
-  BOARD_COLS,
+  drawBoard,
+  drawBlock,
+  drawPiece,
+  clearPlayfield,
+  clearPreview,
+  clearBlock,
+  setColor,
+} from "./drawing";
+import PIECES from "./pieces";
+import {
+  COLUMNS,
   BOARD_SIZE,
+  BLOCK_SIZE,
   GRAVITY_TABLE,
   ARE,
   LINE_CLEAR_STEP_FRAMES,
@@ -11,7 +20,7 @@ import {
   LINES_UPDATE_EVENT,
   GAME_OVER_EVENT,
 } from "./constants";
-import { sequence, broadcast, clearCanvas } from "./utils";
+import { sequence, broadcast, validate } from "./utils";
 
 /**  Useful links
  *
@@ -23,28 +32,28 @@ import { sequence, broadcast, clearCanvas } from "./utils";
 
 export default class Game {
   constructor() {
-    this.board = new Array(BOARD_SIZE); // Uint8Array for multiplayer/webSocket?
+    this.board = new Array(BOARD_SIZE); // Use one flat array (TypedArray for multiplayer?)
     this.sequence = sequence(); // Pseudo random integers between 0 and 6
   }
 
-  start(gameCanvas, previewCanvas, fpsElement, level = 0) {
-    // First game?
-    if (!this.gameCanvas) {
-      // Referenced elements should be in the DOM by the time this method is called
-      this.gameCanvas = gameCanvas;
-      this.gameCanvasCtx = gameCanvas.getContext("2d");
-      this.previewCanvas = previewCanvas;
-      this.previewCanvasCtx = previewCanvas.getContext("2d");
-      this.fpsElement = fpsElement;
-    }
+  init(gameCanvas, previewCanvas, fpsElement, level = 0) {
+    // Referenced elements should be in the DOM by the time this method is called
+    this.gameCanvasCtx = gameCanvas.getContext("2d");
+    this.previewCanvasCtx = previewCanvas.getContext("2d");
+    this.fpsElement = fpsElement;
 
     // Zero out board
     this.board.fill(0);
 
-    // Set up level and speed
+    // Initial values
     this.score = 0;
     this.lines = 0;
     this.level = level;
+
+    // Show starting level if not 0
+    if (level) broadcast(LEVEL_UPDATE_EVENT, level);
+
+    // Initial speed
     this.delay = GRAVITY_TABLE[level] || 1; // Frames between drops
     this.framesRemaining = this.delay;
 
@@ -60,10 +69,18 @@ export default class Game {
     this.lineClearAnimationStep = 0;
 
     // Get first 2 pieces
-    this.getPiece();
+    this.livePiece = this.getNextPiece();
+    this.nextPiece = this.getNextPiece();
 
-    // Start game loop
-    this.run();
+    // Show next piece
+    this.preview();
+
+    // Live piece state
+    [this.column, this.row] = this.livePiece.spawn;
+    this.rotationIdx = 0;
+
+    // Save live block positions for drawing/clearing
+    this.blocks = [];
   }
 
   run() {
@@ -76,15 +93,10 @@ export default class Game {
     clearInterval(this.intervalID);
   }
 
-  reset() {
-    // Clear canvas for start menu
-    clearCanvas(this.gameCanvas);
-    clearCanvas(this.previewCanvas);
-
-    // Reset scores
-    this.score = 0;
-    this.level = 0;
-    this.lines = 0;
+  quit() {
+    // Clear UI
+    clearPlayfield(this.gameCanvasCtx);
+    clearPreview(this.previewCanvasCtx);
 
     broadcast(SCORE_UPDATE_EVENT, 0);
     broadcast(LEVEL_UPDATE_EVENT, 0);
@@ -115,24 +127,48 @@ export default class Game {
       // Remove any cleared lines from the board
       while (this.cleared.length) this.clearLine(this.cleared.pop());
 
-      // Update current and next piece
-      this.getPiece();
-      if (this.hasRoom(this.livePiece.state, this.livePiece.position)) {
-        // New piece spawns
+      // Step through piece sequence
+      this.livePiece = this.nextPiece;
+      this.nextPiece = this.getNextPiece();
+
+      // Reset live piece state
+      [this.column, this.row] = this.livePiece.spawn;
+      this.rotationIdx = 0;
+
+      if (validate(this.board, this.column, this.row, this.rotationState)) {
+        // Reset cycle
         this.framesRemaining = this.delay;
       } else {
-        // GAME OVER
-        this.livePiece = null;
+        /**
+         * GAME OVER!!
+         **/
+
+        // Show jammed piece
+        requestAnimationFrame(() => {
+          drawPiece(
+            this.gameCanvasCtx,
+            this.livePiece,
+            this.column,
+            this.row - 2,
+            0
+          );
+        });
+
+        // And we're done
         this.stop();
 
         // Notify UI
         broadcast(GAME_OVER_EVENT);
       }
+
+      // Show next piece
+      this.preview();
+
       return;
     }
 
     // Live piece tries to move down
-    if (this.moveDown()) this.resetCycle();
+    this.moveDown() && (this.framesRemaining = this.delay);
   }
 
   // Very rough FPS counter that only updates about once per second
@@ -152,27 +188,36 @@ export default class Game {
     }
   }
 
-  resetCycle() {
-    this.framesRemaining = this.delay;
-  }
-
   refresh() {
     requestAnimationFrame((now) => {
-      clearCanvas(this.gameCanvas);
-      drawBoard(this.gameCanvasCtx, this.board);
-      if (this.livePiece) drawPiece(this.gameCanvasCtx, this.livePiece);
+      if (this.dirty) {
+        clearPlayfield(this.gameCanvasCtx);
+        drawBoard(this.gameCanvasCtx, this.board);
+        this.dirty = false;
+      }
+      if (this.livePiece) this.drawLivePiece();
       this.fpsCounter(now);
     });
   }
 
-  lock(row) {
+  lock() {
+    // Live piece's lowest row
+    const row = this.row + this.rotationState[3][1];
+
     // Add live piece to the board
-    this.livePiece.state.forEach((i) => {
-      this.board[this.livePiece.position + i] = this.livePiece.key;
+    this.rotationState.forEach(([x, y]) => {
+      this.board[(this.row + y) * COLUMNS + this.column + x] =
+        this.livePiece.key;
     });
+
+    // Board will need redrawing
+    this.dirty = true;
 
     // Kill live piece
     this.livePiece = null;
+
+    // Reset live block positions (so they don't get cleared by the next piece)
+    this.blocks = [];
 
     // See if we cleared any lines
     const top = Math.max(0, row - 3);
@@ -221,8 +266,8 @@ export default class Game {
     // Step goes from 5 through 1
     this.cleared.forEach((row) => {
       const [left, right] = [
-        row * BOARD_COLS + this.lineClearAnimationStep - 1,
-        (row + 1) * BOARD_COLS - this.lineClearAnimationStep,
+        row * COLUMNS + this.lineClearAnimationStep - 1,
+        (row + 1) * COLUMNS - this.lineClearAnimationStep,
       ];
       this.board[left] = 0;
       this.board[right] = 0;
@@ -230,31 +275,31 @@ export default class Game {
 
     this.framesRemaining = LINE_CLEAR_STEP_FRAMES;
     this.lineClearAnimationStep--;
+
+    // Redraw board
+    this.dirty = true;
   }
 
   preview() {
     requestAnimationFrame(() => {
-      clearCanvas(this.previewCanvas);
-      drawPreview(this.previewCanvasCtx, this.nextPiece);
+      clearPreview(this.previewCanvasCtx);
+      drawPiece(
+        this.previewCanvasCtx,
+        this.nextPiece,
+        ...this.nextPiece.offset,
+        0
+      );
     });
   }
 
-  getPiece() {
-    this.livePiece =
-      this.nextPiece || Piece.fromInt(this.sequence.next().value);
-    this.nextPiece = Piece.fromInt(this.sequence.next().value);
-    this.preview();
-  }
-
-  // Check state and position for collision with existing blocks
-  hasRoom(state, position) {
-    return state.every((i) => this.board[i + position] === 0);
+  getNextPiece() {
+    return Object.values(PIECES)[this.sequence.next().value];
   }
 
   // Line clear check
   isComplete(rowIdx) {
-    const start = rowIdx * BOARD_COLS;
-    for (let i = start; i < start + BOARD_COLS; i++) {
+    const start = rowIdx * COLUMNS;
+    for (let i = start; i < start + COLUMNS; i++) {
       if (this.board[i] === 0) return false;
     }
     return true;
@@ -263,61 +308,55 @@ export default class Game {
   // Clear a completed line
   clearLine(rowIdx) {
     // Everything before the beginning of that line shifts by 1 row
-    for (let i = rowIdx * BOARD_COLS - 1; i >= 0; i--) {
-      this.board[i + BOARD_COLS] = this.board[i];
+    for (let i = rowIdx * COLUMNS - 1; i >= 0; i--) {
+      this.board[i + COLUMNS] = this.board[i];
     }
 
     // Zero out 1st row
-    for (let i = 0; i < BOARD_COLS; i++) {
+    for (let i = 0; i < COLUMNS; i++) {
       this.board[i] = 0;
     }
+
+    // Redraw board
+    this.dirty = true;
   }
 
-  rotateCW() {
-    if (this.livePiece.cannotSpin()) return;
+  // Clockwise
+  rotateRight() {
+    const i = this.rotationIdx;
+    this.rotationIdx = (this.rotationIdx + 1) % 4;
 
-    const i = (this.livePiece.stateIdx + 1) % 4;
-    if (this.hasRoom(this.livePiece.states[i], this.livePiece.position))
-      this.livePiece.stateIdx = i;
+    validate(this.board, this.column, this.row, this.rotationState) ||
+      (this.rotationIdx = i);
   }
 
-  rotateCCW() {
-    if (this.livePiece.cannotSpin()) return;
+  // Counterclockwise
+  rotateLeft() {
+    const i = this.rotationIdx;
+    this.rotationIdx = (this.rotationIdx + 3) % 4;
 
-    const i = (this.livePiece.stateIdx + 3) % 4;
-    if (this.hasRoom(this.livePiece.states[i], this.livePiece.position))
-      this.livePiece.stateIdx = i;
+    validate(this.board, this.column, this.row, this.rotationState) ||
+      (this.rotationIdx = i);
   }
 
   moveLeft() {
-    if (this.livePiece.touchesLeftWall()) return;
-
-    const p = this.livePiece.position - 1;
-    if (this.hasRoom(this.livePiece.state, p)) this.livePiece.position = p;
+    validate(this.board, --this.column, this.row, this.rotationState) ||
+      this.column++;
   }
 
   moveRight() {
-    if (this.livePiece.touchesRightWall()) return;
-
-    const p = this.livePiece.position + 1;
-    if (this.hasRoom(this.livePiece.state, p)) this.livePiece.position = p;
+    validate(this.board, ++this.column, this.row, this.rotationState) ||
+      this.column--;
   }
 
   // Move down or lock
   moveDown() {
-    const row = this.livePiece.baseRow;
-
-    // If live piece is not at the bottom, try to move it down
-    if (row < 21) {
-      const p = this.livePiece.position + BOARD_COLS;
-
-      if (this.hasRoom(this.livePiece.state, p)) {
-        this.livePiece.position = p;
-        return true;
-      }
+    if (validate(this.board, this.column, this.row + 1, this.rotationState)) {
+      this.row++;
+      return true;
     }
 
-    this.lock(row);
+    this.lock();
     return false;
   }
 
@@ -327,11 +366,11 @@ export default class Game {
 
     switch (keyCode) {
       case "KeyZ":
-        this.rotateCCW();
+        this.rotateLeft();
         break;
       case "KeyX":
       case "ArrowUp":
-        this.rotateCW();
+        this.rotateRight();
         break;
       case "ArrowLeft":
         this.moveLeft();
@@ -360,5 +399,27 @@ export default class Game {
   // stub
   keyup(keyCode) {
     console.log("Keyup: %s", keyCode);
+  }
+
+  // Class utilities
+  get rotationState() {
+    return this.livePiece.rotation[this.rotationIdx];
+  }
+
+  drawLivePiece() {
+    // Clear existing blocks
+    this.blocks.forEach(([x, y]) => clearBlock(this.gameCanvasCtx, x, y));
+
+    // Get new block positions
+    this.blocks = this.rotationState.map(([x, y]) => [
+      (this.column + x) * BLOCK_SIZE,
+      (this.row - 2 + y) * BLOCK_SIZE,
+    ]);
+
+    // Draw new blocks. Blocks on top two rows will be clipped
+    setColor(this.gameCanvasCtx, this.livePiece.key);
+    this.blocks.forEach(([x, y]) => {
+      drawBlock(this.gameCanvasCtx, x, y);
+    });
   }
 }

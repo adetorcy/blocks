@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { BLOCK_SIZE, GAME_OVER_EVENT } from "./constants";
+import {
+  PLAYFIELD_HEIGHT,
+  PLAYFIELD_WIDTH,
+  PREVIEW_BOX_SIZE,
+  GAME_OVER_EVENT,
+} from "./constants";
 import Score from "./Score";
 import Level from "./Level";
 import Lines from "./Lines";
@@ -27,15 +32,16 @@ function App() {
     setMenu(null);
   };
   const startGame = () => {
-    gameRef.current.start(
+    gameRef.current.init(
       playfieldRef.current,
       previewRef.current,
       fpsRef.current
     );
+    gameRef.current.run();
     setMenu(null);
   };
   const quitGame = () => {
-    gameRef.current.reset();
+    gameRef.current.quit();
     setMenu("start");
   };
 
@@ -87,8 +93,8 @@ function App() {
         <canvas
           ref={playfieldRef}
           className="baselayer"
-          height={20 * BLOCK_SIZE}
-          width={10 * BLOCK_SIZE}
+          height={PLAYFIELD_HEIGHT}
+          width={PLAYFIELD_WIDTH}
         ></canvas>
         {
           // Overlay menu
@@ -112,8 +118,8 @@ function App() {
             <div>NEXT</div>
             <canvas
               ref={previewRef}
-              height={4 * BLOCK_SIZE}
-              width={4 * BLOCK_SIZE}
+              height={PREVIEW_BOX_SIZE}
+              width={PREVIEW_BOX_SIZE}
             ></canvas>
           </div>
         </div>

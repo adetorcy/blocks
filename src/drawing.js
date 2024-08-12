@@ -1,8 +1,15 @@
-import { BOARD_COLS, BOARD_SIZE, BLOCK_SIZE } from "./constants";
-import PIECE_TYPES from "./pieceTypes";
+import {
+  COLUMNS,
+  PLAYFIELD_ROWS,
+  BLOCK_SIZE,
+  PLAYFIELD_WIDTH,
+  PLAYFIELD_HEIGHT,
+  PREVIEW_BOX_SIZE,
+} from "./constants";
+import PIECES from "./pieces";
 
 // Draw a single block
-function drawBlock(ctx, x, y) {
+export function drawBlock(ctx, x, y) {
   // offset for border effect
   [x, y] = [x + 2, y + 2];
 
@@ -23,72 +30,46 @@ function drawBlock(ctx, x, y) {
   ctx.fillRect(x + 4, y + 4, 4, 4);
 }
 
-// Draw live piece in main canvas
-export function drawPiece(ctx, piece) {
+// Draw a piece at a given (column, row) position
+export function drawPiece(ctx, piece, column, row, rotationIdx) {
   setColor(ctx, piece.key);
 
-  // Draw piece, shifted two rows up
-  piece.state.forEach((i) => {
-    const [column, row] = [
-      (i + piece.position) % BOARD_COLS,
-      Math.trunc((i + piece.position) / BOARD_COLS),
-    ];
-
-    // Blocks on top two rows will be clipped. NBD
-    drawBlock(ctx, column * BLOCK_SIZE, (row - 2) * BLOCK_SIZE);
-  });
-}
-
-// Draw next piece in preview canvas
-export function drawPreview(ctx, piece) {
-  setColor(ctx, piece.key);
-
-  // Center piece
-  const [x, y] = piece.offset;
-
-  // Draw piece
-  piece.states[0].forEach((i) => {
-    const [column, row] = [i % BOARD_COLS, Math.trunc(i / BOARD_COLS)];
+  piece.rotation[rotationIdx].forEach(([x, y]) => {
     drawBlock(ctx, (column + x) * BLOCK_SIZE, (row + y) * BLOCK_SIZE);
   });
 }
 
-// Draw the entire board
+// Draw the board minus the top 2 rows
 export function drawBoard(ctx, board) {
-  // Top 2 rows are hidden
-  for (let i = 20; i < BOARD_SIZE; i++) {
-    const key = board[i];
+  let key;
 
-    // Skip empty blocks
-    if (!key) {
-      continue;
+  // Iterate over playfield (row, column) positions rather than board indices
+  for (let row = 0; row < PLAYFIELD_ROWS; row++) {
+    for (let column = 0; column < COLUMNS; column++) {
+      key = board[(row + 2) * COLUMNS + column];
+
+      // Skip empty blocks
+      if (key) {
+        setColor(ctx, key);
+        drawBlock(ctx, column * BLOCK_SIZE, row * BLOCK_SIZE);
+      }
     }
-
-    // Get playfield coordinates
-    const [col, row] = [i % BOARD_COLS, Math.trunc(i / BOARD_COLS)];
-
-    // Draw block
-    setColor(ctx, key);
-    drawBlock(ctx, col * BLOCK_SIZE, (row - 2) * BLOCK_SIZE);
   }
 }
 
 // Set canvas context fillStyle to piece color
-function setColor(ctx, key) {
-  ctx.fillStyle = PIECE_TYPES[key].color;
+export function setColor(ctx, key) {
+  ctx.fillStyle = PIECES[key].color;
 }
 
-// testing
-export function randomFill(ctx) {
-  console.log("Painting canvas");
+export function clearPlayfield(ctx) {
+  ctx.clearRect(0, 0, PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
+}
 
-  for (let i = 0; i < 200; i++) {
-    // get random piece color
-    ctx.fillStyle =
-      Object.values(PIECE_TYPES)[Math.trunc(Math.random() * 7)].color;
+export function clearPreview(ctx) {
+  ctx.clearRect(0, 0, PREVIEW_BOX_SIZE, PREVIEW_BOX_SIZE);
+}
 
-    // draw block
-    const [column, row] = [i % 10, Math.trunc(i / 10)];
-    drawBlock(ctx, column * BLOCK_SIZE, row * BLOCK_SIZE);
-  }
+export function clearBlock(ctx, x, y) {
+  ctx.clearRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
 }
