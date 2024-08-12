@@ -211,6 +211,7 @@ export default class Game {
     // Level
     if (this.lines >= this.nextLevelUp) {
       broadcast(LEVEL_UPDATE_EVENT, ++this.level);
+      this.delay = GRAVITY_TABLE[this.level] || 1;
       this.nextLevelUp += 10;
     }
   }
