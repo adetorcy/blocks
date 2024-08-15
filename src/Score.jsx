@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { padScore } from "./utils";
-import { SCORE_UPDATE_EVENT } from "./constants";
+import { SCORE_UPDATE } from "./events";
 
 export default function Score() {
   const [score, setScore] = useState(0);
@@ -12,11 +12,11 @@ export default function Score() {
     }
 
     // Add event listener
-    window.addEventListener(SCORE_UPDATE_EVENT, handleScoreUpdate);
+    window.addEventListener(SCORE_UPDATE, handleScoreUpdate);
 
     return () => {
       // Remove event listener
-      window.removeEventListener(SCORE_UPDATE_EVENT, handleScoreUpdate);
+      window.removeEventListener(SCORE_UPDATE, handleScoreUpdate);
     };
   }, []);
 

@@ -14,12 +14,6 @@ export const PLAYFIELD_WIDTH = COLUMNS * BLOCK_SIZE;
 // Preview box
 export const PREVIEW_BOX_SIZE = 4 * BLOCK_SIZE;
 
-// Game events
-export const SCORE_UPDATE_EVENT = "blocks:score";
-export const LEVEL_UPDATE_EVENT = "blocks:level";
-export const LINES_UPDATE_EVENT = "blocks:lines";
-export const GAME_OVER_EVENT = "blocks:game-over";
-
 // Line clear animation
 export const LINE_CLEAR_STEP_FRAMES = 4;
 
@@ -34,3 +28,9 @@ export const ARE = [
   18, 18, 18, 18, 18, 18, 18, 18, 16, 16, 16, 16, 14, 14, 14, 14, 12, 12, 12,
   12, 10, 10,
 ];
+
+// Simplified DAS: 10 frame initial delay, then 1 frame per shift
+export const DAS_FRAMES = 10;
+
+// Soft drop is 1/2 G
+export const SOFT_DROP_FRAMES = 2;

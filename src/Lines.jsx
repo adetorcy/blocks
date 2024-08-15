@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { padScore } from "./utils";
-import { LINES_UPDATE_EVENT } from "./constants";
+import { LINES_UPDATE } from "./events";
 
 export default function Lines() {
   const [lines, setLines] = useState(0);
@@ -12,11 +12,11 @@ export default function Lines() {
     }
 
     // Add event listener
-    window.addEventListener(LINES_UPDATE_EVENT, handleLinesUpdate);
+    window.addEventListener(LINES_UPDATE, handleLinesUpdate);
 
     return () => {
       // Remove event listener
-      window.removeEventListener(LINES_UPDATE_EVENT, handleLinesUpdate);
+      window.removeEventListener(LINES_UPDATE, handleLinesUpdate);
     };
   }, []);
 

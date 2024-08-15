@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { padScore } from "./utils";
-import { LEVEL_UPDATE_EVENT } from "./constants";
-
+import { LEVEL_UPDATE } from "./events";
 export default function Level() {
   const [level, setLevel] = useState(0);
 
@@ -12,11 +11,11 @@ export default function Level() {
     }
 
     // Add event listener
-    window.addEventListener(LEVEL_UPDATE_EVENT, handleLevelUpdate);
+    window.addEventListener(LEVEL_UPDATE, handleLevelUpdate);
 
     return () => {
       // Remove event listener
-      window.removeEventListener(LEVEL_UPDATE_EVENT, handleLevelUpdate);
+      window.removeEventListener(LEVEL_UPDATE, handleLevelUpdate);
     };
   }, []);
 

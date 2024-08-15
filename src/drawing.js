@@ -31,8 +31,12 @@ export function drawBlock(ctx, x, y) {
 }
 
 // Draw a piece at a given (column, row) position
-export function drawPiece(ctx, piece, column, row, rotationIdx) {
-  setColor(ctx, piece.key);
+export function drawPiece(ctx, piece, column, row, rotationIdx, color) {
+  if (color) {
+    ctx.fillStyle = color;
+  } else {
+    setColor(ctx, piece.key);
+  }
 
   piece.rotation[rotationIdx].forEach(([x, y]) => {
     drawBlock(ctx, (column + x) * BLOCK_SIZE, (row + y) * BLOCK_SIZE);

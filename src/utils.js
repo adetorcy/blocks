@@ -27,18 +27,13 @@ export function broadcast(event, value) {
   );
 }
 
-// Check if a piece can move or rotate
-export function validate(board, column, row, state) {
-  return state.every(([x, y]) => emptySquare(board, column + x, row + y));
-}
-
-// Check if a board position is empty and not out of bounds
-function emptySquare(board, column, row) {
+// Check if a board position is occupied or out of bounds
+export function badBlock(board, column, row) {
   return (
-    column >= 0 &&
-    column < COLUMNS &&
-    row < ROWS &&
-    board[row * COLUMNS + column] === 0
+    board[row * COLUMNS + column] !== 0 ||
+    column < 0 ||
+    column >= COLUMNS ||
+    row >= ROWS
   );
 }
 

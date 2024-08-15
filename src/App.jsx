@@ -3,8 +3,8 @@ import {
   PLAYFIELD_HEIGHT,
   PLAYFIELD_WIDTH,
   PREVIEW_BOX_SIZE,
-  GAME_OVER_EVENT,
 } from "./constants";
+import { GAME_OVER } from "./events";
 import Score from "./Score";
 import Level from "./Level";
 import Lines from "./Lines";
@@ -79,11 +79,11 @@ function App() {
     }
 
     // Add event listener
-    window.addEventListener(GAME_OVER_EVENT, handleGameOver);
+    window.addEventListener(GAME_OVER, handleGameOver);
 
     return () => {
       // Remove event listener
-      window.removeEventListener(GAME_OVER_EVENT, handleGameOver);
+      window.removeEventListener(GAME_OVER, handleGameOver);
     };
   }, []);
 

@@ -15,12 +15,11 @@ import {
   GRAVITY_TABLE,
   ARE,
   LINE_CLEAR_STEP_FRAMES,
-  SCORE_UPDATE_EVENT,
-  LEVEL_UPDATE_EVENT,
-  LINES_UPDATE_EVENT,
-  GAME_OVER_EVENT,
+  SOFT_DROP_FRAMES,
+  DAS_FRAMES,
 } from "./constants";
-import { sequence, broadcast, validate } from "./utils";
+import { SCORE_UPDATE, LEVEL_UPDATE, LINES_UPDATE, GAME_OVER } from "./events";
+import { sequence, broadcast, badBlock } from "./utils";
 
 /**  Useful links
  *
@@ -51,7 +50,7 @@ export default class Game {
     this.level = level;
 
     // Show starting level if not 0
-    if (level) broadcast(LEVEL_UPDATE_EVENT, level);
+    if (level) broadcast(LEVEL_UPDATE, level);
 
     // Initial speed
     this.delay = GRAVITY_TABLE[level] || 1; // Frames between drops
@@ -83,6 +82,16 @@ export default class Game {
     this.blocks = [];
   }
 
+  get rotationState() {
+    return this.livePiece.rotation[this.rotationIdx];
+  }
+
+  get invalid() {
+    return this.rotationState.some(([x, y]) =>
+      badBlock(this.board, this.column + x, this.row + y)
+    );
+  }
+
   run() {
     // Both NES and GameBoy run at 60 frames per second (very close)
     // This will likely be off by a few frames (https://stackoverflow.com/a/15216501)
@@ -98,18 +107,46 @@ export default class Game {
     clearPlayfield(this.gameCanvasCtx);
     clearPreview(this.previewCanvasCtx);
 
-    broadcast(SCORE_UPDATE_EVENT, 0);
-    broadcast(LEVEL_UPDATE_EVENT, 0);
-    broadcast(LINES_UPDATE_EVENT, 0);
+    broadcast(SCORE_UPDATE, 0);
+    broadcast(LEVEL_UPDATE, 0);
+    broadcast(LINES_UPDATE, 0);
   }
 
   frame() {
     this.refresh();
 
-    // Nothing to do while we have frames to burn
+    /**
+     * Check for DAS and soft drop
+     **/
+
+    if (this.leftDasOn) {
+      if (this.leftDasFramesLeft) {
+        this.leftDasFramesLeft--;
+      } else {
+        this.moveLeft();
+      }
+    }
+
+    if (this.rightDasOn) {
+      if (this.rightDasFramesLeft) {
+        this.rightDasFramesLeft--;
+      } else {
+        this.moveRight();
+      }
+    }
+
+    if (this.softDropOn && !this.softDropFramesLeft--) {
+      this.moveDown();
+      this.softDropFramesLeft = SOFT_DROP_FRAMES;
+    }
+
+    /**
+     * Nothing else to do while we have frames to burn
+     **/
     if (this.framesRemaining--) return;
 
-    /** No more frames. One of the following happens:
+    /**
+     * No more frames. One of the following happens:
      * Live piece falls down one row
      * Live piece locks
      * Line clear animation moves one step
@@ -117,58 +154,65 @@ export default class Game {
      * The game ends
      **/
 
-    // No live piece
-    if (!this.livePiece) {
-      if (this.lineClearAnimationStep) {
-        this.lineClearAnimation();
-        return;
-      }
-
-      // Remove any cleared lines from the board
-      while (this.cleared.length) this.clearLine(this.cleared.pop());
-
-      // Step through piece sequence
-      this.livePiece = this.nextPiece;
-      this.nextPiece = this.getNextPiece();
-
-      // Reset live piece state
-      [this.column, this.row] = this.livePiece.spawn;
-      this.rotationIdx = 0;
-
-      if (validate(this.board, this.column, this.row, this.rotationState)) {
-        // Reset cycle
-        this.framesRemaining = this.delay;
-      } else {
-        /**
-         * GAME OVER!!
-         **/
-
-        // Show jammed piece
-        requestAnimationFrame(() => {
-          drawPiece(
-            this.gameCanvasCtx,
-            this.livePiece,
-            this.column,
-            this.row - 2,
-            0
-          );
-        });
-
-        // And we're done
-        this.stop();
-
-        // Notify UI
-        broadcast(GAME_OVER_EVENT);
-      }
-
-      // Show next piece
-      this.preview();
-
+    if (this.livePiece) {
+      // Live piece moves down or locks
+      if (this.moveDown()) this.framesRemaining = this.delay;
       return;
     }
 
-    // Live piece tries to move down
-    this.moveDown() && (this.framesRemaining = this.delay);
+    /**
+     * No live piece
+     **/
+
+    if (this.lineClearAnimationStep) {
+      this.lineClearAnimation();
+      return;
+    }
+
+    // Remove any cleared lines from the board
+    while (this.cleared.length) this.clearLine(this.cleared.pop());
+
+    // Step through piece sequence
+    this.livePiece = this.nextPiece;
+    this.nextPiece = this.getNextPiece();
+
+    // Reset live piece state
+    [this.column, this.row] = this.livePiece.spawn;
+    this.rotationIdx = 0;
+
+    if (this.invalid) {
+      /**
+       * GAME OVER!!
+       **/
+
+      // Show jammed piece
+      requestAnimationFrame(() => {
+        drawPiece(
+          this.gameCanvasCtx,
+          this.livePiece,
+          this.column,
+          this.row - 2,
+          0,
+          "DarkGray"
+        );
+      });
+
+      // Stop game loop
+      this.stop();
+
+      // Notify UI
+      broadcast(GAME_OVER);
+    } else {
+      /**
+       * New piece spawned successfully
+       **/
+
+      // Reset cycle
+      this.framesRemaining = this.delay;
+    }
+
+    // Show next piece
+    this.preview();
   }
 
   // Very rough FPS counter that only updates about once per second
@@ -186,6 +230,23 @@ export default class Game {
     } else {
       this.fpsCount++;
     }
+  }
+
+  drawLivePiece() {
+    // Clear existing blocks
+    this.blocks.forEach(([x, y]) => clearBlock(this.gameCanvasCtx, x, y));
+
+    // Get new block positions
+    this.blocks = this.rotationState.map(([x, y]) => [
+      (this.column + x) * BLOCK_SIZE,
+      (this.row - 2 + y) * BLOCK_SIZE,
+    ]);
+
+    // Draw new blocks. Blocks on top two rows will be clipped
+    setColor(this.gameCanvasCtx, this.livePiece.key);
+    this.blocks.forEach(([x, y]) => {
+      drawBlock(this.gameCanvasCtx, x, y);
+    });
   }
 
   refresh() {
@@ -210,11 +271,11 @@ export default class Game {
         this.livePiece.key;
     });
 
+    // Live piece is locked
+    this.livePiece = null;
+
     // Board will need redrawing
     this.dirty = true;
-
-    // Kill live piece
-    this.livePiece = null;
 
     // Reset live block positions (so they don't get cleared by the next piece)
     this.blocks = [];
@@ -246,16 +307,16 @@ export default class Game {
     // Score
     // https://tetris.wiki/Scoring
     broadcast(
-      SCORE_UPDATE_EVENT,
+      SCORE_UPDATE,
       (this.score += (this.level + 1) * [40, 100, 300, 1200][lines - 1])
     );
 
     // Lines
-    broadcast(LINES_UPDATE_EVENT, (this.lines += lines));
+    broadcast(LINES_UPDATE, (this.lines += lines));
 
     // Level
     if (this.lines >= this.nextLevelUp) {
-      broadcast(LEVEL_UPDATE_EVENT, ++this.level);
+      broadcast(LEVEL_UPDATE, ++this.level);
       this.delay = GRAVITY_TABLE[this.level] || 1;
       this.nextLevelUp += 10;
     }
@@ -323,47 +384,51 @@ export default class Game {
 
   // Clockwise
   rotateRight() {
+    if (!this.livePiece) return;
+
     const i = this.rotationIdx;
     this.rotationIdx = (this.rotationIdx + 1) % 4;
-
-    validate(this.board, this.column, this.row, this.rotationState) ||
-      (this.rotationIdx = i);
+    if (this.invalid) this.rotationIdx = i;
   }
 
   // Counterclockwise
   rotateLeft() {
+    if (!this.livePiece) return;
+
     const i = this.rotationIdx;
     this.rotationIdx = (this.rotationIdx + 3) % 4;
-
-    validate(this.board, this.column, this.row, this.rotationState) ||
-      (this.rotationIdx = i);
+    if (this.invalid) this.rotationIdx = i;
   }
 
   moveLeft() {
-    validate(this.board, --this.column, this.row, this.rotationState) ||
-      this.column++;
+    if (!this.livePiece) return;
+
+    this.column--;
+    if (this.invalid) this.column++;
   }
 
   moveRight() {
-    validate(this.board, ++this.column, this.row, this.rotationState) ||
-      this.column--;
+    if (!this.livePiece) return;
+
+    this.column++;
+    if (this.invalid) this.column--;
   }
 
   // Move down or lock
   moveDown() {
-    if (validate(this.board, this.column, this.row + 1, this.rotationState)) {
-      this.row++;
-      return true;
-    }
+    if (!this.livePiece) return false;
 
-    this.lock();
-    return false;
+    this.row++;
+    if (this.invalid) {
+      this.row--;
+      this.lock();
+      return false;
+    }
+    return true;
   }
 
   // Handle keyboard events
   keydown(keyCode) {
-    if (!this.livePiece) return;
-
     switch (keyCode) {
       case "KeyZ":
         this.rotateLeft();
@@ -374,12 +439,20 @@ export default class Game {
         break;
       case "ArrowLeft":
         this.moveLeft();
+        this.leftDasOn = true;
+        this.rightDasOn = false;
+        this.leftDasFramesLeft = DAS_FRAMES;
         break;
       case "ArrowDown":
         this.moveDown();
+        this.softDropOn = true;
+        this.softDropFramesLeft = SOFT_DROP_FRAMES;
         break;
       case "ArrowRight":
         this.moveRight();
+        this.rightDasOn = true;
+        this.leftDasOn = false;
+        this.rightDasFramesLeft = DAS_FRAMES;
         break;
       case "Space":
         // Hard drop
@@ -396,30 +469,20 @@ export default class Game {
     }
   }
 
-  // stub
   keyup(keyCode) {
-    console.log("Keyup: %s", keyCode);
-  }
-
-  // Class utilities
-  get rotationState() {
-    return this.livePiece.rotation[this.rotationIdx];
-  }
-
-  drawLivePiece() {
-    // Clear existing blocks
-    this.blocks.forEach(([x, y]) => clearBlock(this.gameCanvasCtx, x, y));
-
-    // Get new block positions
-    this.blocks = this.rotationState.map(([x, y]) => [
-      (this.column + x) * BLOCK_SIZE,
-      (this.row - 2 + y) * BLOCK_SIZE,
-    ]);
-
-    // Draw new blocks. Blocks on top two rows will be clipped
-    setColor(this.gameCanvasCtx, this.livePiece.key);
-    this.blocks.forEach(([x, y]) => {
-      drawBlock(this.gameCanvasCtx, x, y);
-    });
+    switch (keyCode) {
+      case "ArrowLeft":
+        this.leftDasOn = false;
+        break;
+      case "ArrowDown":
+        this.softDropOn = false;
+        break;
+      case "ArrowRight":
+        this.rightDasOn = false;
+        break;
+      default:
+        // Do nothing
+        return;
+    }
   }
 }
