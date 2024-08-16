@@ -49,6 +49,7 @@ button:focus {
   height: 60vh;
   display: flex;
   align-items: center;
+  font-size: 48px;
 }
 
 @keyframes blinker {
