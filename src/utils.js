@@ -55,3 +55,23 @@ export function* sequence() {
     yield roll;
   }
 }
+
+export function about() {
+  const style = (color) =>
+    `color: ${color}; font-weight: 900; font-size: 48px; text-shadow: 1px 1px 0 black;`;
+
+  const styles = [
+    style("cyan"),
+    style("orange"),
+    style("lime"),
+    style("magenta"),
+    style("yellow"),
+    style("red"),
+  ];
+
+  console.log(
+    "%cB%cL%cO%cC%cK%cS",
+    ...styles,
+    `\n\nversion ${import.meta.env.VITE_APP_VERSION}\n\nAdT 2024`
+  );
+}
