@@ -15,8 +15,6 @@ body {
   color: white;
   user-select: none;
   line-height: 1;
-  animation: fadeIn ease-in .5s;
-  animation-iteration-count: 1;
 }
 
 /**********/
@@ -47,18 +45,15 @@ button:focus {
   flex-direction: column;
 }
 
+.splash {
+  height: 60vh;
+  display: flex;
+  align-items: center;
+}
+
 @keyframes blinker {
   50% {
     color: coral;
-  }
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
   }
 }
 

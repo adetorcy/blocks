@@ -17,6 +17,7 @@ import Game from "./game";
 function App() {
   // UI
   const [menu, setMenu] = useState("start");
+  const [splash, setSplash] = useState(true);
 
   // Game
   const gameRef = useRef(new Game());
@@ -86,6 +87,13 @@ function App() {
       window.removeEventListener(GAME_OVER, handleGameOver);
     };
   }, []);
+
+  // One time splash screen effect
+  useEffect(() => {
+    setTimeout(() => setSplash(false), 500);
+  }, []);
+
+  if (splash) return <div className="splash">👾</div>;
 
   return (
     <>
