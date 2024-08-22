@@ -67,8 +67,9 @@ button:focus {
   padding: 2px;
 }
 
-.baselayer,
-.toplayer {
+.board,
+.piece,
+.menu {
   grid-area: 1/1;
 }
 

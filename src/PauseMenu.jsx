@@ -29,7 +29,7 @@ export default function PauseMenu({ runGame, quitGame }) {
 
   return (
     // <div className="pausemenu-wrapper">
-    <div className="stack menu menu-pause toplayer">
+    <div className="stack menu menu-pause">
       {buttons.map(([callback, label], i) => (
         <button
           key={i}

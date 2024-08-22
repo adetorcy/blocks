@@ -8,6 +8,10 @@ import {
 } from "./constants";
 import PIECES from "./pieces";
 
+const colors = Object.fromEntries(
+  PIECES.map((piece) => [piece.id, piece.color])
+);
+
 // Draw a single block
 export function drawBlock(ctx, x, y) {
   // offset for border effect
@@ -30,50 +34,63 @@ export function drawBlock(ctx, x, y) {
   ctx.fillRect(x + 4, y + 4, 4, 4);
 }
 
-// Draw a piece at a given (column, row) position
-export function drawPiece(ctx, piece, column, row, rotationIdx, color) {
-  if (color) {
-    ctx.fillStyle = color;
-  } else {
-    setColor(ctx, piece.key);
-  }
+// Draw a single (ghost) block
+export function drawGhostBlock(ctx, x, y) {
+  // offset for border effect
+  [x, y] = [x + 4, y + 4];
 
-  piece.rotation[rotationIdx].forEach(([x, y]) => {
-    drawBlock(ctx, (column + x) * BLOCK_SIZE, (row + y) * BLOCK_SIZE);
+  // draw main square
+  ctx.strokeRect(x, y, 32, 32);
+}
+
+export function drawJammedPiece(ctx, piece) {
+  ctx.fillStyle = "DarkGray";
+
+  piece.rotation[0].forEach(([x, y]) => {
+    drawBlock(
+      ctx,
+      (piece.column + x) * BLOCK_SIZE,
+      (piece.row + y - 2) * BLOCK_SIZE
+    );
+  });
+}
+
+export function drawPreview(ctx, piece) {
+  ctx.fillStyle = piece.color;
+
+  piece.rotation[0].forEach(([x, y]) => {
+    drawBlock(
+      ctx,
+      (piece.offset[0] + x) * BLOCK_SIZE,
+      (piece.offset[1] + y) * BLOCK_SIZE
+    );
   });
 }
 
 // Draw the board minus the top 2 rows
 export function drawBoard(ctx, board) {
-  let key;
+  let pieceId;
 
   // Iterate over playfield (row, column) positions rather than board indices
   for (let row = 0; row < PLAYFIELD_ROWS; row++) {
     for (let column = 0; column < COLUMNS; column++) {
-      key = board[(row + 2) * COLUMNS + column];
+      pieceId = board[(row + 2) * COLUMNS + column];
 
       // Skip empty blocks
-      if (key) {
-        setColor(ctx, key);
+      if (pieceId) {
+        ctx.fillStyle = colors[pieceId];
         drawBlock(ctx, column * BLOCK_SIZE, row * BLOCK_SIZE);
       }
     }
   }
 }
 
-// Set canvas context fillStyle to piece color
-export function setColor(ctx, key) {
-  ctx.fillStyle = PIECES[key].color;
-}
-
-export function clearPlayfield(ctx) {
+export function clearBoard(ctx) {
   ctx.clearRect(0, 0, PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
 }
 
+export const clearPiece = clearBoard;
+
 export function clearPreview(ctx) {
   ctx.clearRect(0, 0, PREVIEW_BOX_SIZE, PREVIEW_BOX_SIZE);
-}
-
-export function clearBlock(ctx, x, y) {
-  ctx.clearRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
 }

@@ -15,7 +15,7 @@ List blocks top to bottom, left to right
 */
 
 const I_PIECE = {
-  key: 1,
+  id: 1,
   color: "cyan",
   rotation: [
     [
@@ -43,12 +43,13 @@ const I_PIECE = {
       [2, 3],
     ],
   ],
-  spawn: [3, 0],
+  column: 3,
+  row: 0,
   offset: [0, -0.5],
 };
 
 const O_PIECE = {
-  key: 2,
+  id: 2,
   color: "yellow",
   rotation: [
     [
@@ -76,12 +77,13 @@ const O_PIECE = {
       [2, 2],
     ],
   ],
-  spawn: [3, 1],
+  column: 3,
+  row: 1,
   offset: [0, 0],
 };
 
 const J_PIECE = {
-  key: 3,
+  id: 3,
   color: "blue",
   rotation: [
     [
@@ -109,12 +111,13 @@ const J_PIECE = {
       [1, 2],
     ],
   ],
-  spawn: [4, 1],
+  column: 4,
+  row: 1,
   offset: [0.5, 0],
 };
 
 const L_PIECE = {
-  key: 4,
+  id: 4,
   color: "orange",
   rotation: [
     [
@@ -142,12 +145,13 @@ const L_PIECE = {
       [2, 2],
     ],
   ],
-  spawn: [4, 1],
+  column: 4,
+  row: 1,
   offset: [0.5, 0],
 };
 
 const S_PIECE = {
-  key: 5,
+  id: 5,
   color: "lime",
   rotation: [
     [
@@ -175,12 +179,13 @@ const S_PIECE = {
       [2, 2],
     ],
   ],
-  spawn: [4, 1],
+  column: 4,
+  row: 1,
   offset: [0.5, 0],
 };
 
 const T_PIECE = {
-  key: 6,
+  id: 6,
   color: "magenta",
   rotation: [
     [
@@ -208,12 +213,13 @@ const T_PIECE = {
       [1, 2],
     ],
   ],
-  spawn: [4, 1],
+  column: 4,
+  row: 1,
   offset: [0.5, 0],
 };
 
 const Z_PIECE = {
-  key: 7,
+  id: 7,
   color: "red",
   rotation: [
     [
@@ -241,18 +247,11 @@ const Z_PIECE = {
       [1, 2],
     ],
   ],
-  spawn: [4, 1],
+  column: 4,
+  row: 1,
   offset: [0.5, 0],
 };
 
-const PIECES = {
-  [I_PIECE.key]: I_PIECE,
-  [O_PIECE.key]: O_PIECE,
-  [J_PIECE.key]: J_PIECE,
-  [L_PIECE.key]: L_PIECE,
-  [S_PIECE.key]: S_PIECE,
-  [T_PIECE.key]: T_PIECE,
-  [Z_PIECE.key]: Z_PIECE,
-};
+const PIECES = [I_PIECE, O_PIECE, J_PIECE, L_PIECE, S_PIECE, T_PIECE, Z_PIECE];
 
 export default PIECES;

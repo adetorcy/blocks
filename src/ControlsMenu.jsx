@@ -2,7 +2,7 @@ import { autoFocusRef } from "./utils";
 
 export default function ControlsMenu({ showStartMenu }) {
   return (
-    <div className="stack menu toplayer">
+    <div className="stack menu">
       <div className="stack">
         {controls.map(([keyName, action], i) => (
           <div key={i} className="controlsline">

@@ -1,11 +1,12 @@
 import {
   drawBoard,
   drawBlock,
-  drawPiece,
-  clearPlayfield,
+  drawPreview,
+  drawJammedPiece,
+  clearBoard,
+  clearPiece,
   clearPreview,
-  clearBlock,
-  setColor,
+  drawGhostBlock,
 } from "./drawing";
 import PIECES from "./pieces";
 import {
@@ -19,7 +20,7 @@ import {
   DAS_FRAMES,
 } from "./constants";
 import { SCORE_UPDATE, LEVEL_UPDATE, LINES_UPDATE, GAME_OVER } from "./events";
-import { sequence, broadcast, badBlock } from "./utils";
+import { sequence, broadcast, pieceFits } from "./utils";
 
 /**  Useful links
  *
@@ -30,19 +31,18 @@ import { sequence, broadcast, badBlock } from "./utils";
  **/
 
 export default class Game {
-  constructor() {
-    this.board = new Array(BOARD_SIZE); // Use one flat array (TypedArray for multiplayer?)
-    this.sequence = sequence(); // Pseudo random integers between 0 and 6
-  }
+  constructor(boardCanvas, pieceCanvas, previewCanvas, fpsElement, level = 0) {
+    // Playfield
+    this.board = new Uint8Array(BOARD_SIZE).fill(0);
 
-  init(gameCanvas, previewCanvas, fpsElement, level = 0) {
-    // Referenced elements should be in the DOM by the time this method is called
-    this.gameCanvasCtx = gameCanvas.getContext("2d");
+    // Pseudo random integers between 0 and 6
+    this.sequence = sequence();
+
+    // Referenced elements should be in the DOM by the time this is called
+    this.boardCanvasCtx = boardCanvas.getContext("2d");
     this.previewCanvasCtx = previewCanvas.getContext("2d");
+    this.pieceCanvasCtx = pieceCanvas.getContext("2d");
     this.fpsElement = fpsElement;
-
-    // Zero out board
-    this.board.fill(0);
 
     // Initial values
     this.score = 0;
@@ -68,28 +68,16 @@ export default class Game {
     this.lineClearAnimationStep = 0;
 
     // Get first 2 pieces
-    this.livePiece = this.getNextPiece();
-    this.nextPiece = this.getNextPiece();
+    this.livePiece = this.getPiece();
+    this.nextPiece = this.getPiece();
 
     // Show next piece
     this.preview();
 
-    // Live piece state
-    [this.column, this.row] = this.livePiece.spawn;
-    this.rotationIdx = 0;
-
-    // Save live block positions for drawing/clearing
-    this.blocks = [];
-  }
-
-  get rotationState() {
-    return this.livePiece.rotation[this.rotationIdx];
-  }
-
-  get invalid() {
-    return this.rotationState.some(([x, y]) =>
-      badBlock(this.board, this.column + x, this.row + y)
-    );
+    // Ghost piece
+    this.setGhostPiece();
+    this.pieceCanvasCtx.lineWidth = 4;
+    this.pieceCanvasCtx.strokeStyle = "rgb(64,64,64)";
   }
 
   run() {
@@ -102,18 +90,15 @@ export default class Game {
     clearInterval(this.intervalID);
   }
 
-  quit() {
-    // Clear UI
-    clearPlayfield(this.gameCanvasCtx);
-    clearPreview(this.previewCanvasCtx);
-
-    broadcast(SCORE_UPDATE, 0);
-    broadcast(LEVEL_UPDATE, 0);
-    broadcast(LINES_UPDATE, 0);
-  }
-
   frame() {
-    this.refresh();
+    requestAnimationFrame((now) => {
+      clearPiece(this.pieceCanvasCtx);
+      if (this.livePiece) {
+        this.drawGhostPiece();
+        this.drawLivePiece();
+      }
+      this.fpsCounter(now);
+    });
 
     /**
      * Check for DAS and soft drop
@@ -156,7 +141,8 @@ export default class Game {
 
     if (this.livePiece) {
       // Live piece moves down or locks
-      if (this.moveDown()) this.framesRemaining = this.delay;
+      this.framesRemaining = this.delay;
+      this.moveDown();
       return;
     }
 
@@ -170,31 +156,29 @@ export default class Game {
     }
 
     // Remove any cleared lines from the board
-    while (this.cleared.length) this.clearLine(this.cleared.pop());
+    while (this.cleared.length) this.deleteLine(this.cleared.pop());
 
     // Step through piece sequence
     this.livePiece = this.nextPiece;
-    this.nextPiece = this.getNextPiece();
+    this.nextPiece = this.getPiece();
 
-    // Reset live piece state
-    [this.column, this.row] = this.livePiece.spawn;
-    this.rotationIdx = 0;
+    // Update ghost piece
+    this.setGhostPiece();
 
-    if (this.invalid) {
+    if (pieceFits(this.board, this.livePiece)) {
+      /**
+       * New piece spawns successfully
+       **/
+
+      // Reset cycle
+      this.framesRemaining = this.delay;
+    } else {
       /**
        * GAME OVER!!
        **/
 
-      // Show jammed piece
       requestAnimationFrame(() => {
-        drawPiece(
-          this.gameCanvasCtx,
-          this.livePiece,
-          this.column,
-          this.row - 2,
-          0,
-          "DarkGray"
-        );
+        drawJammedPiece(this.pieceCanvasCtx, this.livePiece);
       });
 
       // Stop game loop
@@ -202,17 +186,21 @@ export default class Game {
 
       // Notify UI
       broadcast(GAME_OVER);
-    } else {
-      /**
-       * New piece spawned successfully
-       **/
-
-      // Reset cycle
-      this.framesRemaining = this.delay;
     }
 
     // Show next piece
     this.preview();
+  }
+
+  cleanup() {
+    // Clear UI
+    clearPiece(this.pieceCanvasCtx);
+    clearBoard(this.boardCanvasCtx);
+    clearPreview(this.previewCanvasCtx);
+
+    broadcast(SCORE_UPDATE, 0);
+    broadcast(LEVEL_UPDATE, 0);
+    broadcast(LINES_UPDATE, 0);
   }
 
   // Very rough FPS counter that only updates about once per second
@@ -232,58 +220,71 @@ export default class Game {
     }
   }
 
+  getPiece() {
+    return {
+      ...PIECES[this.sequence.next().value],
+      step: 0,
+      get positions() {
+        return this.rotation[this.step];
+      },
+    };
+  }
+
   drawLivePiece() {
-    // Clear existing blocks
-    this.blocks.forEach(([x, y]) => clearBlock(this.gameCanvasCtx, x, y));
-
-    // Get new block positions
-    this.blocks = this.rotationState.map(([x, y]) => [
-      (this.column + x) * BLOCK_SIZE,
-      (this.row - 2 + y) * BLOCK_SIZE,
-    ]);
-
-    // Draw new blocks. Blocks on top two rows will be clipped
-    setColor(this.gameCanvasCtx, this.livePiece.key);
-    this.blocks.forEach(([x, y]) => {
-      drawBlock(this.gameCanvasCtx, x, y);
+    // Blocks on top two rows will be clipped
+    this.pieceCanvasCtx.fillStyle = this.livePiece.color;
+    this.livePiece.positions.forEach(([x, y]) => {
+      drawBlock(
+        this.pieceCanvasCtx,
+        (this.livePiece.column + x) * BLOCK_SIZE,
+        (this.livePiece.row - 2 + y) * BLOCK_SIZE
+      );
     });
   }
 
-  refresh() {
-    requestAnimationFrame((now) => {
-      if (this.dirty) {
-        clearPlayfield(this.gameCanvasCtx);
-        drawBoard(this.gameCanvasCtx, this.board);
-        this.dirty = false;
-      }
-      if (this.livePiece) this.drawLivePiece();
-      this.fpsCounter(now);
+  drawGhostPiece() {
+    this.livePiece.positions.forEach(([x, y]) => {
+      drawGhostBlock(
+        this.pieceCanvasCtx,
+        (this.livePiece.column + x) * BLOCK_SIZE,
+        (this.ghostPieceRow - 2 + y) * BLOCK_SIZE
+      );
     });
+  }
+
+  refreshBoard() {
+    requestAnimationFrame(() => {
+      clearBoard(this.boardCanvasCtx);
+      drawBoard(this.boardCanvasCtx, this.board);
+    });
+  }
+
+  setGhostPiece() {
+    const piece = { ...this.livePiece };
+    do {
+      this.ghostPieceRow = piece.row++;
+    } while (pieceFits(this.board, piece));
   }
 
   lock() {
     // Live piece's lowest row
-    const row = this.row + this.rotationState[3][1];
+    const row = this.livePiece.row + this.livePiece.positions[3][1];
 
     // Add live piece to the board
-    this.rotationState.forEach(([x, y]) => {
-      this.board[(this.row + y) * COLUMNS + this.column + x] =
-        this.livePiece.key;
+    this.livePiece.positions.forEach(([x, y]) => {
+      this.board[
+        (this.livePiece.row + y) * COLUMNS + this.livePiece.column + x
+      ] = this.livePiece.id;
     });
+    this.refreshBoard();
 
     // Live piece is locked
     this.livePiece = null;
 
-    // Board will need redrawing
-    this.dirty = true;
-
-    // Reset live block positions (so they don't get cleared by the next piece)
-    this.blocks = [];
-
     // See if we cleared any lines
     const top = Math.max(0, row - 3);
     for (let rowIdx = row; rowIdx >= top; rowIdx--) {
-      if (this.isComplete(rowIdx)) {
+      if (this.lineClearCheck(rowIdx)) {
         // Store line indices bottom up
         this.cleared.push(rowIdx);
       }
@@ -337,37 +338,26 @@ export default class Game {
     this.framesRemaining = LINE_CLEAR_STEP_FRAMES;
     this.lineClearAnimationStep--;
 
-    // Redraw board
-    this.dirty = true;
+    this.refreshBoard();
   }
 
   preview() {
     requestAnimationFrame(() => {
       clearPreview(this.previewCanvasCtx);
-      drawPiece(
-        this.previewCanvasCtx,
-        this.nextPiece,
-        ...this.nextPiece.offset,
-        0
-      );
+      drawPreview(this.previewCanvasCtx, this.nextPiece);
     });
   }
 
-  getNextPiece() {
-    return Object.values(PIECES)[this.sequence.next().value];
-  }
-
-  // Line clear check
-  isComplete(rowIdx) {
-    const start = rowIdx * COLUMNS;
-    for (let i = start; i < start + COLUMNS; i++) {
+  lineClearCheck(rowIdx) {
+    const [start, end] = [rowIdx * COLUMNS, (rowIdx + 1) * COLUMNS];
+    for (let i = start; i < end; i++) {
       if (this.board[i] === 0) return false;
     }
     return true;
   }
 
-  // Clear a completed line
-  clearLine(rowIdx) {
+  // Remove a cleared line from the board
+  deleteLine(rowIdx) {
     // Everything before the beginning of that line shifts by 1 row
     for (let i = rowIdx * COLUMNS - 1; i >= 0; i--) {
       this.board[i + COLUMNS] = this.board[i];
@@ -378,53 +368,67 @@ export default class Game {
       this.board[i] = 0;
     }
 
-    // Redraw board
-    this.dirty = true;
+    // Redraw
+    this.refreshBoard();
   }
 
   // Clockwise
   rotateRight() {
-    if (!this.livePiece) return;
-
-    const i = this.rotationIdx;
-    this.rotationIdx = (this.rotationIdx + 1) % 4;
-    if (this.invalid) this.rotationIdx = i;
+    if (this.livePiece) {
+      const step = this.livePiece.step;
+      this.livePiece.step = (this.livePiece.step + 1) % 4;
+      if (pieceFits(this.board, this.livePiece)) {
+        this.setGhostPiece();
+      } else {
+        this.livePiece.step = step;
+      }
+    }
   }
 
   // Counterclockwise
   rotateLeft() {
-    if (!this.livePiece) return;
-
-    const i = this.rotationIdx;
-    this.rotationIdx = (this.rotationIdx + 3) % 4;
-    if (this.invalid) this.rotationIdx = i;
+    if (this.livePiece) {
+      const step = this.livePiece.step;
+      this.livePiece.step = (this.livePiece.step + 3) % 4;
+      if (pieceFits(this.board, this.livePiece)) {
+        this.setGhostPiece();
+      } else {
+        this.livePiece.step = step;
+      }
+    }
   }
 
   moveLeft() {
-    if (!this.livePiece) return;
-
-    this.column--;
-    if (this.invalid) this.column++;
+    if (this.livePiece) {
+      this.livePiece.column--;
+      if (pieceFits(this.board, this.livePiece)) {
+        this.setGhostPiece();
+      } else {
+        this.livePiece.column++;
+      }
+    }
   }
 
   moveRight() {
-    if (!this.livePiece) return;
-
-    this.column++;
-    if (this.invalid) this.column--;
+    if (this.livePiece) {
+      this.livePiece.column++;
+      if (pieceFits(this.board, this.livePiece)) {
+        this.setGhostPiece();
+      } else {
+        this.livePiece.column--;
+      }
+    }
   }
 
   // Move down or lock
   moveDown() {
-    if (!this.livePiece) return false;
-
-    this.row++;
-    if (this.invalid) {
-      this.row--;
-      this.lock();
-      return false;
+    if (this.livePiece) {
+      if (this.livePiece.row < this.ghostPieceRow) {
+        this.livePiece.row++;
+      } else {
+        this.lock();
+      }
     }
-    return true;
   }
 
   // Handle keyboard events
@@ -456,7 +460,10 @@ export default class Game {
         break;
       case "Space":
         // Hard drop
-        while (this.moveDown());
+        if (this.livePiece) {
+          this.livePiece.row = this.ghostPieceRow;
+          this.lock();
+        }
         break;
       case "Escape":
         // Pause

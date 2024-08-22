@@ -28,7 +28,7 @@ export default function StartMenu({ showControlsMenu, startGame }) {
   ];
 
   return (
-    <div className="stack menu toplayer">
+    <div className="stack menu">
       {buttons.map(([callback, label], i) => (
         <button
           key={i}

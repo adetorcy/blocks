@@ -1,4 +1,4 @@
-import { ROWS, COLUMNS, BOARD_SIZE } from "./constants";
+import { COLUMNS, BOARD_SIZE } from "./constants";
 
 // Cannot rely on autoFocus JSX param (?)
 // We make our own using a ref callback
@@ -27,13 +27,13 @@ export function broadcast(event, value) {
   );
 }
 
-// Check if a board position is occupied or out of bounds
-export function badBlock(board, column, row) {
-  return (
-    board[row * COLUMNS + column] !== 0 ||
-    column < 0 ||
-    column >= COLUMNS ||
-    row >= ROWS
+function blockFits(board, column, row) {
+  return board[row * COLUMNS + column] === 0 && column >= 0 && column < COLUMNS;
+}
+
+export function pieceFits(board, piece) {
+  return piece.positions.every(([x, y]) =>
+    blockFits(board, piece.column + x, piece.row + y)
   );
 }
 

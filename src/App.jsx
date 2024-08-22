@@ -20,8 +20,9 @@ function App() {
   const [splash, setSplash] = useState(true);
 
   // Game
-  const gameRef = useRef(new Game());
-  const playfieldRef = useRef(null);
+  const gameRef = useRef(null);
+  const boardRef = useRef(null);
+  const pieceRef = useRef(null);
   const previewRef = useRef(null);
   const fpsRef = useRef(0);
 
@@ -33,8 +34,9 @@ function App() {
     setMenu(null);
   };
   const startGame = () => {
-    gameRef.current.init(
-      playfieldRef.current,
+    gameRef.current = new Game(
+      boardRef.current,
+      pieceRef.current,
       previewRef.current,
       fpsRef.current
     );
@@ -42,7 +44,8 @@ function App() {
     setMenu(null);
   };
   const quitGame = () => {
-    gameRef.current.quit();
+    gameRef.current.cleanup();
+    gameRef.current = null;
     setMenu("start");
   };
 
@@ -99,8 +102,14 @@ function App() {
     <>
       <div className="card gamearea">
         <canvas
-          ref={playfieldRef}
-          className="baselayer"
+          ref={boardRef}
+          className="board"
+          height={PLAYFIELD_HEIGHT}
+          width={PLAYFIELD_WIDTH}
+        ></canvas>
+        <canvas
+          ref={pieceRef}
+          className="piece"
           height={PLAYFIELD_HEIGHT}
           width={PLAYFIELD_WIDTH}
         ></canvas>
