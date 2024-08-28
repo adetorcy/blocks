@@ -56,6 +56,11 @@ export function* sequence() {
   }
 }
 
+export function play(media) {
+  media.currentTime = 0;
+  media.play();
+}
+
 export function about() {
   const style = (color) =>
     `color: ${color}; font-weight: 900; font-size: 48px; text-shadow: 1px 1px 0 black;`;

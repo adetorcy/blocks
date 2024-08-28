@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { autoFocusRef } from "./utils";
 
-export default function StartMenu({ showControlsMenu, startGame }) {
+export default function StartMenu({ showControlsMenu, start }) {
   const [focusedButtonIndex, setFocusedButtonIndex] = useState(0);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function StartMenu({ showControlsMenu, startGame }) {
 
   // Array of callback-label pairs
   const buttons = [
-    [startGame, "START"],
+    [start, "START"],
     [showControlsMenu, "CONTROLS"],
   ];
 

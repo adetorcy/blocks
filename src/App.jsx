@@ -13,6 +13,8 @@ import ControlsMenu from "./ControlsMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
 import Game from "./game";
+import SFX from "./sfx";
+import { play } from "./utils";
 
 function App() {
   // UI
@@ -29,11 +31,12 @@ function App() {
   // User action callbacks
   const showStartMenu = () => setMenu("start");
   const showControlsMenu = () => setMenu("controls");
-  const runGame = () => {
+  const resume = () => {
+    play(SFX.resume);
     gameRef.current.run();
     setMenu(null);
   };
-  const startGame = () => {
+  const start = () => {
     gameRef.current = new Game(
       boardRef.current,
       pieceRef.current,
@@ -43,7 +46,7 @@ function App() {
     gameRef.current.run();
     setMenu(null);
   };
-  const quitGame = () => {
+  const quit = () => {
     gameRef.current.cleanup();
     gameRef.current = null;
     setMenu("start");
@@ -57,6 +60,7 @@ function App() {
     function handleKeydown(event) {
       gameRef.current.keydown(event.code);
       if (event.code === "Escape") {
+        play(SFX.pause);
         setMenu("pause");
       }
     }
@@ -116,10 +120,10 @@ function App() {
         {
           // Overlay menu
           {
-            start: <StartMenu {...{ showControlsMenu, startGame }} />,
+            start: <StartMenu {...{ showControlsMenu, start }} />,
             controls: <ControlsMenu {...{ showStartMenu }} />,
-            pause: <PauseMenu {...{ runGame, quitGame }} />,
-            gameOver: <GameOverMenu {...{ quitGame }} />,
+            pause: <PauseMenu {...{ resume, quit }} />,
+            gameOver: <GameOverMenu {...{ quit }} />,
           }[menu] || null
         }
       </div>

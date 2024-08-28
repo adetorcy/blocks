@@ -20,7 +20,8 @@ import {
   DAS_FRAMES,
 } from "./constants";
 import { SCORE_UPDATE, LEVEL_UPDATE, LINES_UPDATE, GAME_OVER } from "./events";
-import { sequence, broadcast, pieceFits } from "./utils";
+import { sequence, broadcast, pieceFits, play } from "./utils";
+import SFX from "./sfx";
 
 /**  Useful links
  *
@@ -109,6 +110,7 @@ export default class Game {
         this.leftDasFramesLeft--;
       } else {
         this.moveLeft();
+        this.leftDasFramesLeft = 1;
       }
     }
 
@@ -117,12 +119,16 @@ export default class Game {
         this.rightDasFramesLeft--;
       } else {
         this.moveRight();
+        this.rightDasFramesLeft = 1;
       }
     }
 
-    if (this.softDropOn && !this.softDropFramesLeft--) {
-      this.moveDown();
-      this.softDropFramesLeft = SOFT_DROP_FRAMES;
+    if (this.softDropOn) {
+      if (!this.softDropFramesLeft--) {
+        this.moveDown();
+        this.softDropFramesLeft = SOFT_DROP_FRAMES;
+      }
+      return;
     }
 
     /**
@@ -141,7 +147,6 @@ export default class Game {
 
     if (this.livePiece) {
       // Live piece moves down or locks
-      this.framesRemaining = this.delay;
       this.moveDown();
       return;
     }
@@ -186,6 +191,7 @@ export default class Game {
 
       // Notify UI
       broadcast(GAME_OVER);
+      play(SFX.fail);
     }
 
     // Show next piece
@@ -292,6 +298,7 @@ export default class Game {
 
     // If no lines were cleared just set spawn delay
     if (!this.cleared.length) {
+      play(SFX.lock);
       this.framesRemaining = ARE[row];
       return;
     }
@@ -305,6 +312,12 @@ export default class Game {
   }
 
   reward(lines) {
+    if (lines === 4) {
+      play(SFX.clear4);
+    } else {
+      play(SFX.clear);
+    }
+
     // Score
     // https://tetris.wiki/Scoring
     broadcast(
@@ -317,6 +330,7 @@ export default class Game {
 
     // Level
     if (this.lines >= this.nextLevelUp) {
+      play(SFX.levelUp);
       broadcast(LEVEL_UPDATE, ++this.level);
       this.delay = GRAVITY_TABLE[this.level] || 1;
       this.nextLevelUp += 10;
@@ -378,6 +392,7 @@ export default class Game {
       const step = this.livePiece.step;
       this.livePiece.step = (this.livePiece.step + 1) % 4;
       if (pieceFits(this.board, this.livePiece)) {
+        play(SFX.tap);
         this.setGhostPiece();
       } else {
         this.livePiece.step = step;
@@ -391,6 +406,7 @@ export default class Game {
       const step = this.livePiece.step;
       this.livePiece.step = (this.livePiece.step + 3) % 4;
       if (pieceFits(this.board, this.livePiece)) {
+        play(SFX.tap);
         this.setGhostPiece();
       } else {
         this.livePiece.step = step;
@@ -402,6 +418,7 @@ export default class Game {
     if (this.livePiece) {
       this.livePiece.column--;
       if (pieceFits(this.board, this.livePiece)) {
+        play(SFX.tap);
         this.setGhostPiece();
       } else {
         this.livePiece.column++;
@@ -413,6 +430,7 @@ export default class Game {
     if (this.livePiece) {
       this.livePiece.column++;
       if (pieceFits(this.board, this.livePiece)) {
+        play(SFX.tap);
         this.setGhostPiece();
       } else {
         this.livePiece.column--;
@@ -425,6 +443,7 @@ export default class Game {
     if (this.livePiece) {
       if (this.livePiece.row < this.ghostPieceRow) {
         this.livePiece.row++;
+        this.framesRemaining = this.delay;
       } else {
         this.lock();
       }

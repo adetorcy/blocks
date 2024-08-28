@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { autoFocusRef } from "./utils";
 
-export default function PauseMenu({ runGame, quitGame }) {
+export default function PauseMenu({ resume, quit }) {
   const [focusedButtonIndex, setFocusedButtonIndex] = useState(0);
 
   useEffect(() => {
@@ -23,8 +23,8 @@ export default function PauseMenu({ runGame, quitGame }) {
 
   // Array of callback-label pairs
   const buttons = [
-    [runGame, "CONTINUE"],
-    [quitGame, "QUIT"],
+    [resume, "CONTINUE"],
+    [quit, "QUIT"],
   ];
 
   return (
