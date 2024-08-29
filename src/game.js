@@ -17,6 +17,7 @@ import {
   ARE,
   LINE_CLEAR_STEP_FRAMES,
   SOFT_DROP_FRAMES,
+  DAS_DELAY,
   DAS_FRAMES,
 } from "./constants";
 import { SCORE_UPDATE, LEVEL_UPDATE, LINES_UPDATE, GAME_OVER } from "./events";
@@ -106,25 +107,21 @@ export default class Game {
      **/
 
     if (this.leftDasOn) {
-      if (this.leftDasFramesLeft) {
-        this.leftDasFramesLeft--;
-      } else {
+      if (--this.leftDasFramesLeft === 0) {
         this.moveLeft();
-        this.leftDasFramesLeft = 1;
+        this.leftDasFramesLeft = DAS_FRAMES;
       }
     }
 
     if (this.rightDasOn) {
-      if (this.rightDasFramesLeft) {
-        this.rightDasFramesLeft--;
-      } else {
+      if (--this.rightDasFramesLeft === 0) {
         this.moveRight();
-        this.rightDasFramesLeft = 1;
+        this.rightDasFramesLeft = DAS_FRAMES;
       }
     }
 
     if (this.softDropOn) {
-      if (!this.softDropFramesLeft--) {
+      if (--this.softDropFramesLeft === 0) {
         this.moveDown();
         this.softDropFramesLeft = SOFT_DROP_FRAMES;
       }
@@ -464,7 +461,7 @@ export default class Game {
         this.moveLeft();
         this.leftDasOn = true;
         this.rightDasOn = false;
-        this.leftDasFramesLeft = DAS_FRAMES;
+        this.leftDasFramesLeft = DAS_DELAY;
         break;
       case "ArrowDown":
         this.moveDown();
@@ -475,7 +472,7 @@ export default class Game {
         this.moveRight();
         this.rightDasOn = true;
         this.leftDasOn = false;
-        this.rightDasFramesLeft = DAS_FRAMES;
+        this.rightDasFramesLeft = DAS_DELAY;
         break;
       case "Space":
         // Hard drop

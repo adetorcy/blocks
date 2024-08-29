@@ -29,8 +29,9 @@ export const ARE = [
   12, 10, 10,
 ];
 
-// Simplified DAS: 10 frame initial delay, then 1 frame per shift
-export const DAS_FRAMES = 10;
+// Simplified DAS: Wait 15 frames, then 2 frames per shift
+export const DAS_DELAY = 15;
+export const DAS_FRAMES = 2;
 
-// Soft drop is 1/2 G
-export const SOFT_DROP_FRAMES = 2;
+// Soft drop is 1/3 G
+export const SOFT_DROP_FRAMES = 3;
