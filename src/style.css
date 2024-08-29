@@ -11,7 +11,7 @@ body {
   display: flex;
   justify-content: center;
   column-gap: 16px;
-  margin: 16px auto 0;
+  margin-top: 16px;
   color: white;
   user-select: none;
   line-height: 1;
@@ -50,6 +50,10 @@ button:focus {
   display: flex;
   align-items: center;
   font-size: 48px;
+}
+
+.nocursor {
+  cursor: none;
 }
 
 @keyframes blinker {

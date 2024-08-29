@@ -104,7 +104,7 @@ function App() {
 
   return (
     <>
-      <div className="card gamearea">
+      <div className={menu ? "card gamearea" : "card gamearea nocursor"}>
         <canvas
           ref={boardRef}
           className="board"
@@ -127,7 +127,6 @@ function App() {
           }[menu] || null
         }
       </div>
-
       <div className="stack dashboard">
         <div className="stack cards">
           <div className="card stack score">
