@@ -448,7 +448,7 @@ export default class Game {
   }
 
   // Handle keyboard events
-  keydown(keyCode) {
+  onkeydown(keyCode) {
     switch (keyCode) {
       case "KeyZ":
         this.rotateLeft();
@@ -488,8 +488,9 @@ export default class Game {
       default:
         // Do nothing
         console.log(`${keyCode} key not supported`);
-        return;
+        return false;
     }
+    return true;
   }
 
   keyup(keyCode) {

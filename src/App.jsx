@@ -58,7 +58,7 @@ function App() {
     if (menu) return;
 
     function handleKeydown(event) {
-      gameRef.current.keydown(event.code);
+      if (gameRef.current.onkeydown(event.code)) event.preventDefault();
       if (event.code === "Escape") {
         play(SFX.pause);
         setMenu("pause");

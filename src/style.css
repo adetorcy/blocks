@@ -15,6 +15,14 @@ body {
   color: white;
   user-select: none;
   line-height: 1;
+
+  @media (width < 620px) or (height < 830px) {
+    transform: scale(0.75);
+  }
+
+  @media (width < 470px) or (height < 630px) {
+    transform: scale(0.5);
+  }
 }
 
 /**********/
