@@ -12,9 +12,16 @@ import StartMenu from "./StartMenu";
 import ControlsMenu from "./ControlsMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
+import Keyboard from "./Keyboard";
 import Game from "./game";
 import SFX from "./sfx";
-import { play } from "./utils";
+import {
+  play,
+  listenForKeydown,
+  listenForKeyup,
+  cleanupForKeydown,
+  cleanupForKeyup,
+} from "./utils";
 
 function App() {
   // UI
@@ -52,7 +59,7 @@ function App() {
     setMenu("start");
   };
 
-  // Listen for keyboard events
+  // Listen for keyboard events, physical and on-screen
   useEffect(() => {
     // Only if game is running
     if (menu) return;
@@ -70,13 +77,13 @@ function App() {
     }
 
     // Add event listeners
-    window.addEventListener("keydown", handleKeydown);
-    window.addEventListener("keyup", handleKeyup);
+    listenForKeydown(handleKeydown);
+    listenForKeyup(handleKeyup);
 
     return () => {
       // Remove event listeners
-      window.removeEventListener("keydown", handleKeydown);
-      window.removeEventListener("keyup", handleKeyup);
+      cleanupForKeydown(handleKeydown);
+      cleanupForKeyup(handleKeyup);
     };
   }, [menu]);
 
@@ -104,50 +111,53 @@ function App() {
 
   return (
     <>
-      <div className={menu ? "card gamearea" : "card gamearea nocursor"}>
-        <canvas
-          ref={boardRef}
-          className="board"
-          height={PLAYFIELD_HEIGHT}
-          width={PLAYFIELD_WIDTH}
-        ></canvas>
-        <canvas
-          ref={pieceRef}
-          className="piece"
-          height={PLAYFIELD_HEIGHT}
-          width={PLAYFIELD_WIDTH}
-        ></canvas>
-        {
-          // Overlay menu
+      <div className={menu ? "game" : "game nocursor"}>
+        <div className="card gamearea">
+          <canvas
+            ref={boardRef}
+            className="board"
+            height={PLAYFIELD_HEIGHT}
+            width={PLAYFIELD_WIDTH}
+          ></canvas>
+          <canvas
+            ref={pieceRef}
+            className="piece"
+            height={PLAYFIELD_HEIGHT}
+            width={PLAYFIELD_WIDTH}
+          ></canvas>
           {
-            start: <StartMenu {...{ showControlsMenu, start }} />,
-            controls: <ControlsMenu {...{ showStartMenu }} />,
-            pause: <PauseMenu {...{ resume, quit }} />,
-            gameOver: <GameOverMenu {...{ quit }} />,
-          }[menu] || null
-        }
-      </div>
-      <div className="stack dashboard">
-        <div className="stack cards">
-          <div className="card stack score">
-            <Score />
-            <Level />
-            <Lines />
+            // Overlay menu
+            {
+              start: <StartMenu {...{ showControlsMenu, start }} />,
+              controls: <ControlsMenu {...{ showStartMenu }} />,
+              pause: <PauseMenu {...{ resume, quit }} />,
+              gameOver: <GameOverMenu {...{ quit }} />,
+            }[menu] || null
+          }
+        </div>
+        <div className="stack dashboard">
+          <div className="stack cards">
+            <div className="card stack score">
+              <Score />
+              <Level />
+              <Lines />
+            </div>
+            <div className="card stack preview">
+              <div>NEXT</div>
+              <canvas
+                ref={previewRef}
+                height={PREVIEW_BOX_SIZE}
+                width={PREVIEW_BOX_SIZE}
+              ></canvas>
+            </div>
           </div>
-          <div className="card stack preview">
-            <div>NEXT</div>
-            <canvas
-              ref={previewRef}
-              height={PREVIEW_BOX_SIZE}
-              width={PREVIEW_BOX_SIZE}
-            ></canvas>
+          <div className="card fps">
+            <div ref={fpsRef}>0</div>
+            <div>FPS</div>
           </div>
         </div>
-        <div className="card fps">
-          <div ref={fpsRef}>0</div>
-          <div>FPS</div>
-        </div>
       </div>
+      <Keyboard />
     </>
   );
 }

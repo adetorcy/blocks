@@ -1,6 +1,30 @@
-import { autoFocusRef } from "./utils";
+import { useEffect, useRef } from "react";
+import { listenForKeydown, cleanupForKeydown } from "./utils";
 
 export default function ControlsMenu({ showStartMenu }) {
+  const selectedRef = useRef(null);
+
+  useEffect(() => {
+    // Callback for keydown event listener
+    function handleKeydown(event) {
+      switch (event.code) {
+        case "Enter":
+        case "Space":
+          selectedRef.current.click();
+          event.preventDefault();
+          break;
+      }
+    }
+
+    // Add event listeners
+    listenForKeydown(handleKeydown);
+
+    return () => {
+      // Remove event listeners
+      cleanupForKeydown(handleKeydown);
+    };
+  }, [showStartMenu]);
+
   return (
     <div className="stack menu">
       <div className="stack">
@@ -11,9 +35,13 @@ export default function ControlsMenu({ showStartMenu }) {
           </div>
         ))}
       </div>
-      <button ref={autoFocusRef} onClick={showStartMenu}>
+      <div
+        ref={selectedRef}
+        className="menu-option selected"
+        onClick={showStartMenu}
+      >
         OK
-      </button>
+      </div>
     </div>
   );
 }

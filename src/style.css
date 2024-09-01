@@ -1,13 +1,20 @@
 html {
-  font: 44px "Micro 5", system-ui;
+  font-family: "Micro 5";
   font-synthesis: none;
 }
 
 body {
   margin: 0;
+  overflow: hidden;
 }
 
 #app {
+  display: flex;
+  justify-content: center;
+}
+
+.game {
+  font-size: 44px;
   display: flex;
   justify-content: center;
   column-gap: 16px;
@@ -16,11 +23,13 @@ body {
   user-select: none;
   line-height: 1;
 
-  @media (width < 620px) or (height < 830px) {
+  @media (width < 620px) or (height < 864px) {
+    transform-origin: top center;
     transform: scale(0.75);
   }
 
-  @media (width < 470px) or (height < 630px) {
+  @media (width < 470px) or (height < 660px) {
+    transform-origin: top center;
     transform: scale(0.5);
   }
 }
@@ -28,20 +37,6 @@ body {
 /**********/
 /*** UI ***/
 /**********/
-
-button {
-  border: none;
-  background-color: inherit;
-  font: inherit;
-  color: inherit;
-  padding: 0 12px;
-  cursor: pointer;
-  outline: none;
-}
-
-button:focus {
-  animation: blinker 0.6s step-start infinite;
-}
 
 .card {
   background-color: black;
@@ -56,18 +51,179 @@ button:focus {
 .splash {
   height: 60vh;
   display: flex;
+  justify-content: center;
   align-items: center;
   font-size: 48px;
 }
 
-.nocursor {
-  cursor: none;
+.menu-option {
+  border: none;
+  background-color: inherit;
+  font: inherit;
+  color: inherit;
+  padding: 0 12px;
+  cursor: pointer;
+  outline: none;
+}
+
+.menu-option.selected {
+  animation: blinker 0.6s step-start infinite;
 }
 
 @keyframes blinker {
   50% {
-    color: coral;
+    color: hsl(15, 70%, 60%);
   }
+}
+
+.icon-btn {
+  box-sizing: border-box;
+  width: 40px;
+  height: 30px;
+  border: none;
+  outline: none;
+  background-color: inherit;
+  cursor: pointer;
+}
+
+/****************/
+/*** KEYBOARD ***/
+/****************/
+
+.keyboard {
+  box-sizing: border-box;
+  position: fixed;
+  bottom: -240px;
+  height: 240px;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+
+  padding: 16px 12px 0;
+  transition: bottom 0.2s linear;
+}
+
+.keyboard.open {
+  bottom: 0;
+}
+
+.open-keyboard-btn {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  margin: 0 auto;
+}
+
+.system-keys {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.control-keys {
+  display: grid;
+  grid-template-areas: "left right";
+  gap: 16px;
+
+  > .left {
+    grid-area: left;
+    justify-self: start;
+  }
+
+  > .right {
+    grid-area: right;
+    justify-self: end;
+  }
+}
+
+.arrow-keys {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  grid-template-areas:
+    ". u ."
+    "l . r"
+    ". d .";
+}
+
+.up-arrow {
+  grid-area: u;
+}
+
+.left-arrow {
+  grid-area: l;
+}
+
+.right-arrow {
+  grid-area: r;
+}
+
+.down-arrow {
+  grid-area: d;
+}
+
+.action-keys {
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  grid-template-areas:
+    "z x"
+    "d d";
+}
+
+.ccw-key {
+  grid-area: z;
+}
+
+.cw-key {
+  grid-area: x;
+}
+
+.drop-key {
+  grid-area: d;
+}
+
+.touch-btn {
+  background: hsl(240, 50%, 40%);
+  border-radius: 6px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.touch-btn-front {
+  display: block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: hsl(240, 50%, 60%);
+  color: white;
+  transform: translateY(-6px);
+}
+
+/* Actual or simulated active state */
+:is(.touch-btn:active, .touch-btn.active) .touch-btn-front {
+  transform: translateY(-2px);
+}
+
+.touch-btn-icon {
+  vertical-align: middle;
+}
+
+.touch-btn.system {
+  background: hsl(0, 0%, 60%);
+}
+
+.touch-btn-front.system {
+  background: hsl(0, 0%, 85%);
+  color: black;
+}
+
+.touch-btn-front.large {
+  padding: 10px 15px;
 }
 
 /*****************/
@@ -77,6 +233,10 @@ button:focus {
 .gamearea {
   display: grid;
   padding: 2px;
+}
+
+.nocursor {
+  cursor: none;
 }
 
 .board,

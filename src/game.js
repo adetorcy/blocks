@@ -89,6 +89,7 @@ export default class Game {
   }
 
   stop() {
+    // Stop game loop
     clearInterval(this.intervalID);
   }
 
@@ -125,7 +126,6 @@ export default class Game {
         this.moveDown();
         this.softDropFramesLeft = SOFT_DROP_FRAMES;
       }
-      return;
     }
 
     /**
@@ -188,7 +188,7 @@ export default class Game {
 
       // Notify UI
       broadcast(GAME_OVER);
-      play(SFX.fail);
+      play(SFX.buzz);
     }
 
     // Show next piece
@@ -204,6 +204,8 @@ export default class Game {
     broadcast(SCORE_UPDATE, 0);
     broadcast(LEVEL_UPDATE, 0);
     broadcast(LINES_UPDATE, 0);
+
+    this.fpsElement.textContent = 0;
   }
 
   // Very rough FPS counter that only updates about once per second
@@ -448,8 +450,8 @@ export default class Game {
   }
 
   // Handle keyboard events
-  onkeydown(keyCode) {
-    switch (keyCode) {
+  onkeydown(code) {
+    switch (code) {
       case "KeyZ":
         this.rotateLeft();
         break;
@@ -487,14 +489,14 @@ export default class Game {
         break;
       default:
         // Do nothing
-        console.log(`${keyCode} key not supported`);
+        console.log(`${code} key not supported`);
         return false;
     }
     return true;
   }
 
-  keyup(keyCode) {
-    switch (keyCode) {
+  keyup(code) {
+    switch (code) {
       case "ArrowLeft":
         this.leftDasOn = false;
         break;

@@ -1,9 +1,5 @@
 import { COLUMNS, BOARD_SIZE } from "./constants";
-
-// Cannot rely on autoFocus JSX param (?)
-// We make our own using a ref callback
-// https://react.dev/reference/react-dom/components/common#ref-callback
-export const autoFocusRef = (node) => node?.focus();
+import { ONSCREEN_KEYDOWN, ONSCREEN_KEYUP } from "./events";
 
 export function padScore(score) {
   return score.toString().padStart(3, "0");
@@ -20,7 +16,7 @@ export function logBoard(board) {
 }
 
 export function broadcast(event, value) {
-  window.dispatchEvent(
+  dispatchEvent(
     new CustomEvent(event, {
       detail: value,
     })
@@ -35,6 +31,34 @@ export function pieceFits(board, piece) {
   return piece.positions.every(([x, y]) =>
     blockFits(board, piece.column + x, piece.row + y)
   );
+}
+
+export function dispatchKeyDown(options) {
+  dispatchEvent(new KeyboardEvent(ONSCREEN_KEYDOWN, options));
+}
+
+export function dispatchKeyUp(options) {
+  dispatchEvent(new KeyboardEvent(ONSCREEN_KEYUP, options));
+}
+
+export function listenForKeydown(handleKeydown) {
+  window.addEventListener("keydown", handleKeydown);
+  window.addEventListener(ONSCREEN_KEYDOWN, handleKeydown);
+}
+
+export function cleanupForKeydown(handleKeydown) {
+  window.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener(ONSCREEN_KEYDOWN, handleKeydown);
+}
+
+export function listenForKeyup(handleKeyup) {
+  window.addEventListener("keyup", handleKeyup);
+  window.addEventListener(ONSCREEN_KEYUP, handleKeyup);
+}
+
+export function cleanupForKeyup(handleKeyup) {
+  window.removeEventListener("keyup", handleKeyup);
+  window.removeEventListener(ONSCREEN_KEYUP, handleKeyup);
 }
 
 // Rough simulation of the piece selection algorithm
@@ -77,6 +101,6 @@ export function about() {
   console.log(
     "%cB%cL%cO%cC%cK%cS",
     ...styles,
-    `\n\nversion ${import.meta.env.VITE_APP_VERSION}\n\nAdT 2024`
+    `\n\nversion ${import.meta.env.VITE_APP_VERSION}\n\nadt 2024`
   );
 }

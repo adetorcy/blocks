@@ -9,7 +9,7 @@ import clear4 from "./audio/hero_decorative-celebration-01.wav";
 import levelUp from "./audio/notification_ambient.wav";
 import pause from "./audio/state-change_confirm-up.wav";
 import resume from "./audio/state-change_confirm-down.wav";
-import fail from "./audio/alert_error-01.wav";
+import buzz from "./audio/buzz.wav";
 
 const SFX = {
   tap: new Audio(tap),
@@ -19,7 +19,9 @@ const SFX = {
   levelUp: new Audio(levelUp),
   pause: new Audio(pause),
   resume: new Audio(resume),
-  fail: new Audio(fail),
+  buzz: new Audio(buzz),
 };
+
+SFX.buzz.volume = 0.5;
 
 export default SFX;

@@ -1,45 +1,64 @@
-import { useEffect, useState } from "react";
-import { autoFocusRef } from "./utils";
+import { useEffect, useRef, useState } from "react";
+import { listenForKeydown, cleanupForKeydown } from "./utils";
 
 export default function PauseMenu({ resume, quit }) {
-  const [focusedButtonIndex, setFocusedButtonIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedRef = useRef(null);
 
   useEffect(() => {
     // Callback for keydown event listener
     function handleKeydown(event) {
-      if (["ArrowUp", "ArrowDown"].includes(event.code)) {
-        setFocusedButtonIndex((index) => (index + 1) % 2);
+      switch (event.code) {
+        case "Escape":
+          resume();
+          event.preventDefault();
+          break;
+        case "ArrowUp":
+        case "ArrowDown":
+          setSelectedIndex((index) => (index + 1) % 2);
+          event.preventDefault();
+          break;
+        case "Enter":
+        case "Space":
+          selectedRef.current.click();
+          event.preventDefault();
+          break;
       }
     }
 
-    // Add event listener
-    window.addEventListener("keydown", handleKeydown);
+    // Add event listeners
+    listenForKeydown(handleKeydown);
 
     return () => {
-      // Remove event listener
-      window.removeEventListener("keydown", handleKeydown);
+      // Remove event listeners
+      cleanupForKeydown(handleKeydown);
     };
-  }, []);
+  }, [resume]);
 
   // Array of callback-label pairs
-  const buttons = [
+  const options = [
     [resume, "CONTINUE"],
     [quit, "QUIT"],
   ];
 
   return (
-    // <div className="pausemenu-wrapper">
     <div className="stack menu menu-pause">
-      {buttons.map(([callback, label], i) => (
-        <button
-          key={i}
-          onClick={callback}
-          ref={i === focusedButtonIndex ? autoFocusRef : null}
-        >
-          {label}
-        </button>
-      ))}
+      {options.map(([callback, label], i) =>
+        i === selectedIndex ? (
+          <div
+            ref={selectedRef}
+            className="menu-option selected"
+            key={i}
+            onClick={callback}
+          >
+            {label}
+          </div>
+        ) : (
+          <div className="menu-option" key={i} onClick={callback}>
+            {label}
+          </div>
+        )
+      )}
     </div>
-    // </div>
   );
 }
