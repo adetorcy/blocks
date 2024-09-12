@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource/micro-5": "^5.0.2",
     "@mdi/js": "^7.4.47",
     "@mdi/react": "^1.6.1",
     "react": "^18.3.1",

@@ -139,8 +139,8 @@ function App() {
           <div className="stack cards">
             <div className="card stack score">
               <Score />
-              <Level />
               <Lines />
+              <Level />
             </div>
             <div className="card stack preview">
               <div>NEXT</div>

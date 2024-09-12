@@ -4,7 +4,7 @@ import App from "./App.jsx";
 import { about } from "./utils.js";
 
 // styling
-import "@fontsource/micro-5";
+import "./fonts/Blocks6px-Regular.ttf";
 import "./style.css";
 
 ReactDOM.createRoot(document.getElementById("app")).render(

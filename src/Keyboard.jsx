@@ -253,10 +253,12 @@ const MappedButton = forwardRef(function MappedButton(
   return (
     <button
       {...{ className, ref }}
-      onMouseDown={() => dispatchKeyDown({ code })}
-      onMouseUp={() => dispatchKeyUp({ code })}
-      onTouchStart={() => dispatchKeyDown({ code })}
-      onTouchEnd={() => dispatchKeyUp({ code })}
+      onPointerDown={() => dispatchKeyDown({ code })}
+      onPointerUp={() => dispatchKeyUp({ code })}
+      // onMouseDown={() => dispatchKeyDown({ code })}
+      // onMouseUp={() => dispatchKeyUp({ code })}
+      // onTouchStart={() => dispatchKeyDown({ code })}
+      // onTouchEnd={() => dispatchKeyUp({ code })}
     >
       {children}
     </button>

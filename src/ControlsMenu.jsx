@@ -27,9 +27,9 @@ export default function ControlsMenu({ showStartMenu }) {
 
   return (
     <div className="stack menu">
-      <div className="stack">
+      <div className="stack controls-list">
         {controls.map(([keyName, action], i) => (
-          <div key={i} className="controlsline">
+          <div key={i} className="controls-list-item">
             <span>{keyName}:</span>
             <span>{action}</span>
           </div>
@@ -47,7 +47,7 @@ export default function ControlsMenu({ showStartMenu }) {
 }
 
 const controls = [
-  ["LEFT/RIGHT", "MOVE"],
+  ["LEFT, RIGHT", "MOVE"],
   ["UP", "ROTATE RIGHT"],
   ["DOWN", "SOFT DROP"],
   ["SPACE", "HARD DROP"],
