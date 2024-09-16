@@ -103,7 +103,7 @@ body {
 
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  row-gap: 24px;
 
   padding: 16px 12px 0;
   transition: bottom 0.2s linear;
@@ -124,7 +124,7 @@ body {
 .system-keys {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  column-gap: 24px;
 }
 
 .control-keys {
@@ -172,7 +172,7 @@ body {
 .action-keys {
   display: grid;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
   grid-template-areas:
     "z x"
     "d d";
@@ -227,7 +227,7 @@ body {
 }
 
 .touch-btn-front.large {
-  padding: 10px 15px;
+  padding: 12px 18px;
 }
 
 /*****************/
