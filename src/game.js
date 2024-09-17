@@ -7,6 +7,7 @@ import {
   clearPiece,
   clearPreview,
   drawGhostBlock,
+  drawWhiteBlocks,
 } from "./drawing";
 import PIECES from "./pieces";
 import {
@@ -281,10 +282,21 @@ export default class Game {
         (this.livePiece.row + y) * COLUMNS + this.livePiece.column + x
       ] = this.livePiece.id;
     });
-    this.refreshBoard();
+
+    // Copy live piece block positions for asynchronous lock effect
+    const blocks = this.livePiece.positions.map(([x, y]) => [
+      x + this.livePiece.column,
+      y + this.livePiece.row,
+    ]);
 
     // Live piece is locked
     this.livePiece = null;
+
+    // Lock effect on board canvas (white flash)
+    requestAnimationFrame(() => {
+      drawWhiteBlocks(this.boardCanvasCtx, blocks);
+    });
+    setTimeout(() => this.refreshBoard(), 200);
 
     // See if we cleared any lines
     const top = Math.max(0, row - 3);

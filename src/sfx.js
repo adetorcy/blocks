@@ -1,6 +1,4 @@
-/**
- * Audio by Material Design: https://m2.material.io/design/sound/sound-resources.html
- **/
+// https://m2.material.io/design/sound/sound-resources.html
 
 import tap from "./audio/ui_tap-variant-01.wav";
 import lock from "./audio/ui_lock.wav";

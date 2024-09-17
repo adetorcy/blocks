@@ -90,6 +90,48 @@ body {
   cursor: pointer;
 }
 
+.vibrate {
+  animation-name: vibrate;
+  animation-duration: 250ms;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+}
+
+.slam {
+  animation-name: slam;
+  animation-duration: 0.2s;
+  animation-timing-function: ease-out;
+  animation-iteration-count: 1;
+}
+
+@keyframes vibrate {
+  10% {
+    transform: skewX(1deg);
+  }
+  30% {
+    transform: skewX(-1deg);
+  }
+  50% {
+    transform: skewX(1deg);
+  }
+  70% {
+    transform: skewX(-1deg);
+  }
+  90% {
+    transform: skewX(1deg);
+  }
+}
+
+@keyframes slam {
+  20% {
+    transform: translateY(5px);
+  }
+}
+
+.nocursor {
+  cursor: none;
+}
+
 /****************/
 /*** KEYBOARD ***/
 /****************/
@@ -227,7 +269,7 @@ body {
 }
 
 .touch-btn-front.large {
-  padding: 12px 18px;
+  padding: 12px 14px;
 }
 
 /*****************/
@@ -239,14 +281,19 @@ body {
   padding: 2px;
 }
 
-.nocursor {
-  cursor: none;
+.board {
+  grid-area: 1/1;
+  z-index: 0;
 }
 
-.board,
-.piece,
+.piece {
+  grid-area: 1/1;
+  z-index: 1;
+}
+
 .menu {
   grid-area: 1/1;
+  z-index: 2;
 }
 
 .menu {
@@ -254,7 +301,6 @@ body {
   justify-self: center;
   align-items: center;
   row-gap: 64px;
-  z-index: 2;
 }
 
 .menu-pause {

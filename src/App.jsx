@@ -65,10 +65,22 @@ function App() {
     if (menu) return;
 
     function handleKeydown(event) {
+      // Game
       if (gameRef.current.onkeydown(event.code)) event.preventDefault();
-      if (event.code === "Escape") {
-        play(SFX.pause);
-        setMenu("pause");
+
+      // UI
+      const gameArea = boardRef.current.parentElement;
+      switch (event.code) {
+        case "Escape":
+          play(SFX.pause);
+          setMenu("pause");
+          break;
+        case "Space":
+          gameArea.classList.add("slam");
+          setTimeout(() => {
+            gameArea.classList.remove("slam");
+          }, 200);
+          break;
       }
     }
 
@@ -90,7 +102,12 @@ function App() {
   // Listen for game events
   useEffect(() => {
     function handleGameOver() {
-      setMenu("gameOver");
+      const gameArea = boardRef.current.parentElement;
+      gameArea.classList.add("vibrate");
+      setTimeout(() => {
+        gameArea.classList.remove("vibrate");
+        setMenu("gameOver");
+      }, 250);
     }
 
     // Add event listener

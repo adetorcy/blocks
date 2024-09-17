@@ -55,6 +55,14 @@ export function drawJammedPiece(ctx, piece) {
   });
 }
 
+export function drawWhiteBlocks(ctx, blocks) {
+  ctx.fillStyle = "white";
+
+  blocks.forEach(([x, y]) => {
+    ctx.fillRect(x * BLOCK_SIZE + 2, (y - 2) * BLOCK_SIZE + 2, 36, 36);
+  });
+}
+
 export function drawPreview(ctx, piece) {
   ctx.fillStyle = piece.color;
 
