@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Icon from "@mdi/react";
 import {
   mdiKeyboardOutline,
@@ -246,10 +246,7 @@ export default function Keyboard() {
   );
 }
 
-const MappedButton = forwardRef(function MappedButton(
-  { className, code, children },
-  ref
-) {
+function MappedButton({ className, code, children, ref }) {
   return (
     <button
       {...{ className, ref }}
@@ -260,4 +257,4 @@ const MappedButton = forwardRef(function MappedButton(
       {children}
     </button>
   );
-});
+}
