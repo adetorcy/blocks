@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import Icon from "@mdi/react";
+import { Icon } from "@mdi/react";
 import {
   mdiKeyboardOutline,
   mdiKeyboardCloseOutline,
