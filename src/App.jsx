@@ -31,7 +31,6 @@ function App() {
   // Game
   const gameRef = useRef(null);
   const boardRef = useRef(null);
-  const pieceRef = useRef(null);
   const previewRef = useRef(null);
   const fpsRef = useRef(0);
 
@@ -46,7 +45,6 @@ function App() {
   const start = () => {
     gameRef.current = new Game(
       boardRef.current,
-      pieceRef.current,
       previewRef.current,
       fpsRef.current
     );
@@ -133,12 +131,6 @@ function App() {
           <canvas
             ref={boardRef}
             className="board"
-            height={PLAYFIELD_HEIGHT}
-            width={PLAYFIELD_WIDTH}
-          ></canvas>
-          <canvas
-            ref={pieceRef}
-            className="piece"
             height={PLAYFIELD_HEIGHT}
             width={PLAYFIELD_WIDTH}
           ></canvas>

@@ -97,8 +97,6 @@ export function clearBoard(ctx) {
   ctx.clearRect(0, 0, PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
 }
 
-export const clearPiece = clearBoard;
-
 export function clearPreview(ctx) {
   ctx.clearRect(0, 0, PREVIEW_BOX_SIZE, PREVIEW_BOX_SIZE);
 }

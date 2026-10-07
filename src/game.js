@@ -4,7 +4,6 @@ import {
   drawPreview,
   drawJammedPiece,
   clearBoard,
-  clearPiece,
   clearPreview,
   drawGhostBlock,
   drawWhiteBlocks,
@@ -17,6 +16,7 @@ import {
   GRAVITY_TABLE,
   ARE,
   LINE_CLEAR_STEP_FRAMES,
+  LOCK_FLASH_FRAMES,
   SOFT_DROP_FRAMES,
   DAS_DELAY,
   DAS_FRAMES,
@@ -34,7 +34,7 @@ import SFX from "./sfx";
  **/
 
 export default class Game {
-  constructor(boardCanvas, pieceCanvas, previewCanvas, fpsElement, level = 0) {
+  constructor(boardCanvas, previewCanvas, fpsElement, level = 0) {
     // Playfield
     this.board = new Uint8Array(BOARD_SIZE).fill(0);
 
@@ -44,7 +44,6 @@ export default class Game {
     // Referenced elements should be in the DOM by the time this is called
     this.boardCanvasCtx = boardCanvas.getContext("2d");
     this.previewCanvasCtx = previewCanvas.getContext("2d");
-    this.pieceCanvasCtx = pieceCanvas.getContext("2d");
     this.fpsElement = fpsElement;
 
     // Initial values
@@ -63,24 +62,29 @@ export default class Game {
     // https://tetris.wiki/Tetris_(NES,_Nintendo)
     this.nextLevelUp = Math.min(
       level * 10 + 10,
-      Math.max(100, level * 10 - 50)
+      Math.max(100, level * 10 - 50),
     );
 
     // Line clearing
     this.cleared = []; // Indices of cleared lines
     this.lineClearAnimationStep = 0;
 
+    // Lock effect: { blocks, framesLeft } while active
+    this.lockFlash = null;
+
+    this.gameOver = false;
+
     // Get first 2 pieces
     this.livePiece = this.getPiece();
     this.nextPiece = this.getPiece();
 
-    // Show next piece
-    this.preview();
-
     // Ghost piece
     this.setGhostPiece();
-    this.pieceCanvasCtx.lineWidth = 4;
-    this.pieceCanvasCtx.strokeStyle = "rgb(64,64,64)";
+
+    // Stroke styling
+    // Only used by ghost piece so can be set once here
+    this.boardCanvasCtx.lineWidth = 4;
+    this.boardCanvasCtx.strokeStyle = "rgb(64,64,64)";
   }
 
   run() {
@@ -95,14 +99,16 @@ export default class Game {
   }
 
   frame() {
+    // Single redraw per frame, from state (runs after this tick's updates)
     requestAnimationFrame((now) => {
-      clearPiece(this.pieceCanvasCtx);
-      if (this.livePiece) {
-        this.drawGhostPiece();
-        this.drawLivePiece();
-      }
+      this.draw();
       this.fpsCounter(now);
     });
+
+    // Lock effect countdown
+    if (this.lockFlash && --this.lockFlash.framesLeft === 0) {
+      this.lockFlash = null;
+    }
 
     /**
      * Check for DAS and soft drop
@@ -180,9 +186,8 @@ export default class Game {
        * GAME OVER!!
        **/
 
-      requestAnimationFrame(() => {
-        drawJammedPiece(this.pieceCanvasCtx, this.livePiece);
-      });
+      // Jammed piece is drawn by draw()
+      this.gameOver = true;
 
       // Stop game loop
       this.stop();
@@ -191,14 +196,10 @@ export default class Game {
       broadcast(GAME_OVER);
       play(SFX.buzz);
     }
-
-    // Show next piece
-    this.preview();
   }
 
   cleanup() {
     // Clear UI
-    clearPiece(this.pieceCanvasCtx);
     clearBoard(this.boardCanvasCtx);
     clearPreview(this.previewCanvasCtx);
 
@@ -238,12 +239,12 @@ export default class Game {
 
   drawLivePiece() {
     // Blocks on top two rows will be clipped
-    this.pieceCanvasCtx.fillStyle = this.livePiece.color;
+    this.boardCanvasCtx.fillStyle = this.livePiece.color;
     this.livePiece.positions.forEach(([x, y]) => {
       drawBlock(
-        this.pieceCanvasCtx,
+        this.boardCanvasCtx,
         (this.livePiece.column + x) * BLOCK_SIZE,
-        (this.livePiece.row - 2 + y) * BLOCK_SIZE
+        (this.livePiece.row - 2 + y) * BLOCK_SIZE,
       );
     });
   }
@@ -251,18 +252,37 @@ export default class Game {
   drawGhostPiece() {
     this.livePiece.positions.forEach(([x, y]) => {
       drawGhostBlock(
-        this.pieceCanvasCtx,
+        this.boardCanvasCtx,
         (this.livePiece.column + x) * BLOCK_SIZE,
-        (this.ghostPieceRow - 2 + y) * BLOCK_SIZE
+        (this.ghostPieceRow - 2 + y) * BLOCK_SIZE,
       );
     });
   }
 
-  refreshBoard() {
-    requestAnimationFrame(() => {
-      clearBoard(this.boardCanvasCtx);
-      drawBoard(this.boardCanvasCtx, this.board);
-    });
+  // Redraw everything from state
+  draw() {
+    // Board, including line clear animation
+    clearBoard(this.boardCanvasCtx);
+    drawBoard(this.boardCanvasCtx, this.board);
+
+    if (this.gameOver) {
+      drawJammedPiece(this.boardCanvasCtx, this.livePiece);
+    } else if (this.livePiece) {
+      this.drawGhostPiece();
+      this.drawLivePiece();
+    }
+
+    // Lock effect, skipping blocks already removed by a line clear
+    if (this.lockFlash) {
+      drawWhiteBlocks(
+        this.boardCanvasCtx,
+        this.lockFlash.blocks.filter(([x, y]) => this.board[y * COLUMNS + x]),
+      );
+    }
+
+    // Next piece
+    clearPreview(this.previewCanvasCtx);
+    drawPreview(this.previewCanvasCtx, this.nextPiece);
   }
 
   setGhostPiece() {
@@ -283,7 +303,7 @@ export default class Game {
       ] = this.livePiece.id;
     });
 
-    // Copy live piece block positions for asynchronous lock effect
+    // Copy live piece block positions for lock effect
     const blocks = this.livePiece.positions.map(([x, y]) => [
       x + this.livePiece.column,
       y + this.livePiece.row,
@@ -292,11 +312,8 @@ export default class Game {
     // Live piece is locked
     this.livePiece = null;
 
-    // Lock effect on board canvas (white flash)
-    requestAnimationFrame(() => {
-      drawWhiteBlocks(this.boardCanvasCtx, blocks);
-    });
-    setTimeout(() => this.refreshBoard(), 200);
+    // Lock effect (white flash), drawn by draw()
+    this.lockFlash = { blocks, framesLeft: LOCK_FLASH_FRAMES };
 
     // See if we cleared any lines
     const top = Math.max(0, row - 3);
@@ -333,7 +350,7 @@ export default class Game {
     // https://tetris.wiki/Scoring
     broadcast(
       SCORE_UPDATE,
-      (this.score += (this.level + 1) * [40, 100, 300, 1200][lines - 1])
+      (this.score += (this.level + 1) * [40, 100, 300, 1200][lines - 1]),
     );
 
     // Lines
@@ -362,15 +379,6 @@ export default class Game {
 
     this.framesRemaining = LINE_CLEAR_STEP_FRAMES;
     this.lineClearAnimationStep--;
-
-    this.refreshBoard();
-  }
-
-  preview() {
-    requestAnimationFrame(() => {
-      clearPreview(this.previewCanvasCtx);
-      drawPreview(this.previewCanvasCtx, this.nextPiece);
-    });
   }
 
   lineClearCheck(rowIdx) {
@@ -392,9 +400,6 @@ export default class Game {
     for (let i = 0; i < COLUMNS; i++) {
       this.board[i] = 0;
     }
-
-    // Redraw
-    this.refreshBoard();
   }
 
   // Clockwise

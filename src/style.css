@@ -286,17 +286,9 @@ body {
   z-index: 0;
 }
 
-.piece {
+.menu {
   grid-area: 1/1;
   z-index: 1;
-}
-
-.menu {
-  grid-area: 1/1;
-  z-index: 2;
-}
-
-.menu {
   align-self: center;
   justify-self: center;
   align-items: center;
