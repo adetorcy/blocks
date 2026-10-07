@@ -14,6 +14,7 @@ import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
 import Keyboard from "./Keyboard";
 import Game from "./game";
+import Renderer from "./renderer";
 import SFX from "./sfx";
 import {
   play,
@@ -44,9 +45,7 @@ function App() {
   };
   const start = () => {
     gameRef.current = new Game(
-      boardRef.current,
-      previewRef.current,
-      fpsRef.current
+      new Renderer(boardRef.current, previewRef.current, fpsRef.current)
     );
     gameRef.current.run();
     setMenu(null);

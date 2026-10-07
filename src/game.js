@@ -1,18 +1,7 @@
-import {
-  drawBoard,
-  drawBlock,
-  drawPreview,
-  drawJammedPiece,
-  clearBoard,
-  clearPreview,
-  drawGhostBlock,
-  drawWhiteBlocks,
-} from "./drawing";
 import PIECES from "./pieces";
 import {
   COLUMNS,
   BOARD_SIZE,
-  BLOCK_SIZE,
   GRAVITY_TABLE,
   ARE,
   LINE_CLEAR_STEP_FRAMES,
@@ -34,17 +23,15 @@ import SFX from "./sfx";
  **/
 
 export default class Game {
-  constructor(boardCanvas, previewCanvas, fpsElement, level = 0) {
+  constructor(renderer, level = 0) {
     // Playfield
     this.board = new Uint8Array(BOARD_SIZE).fill(0);
 
     // Pseudo random integers between 0 and 6
     this.sequence = sequence();
 
-    // Referenced elements should be in the DOM by the time this is called
-    this.boardCanvasCtx = boardCanvas.getContext("2d");
-    this.previewCanvasCtx = previewCanvas.getContext("2d");
-    this.fpsElement = fpsElement;
+    // Draws game state
+    this.renderer = renderer;
 
     // Initial values
     this.score = 0;
@@ -80,11 +67,6 @@ export default class Game {
 
     // Ghost piece
     this.setGhostPiece();
-
-    // Stroke styling
-    // Only used by ghost piece so can be set once here
-    this.boardCanvasCtx.lineWidth = 4;
-    this.boardCanvasCtx.strokeStyle = "rgb(64,64,64)";
   }
 
   run() {
@@ -100,10 +82,7 @@ export default class Game {
 
   frame() {
     // Single redraw per frame, from state (runs after this tick's updates)
-    requestAnimationFrame((now) => {
-      this.draw();
-      this.fpsCounter(now);
-    });
+    requestAnimationFrame((now) => this.renderer.render(this, now));
 
     // Lock effect countdown
     if (this.lockFlash && --this.lockFlash.framesLeft === 0) {
@@ -186,7 +165,7 @@ export default class Game {
        * GAME OVER!!
        **/
 
-      // Jammed piece is drawn by draw()
+      // Jammed piece is drawn by renderer
       this.gameOver = true;
 
       // Stop game loop
@@ -200,31 +179,11 @@ export default class Game {
 
   cleanup() {
     // Clear UI
-    clearBoard(this.boardCanvasCtx);
-    clearPreview(this.previewCanvasCtx);
+    this.renderer.clear();
 
     broadcast(SCORE_UPDATE, 0);
     broadcast(LEVEL_UPDATE, 0);
     broadcast(LINES_UPDATE, 0);
-
-    this.fpsElement.textContent = 0;
-  }
-
-  // Very rough FPS counter that only updates about once per second
-  fpsCounter(now) {
-    if (!this.fpsCounterStart) {
-      this.fpsCounterStart = now;
-      this.fpsCount = 0;
-      return;
-    }
-
-    if (now - this.fpsCounterStart >= 1000) {
-      this.fpsElement.textContent = this.fpsCount;
-      this.fpsCount = 0;
-      this.fpsCounterStart = now;
-    } else {
-      this.fpsCount++;
-    }
   }
 
   getPiece() {
@@ -235,54 +194,6 @@ export default class Game {
         return this.rotation[this.step];
       },
     };
-  }
-
-  drawLivePiece() {
-    // Blocks on top two rows will be clipped
-    this.boardCanvasCtx.fillStyle = this.livePiece.color;
-    this.livePiece.positions.forEach(([x, y]) => {
-      drawBlock(
-        this.boardCanvasCtx,
-        (this.livePiece.column + x) * BLOCK_SIZE,
-        (this.livePiece.row - 2 + y) * BLOCK_SIZE,
-      );
-    });
-  }
-
-  drawGhostPiece() {
-    this.livePiece.positions.forEach(([x, y]) => {
-      drawGhostBlock(
-        this.boardCanvasCtx,
-        (this.livePiece.column + x) * BLOCK_SIZE,
-        (this.ghostPieceRow - 2 + y) * BLOCK_SIZE,
-      );
-    });
-  }
-
-  // Redraw everything from state
-  draw() {
-    // Board, including line clear animation
-    clearBoard(this.boardCanvasCtx);
-    drawBoard(this.boardCanvasCtx, this.board);
-
-    if (this.gameOver) {
-      drawJammedPiece(this.boardCanvasCtx, this.livePiece);
-    } else if (this.livePiece) {
-      this.drawGhostPiece();
-      this.drawLivePiece();
-    }
-
-    // Lock effect, skipping blocks already removed by a line clear
-    if (this.lockFlash) {
-      drawWhiteBlocks(
-        this.boardCanvasCtx,
-        this.lockFlash.blocks.filter(([x, y]) => this.board[y * COLUMNS + x]),
-      );
-    }
-
-    // Next piece
-    clearPreview(this.previewCanvasCtx);
-    drawPreview(this.previewCanvasCtx, this.nextPiece);
   }
 
   setGhostPiece() {
@@ -312,7 +223,7 @@ export default class Game {
     // Live piece is locked
     this.livePiece = null;
 
-    // Lock effect (white flash), drawn by draw()
+    // Lock effect (white flash), drawn by renderer
     this.lockFlash = { blocks, framesLeft: LOCK_FLASH_FRAMES };
 
     // See if we cleared any lines
