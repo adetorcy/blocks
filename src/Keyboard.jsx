@@ -6,9 +6,9 @@ import {
   mdiSwapHorizontal,
   mdiPauseOctagonOutline,
   mdiPlay,
-  mdiKeyboardSpace,
-  mdiAlphaZ,
-  mdiAlphaX,
+  mdiCheckBold,
+  mdiRotateLeftVariant,
+  mdiRotateRightVariant,
 } from "@mdi/js";
 import { dispatchKeyDown, dispatchKeyUp } from "./utils";
 
@@ -180,7 +180,7 @@ export default function Keyboard() {
               ref={rotateLeftBtnRef}
             >
               <span className="touch-btn-front large">
-                <Icon className="touch-btn-icon" path={mdiAlphaZ} size={1} />
+                <Icon className="touch-btn-icon" path={mdiRotateLeftVariant} size={1} />
               </span>
             </MappedButton>
             <MappedButton
@@ -189,7 +189,7 @@ export default function Keyboard() {
               ref={rotateRightBtnRef}
             >
               <span className="touch-btn-front large">
-                <Icon className="touch-btn-icon" path={mdiAlphaX} size={1} />
+                <Icon className="touch-btn-icon" path={mdiRotateRightVariant} size={1} />
               </span>
             </MappedButton>
             <MappedButton
@@ -200,7 +200,7 @@ export default function Keyboard() {
               <span className="touch-btn-front large">
                 <Icon
                   className="touch-btn-icon"
-                  path={mdiKeyboardSpace}
+                  path={mdiCheckBold}
                   size={1}
                 />
               </span>
