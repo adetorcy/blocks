@@ -12,7 +12,7 @@ import StartMenu from "./StartMenu";
 import ControlsMenu from "./ControlsMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
-import Keyboard from "./Keyboard";
+import ControlButtons from "./Keyboard";
 import Game from "./game";
 import Renderer from "./renderer";
 import SFX from "./sfx";
@@ -165,7 +165,7 @@ function App() {
           </div>
         </div>
       </div>
-      <Keyboard />
+      <ControlButtons />
     </>
   );
 }

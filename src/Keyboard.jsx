@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@mdi/react";
 import {
-  mdiKeyboardOutline,
-  mdiKeyboardCloseOutline,
+  mdiGestureTapButton,
+  mdiDesktopTowerMonitor,
   mdiSwapHorizontal,
-  mdiPauseOctagonOutline,
+  mdiPauseCircleOutline,
   mdiPlay,
   mdiCheckBold,
   mdiRotateLeftVariant,
@@ -12,8 +12,8 @@ import {
 } from "@mdi/js";
 import { dispatchKeyDown, dispatchKeyUp } from "./utils";
 
-export default function Keyboard() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function ControlButtons() {
+  const [isTouchScreen, setIsTouchScreen] = useState(false);
   const [controllerStyleLayout, setControllerStyleLayout] = useState(true); // D-pad on the left
 
   // On-screen button references
@@ -26,8 +26,8 @@ export default function Keyboard() {
   const arrowDownBtnRef = useRef(null);
   const arrowRightBtnRef = useRef(null);
 
-  function toggleKeyboard() {
-    setIsOpen((x) => !x);
+  function toggleControlButtons() {
+    setIsTouchScreen((x) => !x);
   }
 
   function toggleLayout() {
@@ -105,12 +105,12 @@ export default function Keyboard() {
 
   return (
     <>
-      {isOpen || (
-        <button className="icon-btn open-keyboard-btn" onClick={toggleKeyboard}>
-          <Icon path={mdiKeyboardOutline} size={1} />
+      {isTouchScreen || (
+        <button className="icon-btn open-keyboard-btn" onClick={toggleControlButtons}>
+          <Icon path={mdiGestureTapButton} size={1} />
         </button>
       )}
-      <div className={isOpen ? "keyboard open" : "keyboard"}>
+      <div className={isTouchScreen ? "keyboard open" : "keyboard"}>
         <div className="control-keys">
           <div
             className={
@@ -218,11 +218,11 @@ export default function Keyboard() {
               />
             </span>
           </button>
-          <button className="touch-btn system" onClick={toggleKeyboard}>
+          <button className="touch-btn system" onClick={toggleControlButtons}>
             <span className="touch-btn-front system">
               <Icon
                 className="touch-btn-icon"
-                path={mdiKeyboardCloseOutline}
+                path={mdiDesktopTowerMonitor}
                 size={1}
               />
             </span>
@@ -235,7 +235,7 @@ export default function Keyboard() {
             <span className="touch-btn-front system">
               <Icon
                 className="touch-btn-icon"
-                path={mdiPauseOctagonOutline}
+                path={mdiPauseCircleOutline}
                 size={1}
               />
             </span>
