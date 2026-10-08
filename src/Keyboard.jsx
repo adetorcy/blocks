@@ -58,7 +58,7 @@ export default function ControlButtons() {
         case "Space":
           hardDropBtnRef.current.classList.add("active");
           break;
-        case "Escape":
+        case "Enter":
           pauseBtnRef.current.classList.add("active");
           break;
       }
@@ -87,7 +87,7 @@ export default function ControlButtons() {
         case "Space":
           hardDropBtnRef.current.classList.remove("active");
           break;
-        case "Escape":
+        case "Enter":
           pauseBtnRef.current.classList.remove("active");
           break;
       }
@@ -229,7 +229,7 @@ export default function ControlButtons() {
           </button>
           <MappedButton
             className="touch-btn system"
-            code="Escape"
+            code="Enter"
             ref={pauseBtnRef}
           >
             <span className="touch-btn-front system">

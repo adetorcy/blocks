@@ -411,7 +411,7 @@ export default class Game {
           this.lock();
         }
         break;
-      case "Escape":
+      case "Enter":
         // Pause
         this.stop();
         break;

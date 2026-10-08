@@ -53,5 +53,5 @@ const controls = [
   ["SPACE", "HARD DROP"],
   ["Z", "ROTATE LEFT"],
   ["X", "ROTATE RIGHT"],
-  ["ESC", "PAUSE GAME"],
+  ["ENTER", "PAUSE GAME"],
 ];

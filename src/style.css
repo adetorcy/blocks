@@ -309,7 +309,7 @@ body {
 .controls-list-item {
   display: flex;
   justify-content: space-between;
-  column-gap: 44px;
+  column-gap: 24px;
 }
 
 /*****************/

@@ -9,10 +9,6 @@ export default function PauseMenu({ resume, quit }) {
     // Callback for keydown event listener
     function handleKeydown(event) {
       switch (event.code) {
-        case "Escape":
-          resume();
-          event.preventDefault();
-          break;
         case "ArrowUp":
         case "ArrowDown":
           setSelectedIndex((index) => (index + 1) % 2);

@@ -68,7 +68,7 @@ function App() {
       // UI
       const gameArea = boardRef.current.parentElement;
       switch (event.code) {
-        case "Escape":
+        case "Enter":
           play(SFX.pause);
           setMenu("pause");
           break;
