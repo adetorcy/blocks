@@ -12,7 +12,7 @@ import StartMenu from "./StartMenu";
 import ControlsMenu from "./ControlsMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
-import ControlButtons from "./Keyboard";
+import TouchUI from "./TouchUI";
 import Game from "./game";
 import Renderer from "./renderer";
 import SFX from "./sfx";
@@ -171,7 +171,7 @@ function App() {
           </div>
         </div>
       </div>
-      <ControlButtons menu={menu} />
+      <TouchUI menu={menu} />
     </>
   );
 }

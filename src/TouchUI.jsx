@@ -12,8 +12,8 @@ import {
 } from "@mdi/js";
 import { dispatchKeyDown, dispatchKeyUp } from "./utils";
 
-export default function ControlButtons({ menu }) {
-  const [isTouchScreen, setIsTouchScreen] = useState(false);
+export default function TouchUI({ menu }) {
+  const [isVisible, setIsVisible] = useState(false);
   const [controllerStyleLayout, setControllerStyleLayout] = useState(true); // D-pad on the left
 
   // On-screen button references
@@ -26,8 +26,8 @@ export default function ControlButtons({ menu }) {
   const arrowDownBtnRef = useRef(null);
   const arrowRightBtnRef = useRef(null);
 
-  function toggleControlButtons() {
-    setIsTouchScreen((x) => !x);
+  function toggleIsVisible() {
+    setIsVisible((x) => !x);
   }
 
   function toggleLayout() {
@@ -108,16 +108,16 @@ export default function ControlButtons({ menu }) {
 
   return (
     <>
-      {isTouchScreen || (
-        <button className="icon-btn open-keyboard-btn" onClick={toggleControlButtons}>
+      {isVisible || (
+        <button className="icon-btn show-touch-ui-btn" onClick={toggleIsVisible}>
           <Icon path={mdiGestureTapButton} size={1} />
         </button>
       )}
-      <div className={isTouchScreen ? "keyboard open" : "keyboard"}>
-        <div className="control-keys">
+      <div className={isVisible ? "touch-ui visible" : "touch-ui"}>
+        <div className="control-buttons">
           <div
             className={
-              controllerStyleLayout ? "arrow-keys left" : "arrow-keys right"
+              controllerStyleLayout ? "arrow-buttons left" : "arrow-buttons right"
             }
           >
             <MappedButton
@@ -174,11 +174,11 @@ export default function ControlButtons({ menu }) {
           </div>
           <div
             className={
-              controllerStyleLayout ? "action-keys right" : "action-keys left"
+              controllerStyleLayout ? "action-buttons right" : "action-buttons left"
             }
           >
             <MappedButton
-              className="touch-btn ccw-key"
+              className="touch-btn ccw-btn"
               code="KeyZ"
               ref={rotateLeftBtnRef}
             >
@@ -187,7 +187,7 @@ export default function ControlButtons({ menu }) {
               </span>
             </MappedButton>
             <MappedButton
-              className="touch-btn cw-key"
+              className="touch-btn cw-btn"
               code="KeyX"
               ref={rotateRightBtnRef}
             >
@@ -196,7 +196,7 @@ export default function ControlButtons({ menu }) {
               </span>
             </MappedButton>
             <MappedButton
-              className="touch-btn drop-key"
+              className="touch-btn drop-btn"
               code="Space"
               ref={hardDropBtnRef}
             >
@@ -210,7 +210,7 @@ export default function ControlButtons({ menu }) {
             </MappedButton>
           </div>
         </div>
-        <div className="system-keys">
+        <div className="system-buttons">
           <button className="touch-btn system" onClick={toggleLayout}>
             <span className="touch-btn-front system">
               <Icon
@@ -221,7 +221,7 @@ export default function ControlButtons({ menu }) {
               />
             </span>
           </button>
-          <button className="touch-btn system" onClick={toggleControlButtons}>
+          <button className="touch-btn system" onClick={toggleIsVisible}>
             <span className="touch-btn-front system">
               <Icon
                 className="touch-btn-icon"

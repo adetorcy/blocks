@@ -133,10 +133,10 @@ body {
 }
 
 /****************/
-/*** KEYBOARD ***/
+/*** TOUCH UI ***/
 /****************/
 
-.keyboard {
+.touch-ui {
   box-sizing: border-box;
   position: fixed;
   bottom: -240px;
@@ -151,11 +151,11 @@ body {
   transition: bottom 0.2s linear;
 }
 
-.keyboard.open {
+.touch-ui.visible {
   bottom: 0;
 }
 
-.open-keyboard-btn {
+.show-touch-ui-btn {
   position: fixed;
   left: 0;
   right: 0;
@@ -163,13 +163,13 @@ body {
   margin: 0 auto;
 }
 
-.system-keys {
+.system-buttons {
   display: flex;
   justify-content: center;
   column-gap: 24px;
 }
 
-.control-keys {
+.control-buttons {
   display: grid;
   grid-template-areas: "left right";
   gap: 16px;
@@ -185,7 +185,7 @@ body {
   }
 }
 
-.arrow-keys {
+.arrow-buttons {
   display: grid;
   align-items: center;
   gap: 8px;
@@ -211,7 +211,7 @@ body {
   grid-area: d;
 }
 
-.action-keys {
+.action-buttons {
   display: grid;
   align-items: center;
   gap: 24px;
@@ -220,15 +220,15 @@ body {
     "d d";
 }
 
-.ccw-key {
+.ccw-btn {
   grid-area: z;
 }
 
-.cw-key {
+.cw-btn {
   grid-area: x;
 }
 
-.drop-key {
+.drop-btn {
   grid-area: d;
 }
 
