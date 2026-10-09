@@ -171,7 +171,7 @@ function App() {
           </div>
         </div>
       </div>
-      <ControlButtons />
+      <ControlButtons menu={menu} />
     </>
   );
 }

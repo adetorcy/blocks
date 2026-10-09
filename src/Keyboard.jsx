@@ -12,7 +12,7 @@ import {
 } from "@mdi/js";
 import { dispatchKeyDown, dispatchKeyUp } from "./utils";
 
-export default function ControlButtons() {
+export default function ControlButtons({ menu }) {
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   const [controllerStyleLayout, setControllerStyleLayout] = useState(true); // D-pad on the left
 
@@ -59,7 +59,10 @@ export default function ControlButtons() {
           hardDropBtnRef.current.classList.add("active");
           break;
         case "Enter":
-          pauseBtnRef.current.classList.add("active");
+          // Only when Enter pauses or resumes the game, not for menu selections
+          if (menu === null || menu === "pause") {
+            pauseBtnRef.current.classList.add("active");
+          }
           break;
       }
     }
@@ -101,7 +104,7 @@ export default function ControlButtons() {
       window.removeEventListener("keydown", handleKeydown);
       window.removeEventListener("keyup", handleKeyup);
     };
-  }, []);
+  }, [menu]);
 
   return (
     <>
