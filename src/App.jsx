@@ -62,6 +62,12 @@ function App() {
     if (menu) return;
 
     function handleKeydown(event) {
+      // Ignore auto-repeat from held keys, DAS handles held keys
+      if (event.repeat) {
+        event.preventDefault();
+        return;
+      }
+
       // Game
       if (gameRef.current.onkeydown(event.code)) event.preventDefault();
 

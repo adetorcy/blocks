@@ -16,7 +16,8 @@ export default function PauseMenu({ resume, quit }) {
           break;
         case "Enter":
         case "Space":
-          selectedRef.current.click();
+          // Ignore auto-repeat from a held key
+          if (!event.repeat) selectedRef.current.click();
           event.preventDefault();
           break;
       }
