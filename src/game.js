@@ -11,8 +11,7 @@ import {
   DAS_FRAMES,
 } from "./constants";
 import { SCORE_UPDATE, LEVEL_UPDATE, LINES_UPDATE, GAME_OVER } from "./events";
-import { sequence, broadcast, pieceFits, play } from "./utils";
-import SFX from "./sfx";
+import { sequence, broadcast, pieceFits } from "./utils";
 
 /**  Useful links
  *
@@ -23,7 +22,7 @@ import SFX from "./sfx";
  **/
 
 export default class Game {
-  constructor(renderer, level = 0) {
+  constructor(renderer, sound, level = 0) {
     // Playfield
     this.board = new Uint8Array(BOARD_SIZE).fill(0);
 
@@ -32,6 +31,9 @@ export default class Game {
 
     // Draws game state
     this.renderer = renderer;
+
+    // Plays a sound effect by name
+    this.sound = sound;
 
     // Initial values
     this.score = 0;
@@ -173,7 +175,7 @@ export default class Game {
 
       // Notify UI
       broadcast(GAME_OVER);
-      play(SFX.buzz);
+      this.sound("buzz");
     }
   }
 
@@ -237,7 +239,7 @@ export default class Game {
 
     // If no lines were cleared just set spawn delay
     if (!this.cleared.length) {
-      play(SFX.lock);
+      this.sound("lock");
       this.framesRemaining = ARE[row];
       return;
     }
@@ -252,9 +254,9 @@ export default class Game {
 
   reward(lines) {
     if (lines === 4) {
-      play(SFX.clear4);
+      this.sound("clear4");
     } else {
-      play(SFX.clear);
+      this.sound("clear");
     }
 
     // Score
@@ -269,7 +271,7 @@ export default class Game {
 
     // Level
     if (this.lines >= this.nextLevelUp) {
-      play(SFX.levelUp);
+      this.sound("levelUp");
       broadcast(LEVEL_UPDATE, ++this.level);
       this.delay = GRAVITY_TABLE[this.level] || 1;
       this.nextLevelUp += 10;
@@ -319,7 +321,7 @@ export default class Game {
       const step = this.livePiece.step;
       this.livePiece.step = (this.livePiece.step + 1) % 4;
       if (pieceFits(this.board, this.livePiece)) {
-        play(SFX.tap);
+        this.sound("tap");
         this.setGhostPiece();
       } else {
         this.livePiece.step = step;
@@ -333,7 +335,7 @@ export default class Game {
       const step = this.livePiece.step;
       this.livePiece.step = (this.livePiece.step + 3) % 4;
       if (pieceFits(this.board, this.livePiece)) {
-        play(SFX.tap);
+        this.sound("tap");
         this.setGhostPiece();
       } else {
         this.livePiece.step = step;
@@ -345,7 +347,7 @@ export default class Game {
     if (this.livePiece) {
       this.livePiece.column--;
       if (pieceFits(this.board, this.livePiece)) {
-        play(SFX.tap);
+        this.sound("tap");
         this.setGhostPiece();
       } else {
         this.livePiece.column++;
@@ -357,7 +359,7 @@ export default class Game {
     if (this.livePiece) {
       this.livePiece.column++;
       if (pieceFits(this.board, this.livePiece)) {
-        play(SFX.tap);
+        this.sound("tap");
         this.setGhostPiece();
       } else {
         this.livePiece.column--;

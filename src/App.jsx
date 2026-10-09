@@ -45,7 +45,8 @@ function App() {
   };
   const start = () => {
     gameRef.current = new Game(
-      new Renderer(boardRef.current, previewRef.current, fpsRef.current)
+      new Renderer(boardRef.current, previewRef.current, fpsRef.current),
+      (name) => play(SFX[name]),
     );
     gameRef.current.run();
     setMenu(null);
