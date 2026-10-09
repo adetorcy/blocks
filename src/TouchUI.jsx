@@ -26,6 +26,10 @@ export default function TouchUI({ menu }) {
   const arrowDownBtnRef = useRef(null);
   const arrowRightBtnRef = useRef(null);
 
+  // Pause button highlight: Enter is held and the game pauses or resumes
+  const enterDownRef = useRef(false);
+  const prevMenuRef = useRef(menu);
+
   function toggleIsVisible() {
     setIsVisible((x) => !x);
   }
@@ -59,10 +63,8 @@ export default function TouchUI({ menu }) {
           hardDropBtnRef.current.classList.add("active");
           break;
         case "Enter":
-          // Only when Enter pauses or resumes the game, not for menu selections
-          if (menu === null || menu === "pause") {
-            pauseBtnRef.current.classList.add("active");
-          }
+          // Highlight is added when the game pauses or resumes, see below
+          enterDownRef.current = true;
           break;
       }
     }
@@ -91,6 +93,7 @@ export default function TouchUI({ menu }) {
           hardDropBtnRef.current.classList.remove("active");
           break;
         case "Enter":
+          enterDownRef.current = false;
           pauseBtnRef.current.classList.remove("active");
           break;
       }
@@ -104,6 +107,19 @@ export default function TouchUI({ menu }) {
       window.removeEventListener("keydown", handleKeydown);
       window.removeEventListener("keyup", handleKeyup);
     };
+  }, []);
+
+  // Highlight pause button only when Enter pauses or resumes the game,
+  // not for other menu selections (start, quit, etc.)
+  useEffect(() => {
+    const prevMenu = prevMenuRef.current;
+    prevMenuRef.current = menu;
+
+    const paused = prevMenu === null && menu === "pause";
+    const resumed = prevMenu === "pause" && menu === null;
+    if ((paused || resumed) && enterDownRef.current) {
+      pauseBtnRef.current.classList.add("active");
+    }
   }, [menu]);
 
   return (
