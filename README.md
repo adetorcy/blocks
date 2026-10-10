@@ -9,4 +9,4 @@ Tetris clone for the browser
 * Hard Drop
 * Ghost Piece
 
-[https://adetorcy.github.io/blocks/](https://adetorcy.github.io/blocks/)
+[Try it live](https://adetorcy.github.io/blocks/)
