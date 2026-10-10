@@ -15,6 +15,7 @@ import GameOverMenu from "./GameOverMenu";
 import TouchUI from "./TouchUI";
 import Game from "./game";
 import Renderer from "./renderer";
+import Loop from "./loop";
 import SFX from "./sfx";
 import {
   play,
@@ -31,6 +32,7 @@ function App() {
 
   // Game
   const gameRef = useRef(null);
+  const loopRef = useRef(null);
   const boardRef = useRef(null);
   const previewRef = useRef(null);
   const fpsRef = useRef(0);
@@ -40,19 +42,23 @@ function App() {
   const showControlsMenu = () => setMenu("controls");
   const resume = () => {
     play(SFX.resume);
-    gameRef.current.run();
+    loopRef.current.start();
     setMenu(null);
   };
   const start = () => {
-    gameRef.current = new Game(
+    gameRef.current = new Game((name) => play(SFX[name]));
+    loopRef.current = new Loop(
+      gameRef.current,
       new Renderer(boardRef.current, previewRef.current, fpsRef.current),
-      (name) => play(SFX[name]),
     );
-    gameRef.current.run();
+    loopRef.current.start();
     setMenu(null);
   };
   const quit = () => {
+    loopRef.current.stop();
+    loopRef.current.renderer.clear();
     gameRef.current.cleanup();
+    loopRef.current = null;
     gameRef.current = null;
     setMenu("start");
   };
@@ -69,22 +75,25 @@ function App() {
         return;
       }
 
+      // Pause
+      if (event.code === "Enter") {
+        event.preventDefault();
+        loopRef.current.stop();
+        play(SFX.pause);
+        setMenu("pause");
+        return;
+      }
+
       // Game
       if (gameRef.current.onkeydown(event.code)) event.preventDefault();
 
       // UI
-      const gameArea = boardRef.current.parentElement;
-      switch (event.code) {
-        case "Enter":
-          play(SFX.pause);
-          setMenu("pause");
-          break;
-        case "Space":
-          gameArea.classList.add("slam");
-          setTimeout(() => {
-            gameArea.classList.remove("slam");
-          }, 200);
-          break;
+      if (event.code === "Space") {
+        const gameArea = boardRef.current.parentElement;
+        gameArea.classList.add("slam");
+        setTimeout(() => {
+          gameArea.classList.remove("slam");
+        }, 200);
       }
     }
 

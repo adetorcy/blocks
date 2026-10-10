@@ -22,15 +22,12 @@ import { sequence, broadcast, pieceFits } from "./utils";
  **/
 
 export default class Game {
-  constructor(renderer, sound, level = 0, pieceSequence = sequence()) {
+  constructor(sound, level = 0, pieceSequence = sequence()) {
     // Playfield
     this.board = new Uint8Array(BOARD_SIZE).fill(0);
 
     // Pseudo random integers between 0 and 6
     this.sequence = pieceSequence;
-
-    // Draws game state
-    this.renderer = renderer;
 
     // Plays a sound effect by name
     this.sound = sound;
@@ -71,21 +68,8 @@ export default class Game {
     this.setGhostPiece();
   }
 
-  run() {
-    // Both NES and GameBoy run at 60 frames per second (very close)
-    // This will likely be off by a few frames (https://stackoverflow.com/a/15216501)
-    this.intervalID = setInterval(() => this.frame(), 1000 / 60);
-  }
-
-  stop() {
-    // Stop game loop
-    clearInterval(this.intervalID);
-  }
-
+  // Advance the game by one frame (run 60 times per second by the loop)
   frame() {
-    // Single redraw per frame, from state (runs after this tick's updates)
-    requestAnimationFrame((now) => this.renderer.render(this, now));
-
     // Lock effect countdown
     if (this.lockFlash && --this.lockFlash.framesLeft === 0) {
       this.lockFlash = null;
@@ -167,11 +151,8 @@ export default class Game {
        * GAME OVER!!
        **/
 
-      // Jammed piece is drawn by renderer
+      // Jammed piece is drawn by renderer, loop stops
       this.gameOver = true;
-
-      // Stop game loop
-      this.stop();
 
       // Notify UI
       broadcast(GAME_OVER);
@@ -180,9 +161,7 @@ export default class Game {
   }
 
   cleanup() {
-    // Clear UI
-    this.renderer.clear();
-
+    // Reset UI
     broadcast(SCORE_UPDATE, 0);
     broadcast(LEVEL_UPDATE, 0);
     broadcast(LINES_UPDATE, 0);
@@ -412,10 +391,6 @@ export default class Game {
           this.livePiece.row = this.ghostPieceRow;
           this.lock();
         }
-        break;
-      case "Enter":
-        // Pause
-        this.stop();
         break;
       default:
         // Do nothing

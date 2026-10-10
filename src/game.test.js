@@ -13,10 +13,9 @@ import {
  * Test setup
  **/
 
-// Browser APIs still used by Game, stubbed for Node
+// Browser API still used by Game, stubbed for Node
 beforeAll(() => {
   globalThis.dispatchEvent = () => {}; // broadcast()
-  globalThis.requestAnimationFrame = () => {}; // frame()
 });
 
 // Piece indices in PIECES
@@ -28,11 +27,10 @@ function* repeat(...indices) {
   while (true) yield* indices;
 }
 
-// New game with no drawing, recording sounds in game.sounds
+// New game recording sounds in game.sounds
 function newGame({ level = 0, pieces = repeat(O) } = {}) {
   const sounds = [];
-  const renderer = { render() {}, clear() {} };
-  const game = new Game(renderer, (name) => sounds.push(name), level, pieces);
+  const game = new Game((name) => sounds.push(name), level, pieces);
   game.sounds = sounds;
   return game;
 }
