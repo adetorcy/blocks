@@ -22,12 +22,12 @@ import { sequence, broadcast, pieceFits } from "./utils";
  **/
 
 export default class Game {
-  constructor(renderer, sound, level = 0) {
+  constructor(renderer, sound, level = 0, pieceSequence = sequence()) {
     // Playfield
     this.board = new Uint8Array(BOARD_SIZE).fill(0);
 
     // Pseudo random integers between 0 and 6
-    this.sequence = sequence();
+    this.sequence = pieceSequence;
 
     // Draws game state
     this.renderer = renderer;
