@@ -69,6 +69,9 @@ function App() {
     if (menu) return;
 
     function pause() {
+      // Game over menu is on its way
+      if (gameRef.current.gameOver) return;
+
       loopRef.current.stop();
       setMenu("pause");
     }
@@ -79,6 +82,9 @@ function App() {
         event.preventDefault();
         return;
       }
+
+      // Game over, ignore input until the menu shows
+      if (gameRef.current.gameOver) return;
 
       // Pause
       if (event.code === "Enter") {
