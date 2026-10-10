@@ -22,11 +22,11 @@ function* repeat(...indices) {
   while (true) yield* indices;
 }
 
-// New game recording sounds in game.sounds
+// New game recording game events in game.gameEvents
 function newGame({ level = 0, pieces = repeat(O) } = {}) {
-  const sounds = [];
-  const game = new Game((name) => sounds.push(name), level, pieces);
-  game.sounds = sounds;
+  const gameEvents = [];
+  const game = new Game((name) => gameEvents.push(name), level, pieces);
+  game.gameEvents = gameEvents;
   return game;
 }
 
@@ -86,7 +86,7 @@ describe("hard drop", () => {
     expect(ghostRow).toBe(BOTTOM - 2);
     expect(cell(game, 4, BOTTOM)).toBe(2);
     expect(cell(game, 5, BOTTOM - 1)).toBe(2);
-    expect(game.sounds).toEqual(["lock"]);
+    expect(game.gameEvents).toEqual(["hardDrop", "lock"]);
   });
 
   it("spawns the next piece after ARE frames", () => {
@@ -96,6 +96,15 @@ describe("hard drop", () => {
     const n = framesUntil(game, () => game.livePiece !== null);
 
     expect(n).toBe(ARE[BOTTOM]);
+  });
+
+  it("does nothing without a live piece", () => {
+    const game = newGame();
+
+    game.onkeydown("Space");
+    game.onkeydown("Space"); // During ARE
+
+    expect(game.gameEvents).toEqual(["hardDrop", "lock"]);
   });
 });
 
@@ -123,7 +132,7 @@ describe("DAS", () => {
     // Wall stops it
     frames(game, DAS_FRAMES * 3);
     expect(game.livePiece.column).toBe(column - 4);
-    expect(game.sounds).toEqual(["tap", "tap", "tap", "tap"]);
+    expect(game.gameEvents).toEqual(["move", "move", "move", "move"]);
   });
 
   it("stops on key release", () => {
@@ -145,7 +154,7 @@ describe("line clears", () => {
 
     game.onkeydown("Space");
 
-    expect(game.sounds).toEqual(["clear"]);
+    expect(game.gameEvents).toEqual(["hardDrop", "lineClear"]);
     expect(game.getSnapshot()).toMatchObject({ score: 100, lines: 2 });
 
     // After the line clear animation the next piece spawns on an empty board
@@ -160,7 +169,7 @@ describe("line clears", () => {
     game.onkeydown("KeyX"); // Vertical I piece in column 5
     game.onkeydown("Space");
 
-    expect(game.sounds).toEqual(["tap", "clear4"]);
+    expect(game.gameEvents).toEqual(["rotate", "hardDrop", "tetris"]);
     expect(game.getSnapshot()).toMatchObject({ score: 1200 * 4, lines: 4 });
   });
 });
@@ -188,7 +197,7 @@ describe("level up", () => {
     expect(game.getSnapshot()).toMatchObject({ lines: 10, level: 1 });
     expect(game.delay).toBe(GRAVITY_TABLE[1]);
     expect(game.nextLevelUp).toBe(20);
-    expect(game.sounds).toEqual(["clear", "levelUp"]);
+    expect(game.gameEvents).toEqual(["hardDrop", "lineClear", "levelUp"]);
   });
 });
 
@@ -202,7 +211,7 @@ describe("game over", () => {
     framesUntil(game, () => game.getSnapshot().gameOver);
 
     expect(game.livePiece).not.toBeNull(); // Jammed piece
-    expect(game.sounds).toEqual(["lock", "buzz"]);
+    expect(game.gameEvents).toEqual(["hardDrop", "lock", "gameOver"]);
   });
 });
 

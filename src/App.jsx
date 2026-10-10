@@ -25,6 +25,17 @@ import {
   cleanupForKeyup,
 } from "./utils";
 
+// Sound effect for each game event
+const GAME_EVENT_SFX = {
+  move: SFX.tap,
+  rotate: SFX.tap,
+  lock: SFX.lock,
+  lineClear: SFX.clear,
+  tetris: SFX.clear4,
+  levelUp: SFX.levelUp,
+  gameOver: SFX.buzz,
+};
+
 function App() {
   // UI
   const [menu, setMenu] = useState("start");
@@ -39,6 +50,21 @@ function App() {
   const previewRef = useRef(null);
   const fpsRef = useRef(0);
 
+  // Callback to trigger effects not tied to game frames
+  const handleGameEvent = (name) => {
+    // Visual effects
+    if (name === "hardDrop") {
+      const gameArea = boardRef.current.parentElement;
+      gameArea.classList.add("slam");
+      setTimeout(() => {
+        gameArea.classList.remove("slam");
+      }, 200);
+    }
+
+    // Sound effects
+    if (GAME_EVENT_SFX[name]) play(GAME_EVENT_SFX[name]);
+  };
+
   // User action callbacks
   const showStartMenu = () => setMenu("start");
   const showControlsMenu = () => setMenu("controls");
@@ -48,7 +74,7 @@ function App() {
     setMenu(null);
   };
   const start = () => {
-    const newGame = new Game((name) => play(SFX[name]));
+    const newGame = new Game(handleGameEvent);
     loopRef.current = new Loop(
       newGame,
       new Renderer(boardRef.current, previewRef.current, fpsRef.current),
@@ -98,15 +124,6 @@ function App() {
 
       // Game
       if (game.onkeydown(event.code)) event.preventDefault();
-
-      // UI
-      if (event.code === "Space") {
-        const gameArea = boardRef.current.parentElement;
-        gameArea.classList.add("slam");
-        setTimeout(() => {
-          gameArea.classList.remove("slam");
-        }, 200);
-      }
     }
 
     function handleKeyup(event) {

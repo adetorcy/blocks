@@ -21,15 +21,16 @@ import { sequence, pieceFits } from "./utils";
  **/
 
 export default class Game {
-  constructor(sound, level = 0, pieceSequence = sequence()) {
+  constructor(onGameEvent, level = 0, pieceSequence = sequence()) {
     // Playfield
     this.board = new Uint8Array(BOARD_SIZE).fill(0);
 
     // Pseudo random integers between 0 and 6
     this.sequence = pieceSequence;
 
-    // Plays a sound effect by name
-    this.sound = sound;
+    // Reports game events by name (move, lock, tetris...)
+    // The UI decides what to do with them (sounds, visual effects)
+    this.onGameEvent = onGameEvent;
 
     // Initial values
     this.score = 0;
@@ -181,7 +182,7 @@ export default class Game {
 
       // Notify UI
       this.notify();
-      this.sound("buzz");
+      this.onGameEvent("gameOver");
     }
   }
 
@@ -236,7 +237,8 @@ export default class Game {
 
     // If no lines were cleared just set spawn delay
     if (!this.cleared.length) {
-      this.sound("lock");
+      // Lock without line clear, line clears have their own events
+      this.onGameEvent("lock");
       this.framesRemaining = ARE[row];
       return;
     }
@@ -251,9 +253,9 @@ export default class Game {
 
   reward(lines) {
     if (lines === 4) {
-      this.sound("clear4");
+      this.onGameEvent("tetris");
     } else {
-      this.sound("clear");
+      this.onGameEvent("lineClear");
     }
 
     // Score
@@ -265,7 +267,7 @@ export default class Game {
 
     // Level
     if (this.lines >= this.nextLevelUp) {
-      this.sound("levelUp");
+      this.onGameEvent("levelUp");
       this.level++;
       this.delay = GRAVITY_TABLE[this.level] || 1;
       this.nextLevelUp += 10;
@@ -317,7 +319,7 @@ export default class Game {
       const step = this.livePiece.step;
       this.livePiece.step = (this.livePiece.step + 1) % 4;
       if (pieceFits(this.board, this.livePiece)) {
-        this.sound("tap");
+        this.onGameEvent("rotate");
         this.setGhostPiece();
       } else {
         this.livePiece.step = step;
@@ -331,7 +333,7 @@ export default class Game {
       const step = this.livePiece.step;
       this.livePiece.step = (this.livePiece.step + 3) % 4;
       if (pieceFits(this.board, this.livePiece)) {
-        this.sound("tap");
+        this.onGameEvent("rotate");
         this.setGhostPiece();
       } else {
         this.livePiece.step = step;
@@ -343,7 +345,7 @@ export default class Game {
     if (this.livePiece) {
       this.livePiece.column--;
       if (pieceFits(this.board, this.livePiece)) {
-        this.sound("tap");
+        this.onGameEvent("move");
         this.setGhostPiece();
       } else {
         this.livePiece.column++;
@@ -355,7 +357,7 @@ export default class Game {
     if (this.livePiece) {
       this.livePiece.column++;
       if (pieceFits(this.board, this.livePiece)) {
-        this.sound("tap");
+        this.onGameEvent("move");
         this.setGhostPiece();
       } else {
         this.livePiece.column--;
@@ -405,6 +407,7 @@ export default class Game {
       case "Space":
         // Hard drop
         if (this.livePiece) {
+          this.onGameEvent("hardDrop");
           this.livePiece.row = this.ghostPieceRow;
           this.lock();
         }
