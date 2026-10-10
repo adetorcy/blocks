@@ -63,10 +63,15 @@ function App() {
     setMenu("start");
   };
 
-  // Listen for keyboard events, physical and on-screen
+  // Listen for keyboard events (physical and on-screen) and tab visibility
   useEffect(() => {
     // Only if game is running
     if (menu) return;
+
+    function pause() {
+      loopRef.current.stop();
+      setMenu("pause");
+    }
 
     function handleKeydown(event) {
       // Ignore auto-repeat from held keys, DAS handles held keys
@@ -78,9 +83,8 @@ function App() {
       // Pause
       if (event.code === "Enter") {
         event.preventDefault();
-        loopRef.current.stop();
         play(SFX.pause);
-        setMenu("pause");
+        pause();
         return;
       }
 
@@ -101,14 +105,22 @@ function App() {
       gameRef.current.keyup(event.code);
     }
 
+    // Auto-pause when the tab is hidden
+    // requestAnimationFrame stops in background tabs
+    function handleVisibilityChange() {
+      if (document.hidden) pause();
+    }
+
     // Add event listeners
     listenForKeydown(handleKeydown);
     listenForKeyup(handleKeyup);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       // Remove event listeners
       cleanupForKeydown(handleKeydown);
       cleanupForKeyup(handleKeyup);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [menu]);
 
