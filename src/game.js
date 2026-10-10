@@ -60,12 +60,41 @@ export default class Game {
 
     this.gameOver = false;
 
+    // UI subscribers and initial snapshot
+    this.listeners = new Set();
+    this.notify();
+
     // Get first 2 pieces
     this.livePiece = this.getPiece();
     this.nextPiece = this.getPiece();
 
     // Ghost piece
     this.setGhostPiece();
+  }
+
+  /**
+   * UI state for React (useSyncExternalStore)
+   * Arrow functions because React calls them unbound
+   **/
+
+  subscribe = (callback) => {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  };
+
+  // Same object until something changes
+  // React compares snapshots by reference and re-renders when they differ
+  getSnapshot = () => this.snapshot;
+
+  // New snapshot then tell subscribers
+  notify() {
+    this.snapshot = {
+      score: this.score,
+      lines: this.lines,
+      level: this.level,
+      gameOver: this.gameOver,
+    };
+    this.listeners.forEach((callback) => callback());
   }
 
   // Advance the game by one frame (run 60 times per second by the loop)
@@ -155,6 +184,7 @@ export default class Game {
       this.gameOver = true;
 
       // Notify UI
+      this.notify();
       broadcast(GAME_OVER);
       this.sound("buzz");
     }
@@ -255,6 +285,8 @@ export default class Game {
       this.delay = GRAVITY_TABLE[this.level] || 1;
       this.nextLevelUp += 10;
     }
+
+    this.notify();
   }
 
   lineClearAnimation() {

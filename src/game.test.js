@@ -212,3 +212,74 @@ describe("game over", () => {
     expect(game.sounds).toEqual(["lock", "buzz"]);
   });
 });
+
+describe("snapshot", () => {
+  it("starts with the starting level", () => {
+    expect(newGame({ level: 5 }).getSnapshot()).toEqual({
+      score: 0,
+      lines: 0,
+      level: 5,
+      gameOver: false,
+    });
+  });
+
+  it("notifies subscribers on line clear with a new snapshot", () => {
+    const game = newGame({ level: 8 });
+    fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]);
+    const before = game.getSnapshot();
+    let calls = 0;
+    game.subscribe(() => calls++);
+
+    game.onkeydown("Space");
+
+    expect(calls).toBe(1);
+    expect(game.getSnapshot()).not.toBe(before);
+    expect(game.getSnapshot()).toEqual({
+      score: 900,
+      lines: 2,
+      level: 8,
+      gameOver: false,
+    });
+  });
+
+  // useSyncExternalStore re-renders forever if the snapshot changes on every call
+  it("keeps the same object while nothing changes", () => {
+    const game = newGame();
+    const snapshot = game.getSnapshot();
+    let calls = 0;
+    game.subscribe(() => calls++);
+
+    game.onkeydown("ArrowLeft");
+    game.onkeydown("Space"); // Lock without line clear
+    frames(game, 100);
+
+    expect(calls).toBe(0);
+    expect(game.getSnapshot()).toBe(snapshot);
+  });
+
+  it("stops notifying after unsubscribe", () => {
+    const game = newGame();
+    fillRows(game, [BOTTOM], [4, 5]);
+    let calls = 0;
+    const unsubscribe = game.subscribe(() => calls++);
+
+    unsubscribe();
+    game.onkeydown("Space");
+
+    expect(calls).toBe(0);
+    expect(game.getSnapshot().lines).toBe(1);
+  });
+
+  it("reports game over", () => {
+    const game = newGame();
+    fillRows(game, Array.from({ length: ROWS - 4 }, (_, i) => i + 4), [0]);
+    let calls = 0;
+    game.subscribe(() => calls++);
+
+    game.onkeydown("Space");
+    framesUntil(game, () => game.gameOver);
+
+    expect(calls).toBe(1);
+    expect(game.getSnapshot().gameOver).toBe(true);
+  });
+});
