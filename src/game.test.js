@@ -146,8 +146,7 @@ describe("line clears", () => {
     game.onkeydown("Space");
 
     expect(game.sounds).toEqual(["clear"]);
-    expect(game.lines).toBe(2);
-    expect(game.score).toBe(100);
+    expect(game.getSnapshot()).toMatchObject({ score: 100, lines: 2 });
 
     // After the line clear animation the next piece spawns on an empty board
     framesUntil(game, () => game.livePiece !== null);
@@ -162,8 +161,7 @@ describe("line clears", () => {
     game.onkeydown("Space");
 
     expect(game.sounds).toEqual(["tap", "clear4"]);
-    expect(game.lines).toBe(4);
-    expect(game.score).toBe(1200 * 4);
+    expect(game.getSnapshot()).toMatchObject({ score: 1200 * 4, lines: 4 });
   });
 });
 
@@ -182,12 +180,12 @@ describe("level up", () => {
 
   it("speeds up gravity when reaching the line threshold", () => {
     const game = newGame();
-    game.lines = 8;
+    game.lines = 8; // Skip ahead, internal field
     fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]);
 
     game.onkeydown("Space");
 
-    expect(game.level).toBe(1);
+    expect(game.getSnapshot()).toMatchObject({ lines: 10, level: 1 });
     expect(game.delay).toBe(GRAVITY_TABLE[1]);
     expect(game.nextLevelUp).toBe(20);
     expect(game.sounds).toEqual(["clear", "levelUp"]);
@@ -201,7 +199,7 @@ describe("game over", () => {
     fillRows(game, Array.from({ length: ROWS - 4 }, (_, i) => i + 4), [0]);
 
     game.onkeydown("Space"); // Locks in the spawn area
-    framesUntil(game, () => game.gameOver);
+    framesUntil(game, () => game.getSnapshot().gameOver);
 
     expect(game.livePiece).not.toBeNull(); // Jammed piece
     expect(game.sounds).toEqual(["lock", "buzz"]);
@@ -272,7 +270,7 @@ describe("snapshot", () => {
     game.subscribe(() => calls++);
 
     game.onkeydown("Space");
-    framesUntil(game, () => game.gameOver);
+    framesUntil(game, () => game.getSnapshot().gameOver);
 
     expect(calls).toBe(1);
     expect(game.getSnapshot().gameOver).toBe(true);
