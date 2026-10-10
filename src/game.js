@@ -119,7 +119,7 @@ export default class Game {
     /**
      * Nothing else to do while we have frames to burn
      **/
-    if (this.framesRemaining--) return;
+    if (--this.framesRemaining > 0) return;
 
     /**
      * No more frames. One of the following happens:
