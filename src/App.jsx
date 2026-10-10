@@ -60,7 +60,6 @@ function App() {
   const quit = () => {
     loopRef.current.stop();
     loopRef.current.renderer.clear();
-    game.cleanup();
     loopRef.current = null;
     setGame(null);
     setMenu("start");

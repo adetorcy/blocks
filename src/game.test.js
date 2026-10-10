@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import Game from "./game";
 import {
   COLUMNS,
@@ -12,11 +12,6 @@ import {
 /**
  * Test setup
  **/
-
-// Browser API still used by Game, stubbed for Node
-beforeAll(() => {
-  globalThis.dispatchEvent = () => {}; // broadcast()
-});
 
 // Piece indices in PIECES
 const I = 0;

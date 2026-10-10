@@ -15,14 +15,6 @@ export function logBoard(board) {
   console.log(strings.join("\n").replaceAll("0", "."));
 }
 
-export function broadcast(event, value) {
-  dispatchEvent(
-    new CustomEvent(event, {
-      detail: value,
-    })
-  );
-}
-
 function blockFits(board, column, row) {
   return board[row * COLUMNS + column] === 0 && column >= 0 && column < COLUMNS;
 }

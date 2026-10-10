@@ -10,8 +10,7 @@ import {
   DAS_DELAY,
   DAS_FRAMES,
 } from "./constants";
-import { SCORE_UPDATE, LEVEL_UPDATE, LINES_UPDATE, GAME_OVER } from "./events";
-import { sequence, broadcast, pieceFits } from "./utils";
+import { sequence, pieceFits } from "./utils";
 
 /**  Useful links
  *
@@ -36,9 +35,6 @@ export default class Game {
     this.score = 0;
     this.lines = 0;
     this.level = level;
-
-    // Show starting level if not 0
-    if (level) broadcast(LEVEL_UPDATE, level);
 
     // Initial speed
     this.delay = GRAVITY_TABLE[level] || 1; // Frames between drops
@@ -185,16 +181,8 @@ export default class Game {
 
       // Notify UI
       this.notify();
-      broadcast(GAME_OVER);
       this.sound("buzz");
     }
-  }
-
-  cleanup() {
-    // Reset UI
-    broadcast(SCORE_UPDATE, 0);
-    broadcast(LEVEL_UPDATE, 0);
-    broadcast(LINES_UPDATE, 0);
   }
 
   getPiece() {
@@ -270,18 +258,15 @@ export default class Game {
 
     // Score
     // https://tetris.wiki/Scoring
-    broadcast(
-      SCORE_UPDATE,
-      (this.score += (this.level + 1) * [40, 100, 300, 1200][lines - 1]),
-    );
+    this.score += (this.level + 1) * [40, 100, 300, 1200][lines - 1];
 
     // Lines
-    broadcast(LINES_UPDATE, (this.lines += lines));
+    this.lines += lines;
 
     // Level
     if (this.lines >= this.nextLevelUp) {
       this.sound("levelUp");
-      broadcast(LEVEL_UPDATE, ++this.level);
+      this.level++;
       this.delay = GRAVITY_TABLE[this.level] || 1;
       this.nextLevelUp += 10;
     }
