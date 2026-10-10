@@ -4,7 +4,6 @@ import {
   PLAYFIELD_WIDTH,
   PREVIEW_BOX_SIZE,
 } from "./constants";
-import { GAME_OVER } from "./events";
 import Score from "./Score";
 import Level from "./Level";
 import Lines from "./Lines";
@@ -16,6 +15,7 @@ import TouchUI from "./TouchUI";
 import Game from "./game";
 import Renderer from "./renderer";
 import Loop from "./loop";
+import useGameSnapshot from "./useGameSnapshot";
 import SFX from "./sfx";
 import {
   play,
@@ -31,7 +31,9 @@ function App() {
   const [splash, setSplash] = useState(true);
 
   // Game
-  const gameRef = useRef(null);
+  // State so the snapshot hook resubscribes on start and quit
+  const [game, setGame] = useState(null);
+  const { score, lines, level, gameOver } = useGameSnapshot(game);
   const loopRef = useRef(null);
   const boardRef = useRef(null);
   const previewRef = useRef(null);
@@ -46,20 +48,21 @@ function App() {
     setMenu(null);
   };
   const start = () => {
-    gameRef.current = new Game((name) => play(SFX[name]));
+    const newGame = new Game((name) => play(SFX[name]));
     loopRef.current = new Loop(
-      gameRef.current,
+      newGame,
       new Renderer(boardRef.current, previewRef.current, fpsRef.current),
     );
     loopRef.current.start();
+    setGame(newGame);
     setMenu(null);
   };
   const quit = () => {
     loopRef.current.stop();
     loopRef.current.renderer.clear();
-    gameRef.current.cleanup();
+    game.cleanup();
     loopRef.current = null;
-    gameRef.current = null;
+    setGame(null);
     setMenu("start");
   };
 
@@ -70,7 +73,7 @@ function App() {
 
     function pause() {
       // Game over menu is on its way
-      if (gameRef.current.gameOver) return;
+      if (game.gameOver) return;
 
       loopRef.current.stop();
       setMenu("pause");
@@ -84,7 +87,7 @@ function App() {
       }
 
       // Game over, ignore input until the menu shows
-      if (gameRef.current.gameOver) return;
+      if (game.gameOver) return;
 
       // Pause
       if (event.code === "Enter") {
@@ -95,7 +98,7 @@ function App() {
       }
 
       // Game
-      if (gameRef.current.onkeydown(event.code)) event.preventDefault();
+      if (game.onkeydown(event.code)) event.preventDefault();
 
       // UI
       if (event.code === "Space") {
@@ -108,7 +111,7 @@ function App() {
     }
 
     function handleKeyup(event) {
-      gameRef.current.keyup(event.code);
+      game.keyup(event.code);
     }
 
     // Auto-pause when the tab is hidden
@@ -128,27 +131,21 @@ function App() {
       cleanupForKeyup(handleKeyup);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [menu]);
+  }, [menu, game]);
 
-  // Listen for game events
+  // Game over: vibrate then show menu
   useEffect(() => {
-    function handleGameOver() {
-      const gameArea = boardRef.current.parentElement;
-      gameArea.classList.add("vibrate");
-      setTimeout(() => {
-        gameArea.classList.remove("vibrate");
-        setMenu("gameOver");
-      }, 250);
-    }
+    if (!gameOver) return;
 
-    // Add event listener
-    window.addEventListener(GAME_OVER, handleGameOver);
+    const gameArea = boardRef.current.parentElement;
+    gameArea.classList.add("vibrate");
+    const timeoutID = setTimeout(() => {
+      gameArea.classList.remove("vibrate");
+      setMenu("gameOver");
+    }, 250);
 
-    return () => {
-      // Remove event listener
-      window.removeEventListener(GAME_OVER, handleGameOver);
-    };
-  }, []);
+    return () => clearTimeout(timeoutID);
+  }, [gameOver]);
 
   // One time splash screen effect
   useEffect(() => {
@@ -180,9 +177,9 @@ function App() {
         <div className="stack dashboard">
           <div className="stack cards">
             <div className="card stack score">
-              <Score />
-              <Lines />
-              <Level />
+              <Score score={score} />
+              <Lines lines={lines} />
+              <Level level={level} />
             </div>
             <div className="card stack preview">
               <div>NEXT</div>
