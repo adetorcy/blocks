@@ -7,6 +7,7 @@ import {
   ARE,
   DAS_DELAY,
   DAS_FRAMES,
+  LINE_CLEAR_STEP_FRAMES,
 } from "./constants";
 
 /**
@@ -160,6 +161,18 @@ describe("line clears", () => {
     // After the line clear animation the next piece spawns on an empty board
     framesUntil(game, () => game.livePiece !== null);
     expect(game.board.every((id) => id === 0)).toBe(true);
+    expect(game.gameEvents).toEqual(["hardDrop", "lineClear", "stackDrop"]);
+  });
+
+  it("drops the stack when the animation ends", () => {
+    const game = newGame();
+    fillRows(game, [BOTTOM], [4, 5]);
+
+    game.onkeydown("Space");
+    const n = framesUntil(game, () => game.gameEvents.includes("stackDrop"));
+
+    // 5 animation steps, then one more step before the rows are removed
+    expect(n).toBe(6 * LINE_CLEAR_STEP_FRAMES);
   });
 
   it("scores a tetris times level + 1", () => {

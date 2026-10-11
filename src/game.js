@@ -155,8 +155,11 @@ export default class Game {
       return;
     }
 
-    // Remove any cleared lines from the board
-    while (this.cleared.length) this.deleteLine(this.cleared.pop());
+    // Remove any cleared lines from the board, the stack drops
+    if (this.cleared.length) {
+      while (this.cleared.length) this.deleteLine(this.cleared.pop());
+      this.onGameEvent("stackDrop");
+    }
 
     // Step through piece sequence
     this.livePiece = this.nextPiece;

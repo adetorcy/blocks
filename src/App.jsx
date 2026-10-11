@@ -26,13 +26,14 @@ import {
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
-  move: "tap",
-  rotate: "tap",
+  move: "move",
+  rotate: "rotate",
   lock: "lock",
   lineClear: "clear",
-  tetris: "clear4",
+  tetris: "tetris",
   levelUp: "levelUp",
-  gameOver: "buzz",
+  stackDrop: "stackDrop",
+  gameOver: "gameOver",
 };
 
 function App() {
@@ -49,6 +50,10 @@ function App() {
   const previewRef = useRef(null);
   const fpsRef = useRef(0);
 
+  // Length of the last line clear or tetris sound
+  // Level up comes on the same frame and waits for it to end
+  const clearSoundLengthRef = useRef(0);
+
   // Callback to trigger effects not tied to game frames
   const handleGameEvent = (name) => {
     // Visual effects
@@ -61,7 +66,13 @@ function App() {
     }
 
     // Sound effects
-    if (GAME_EVENT_SFX[name]) playSound(GAME_EVENT_SFX[name]);
+    const sound = GAME_EVENT_SFX[name];
+    if (!sound) return;
+    const delay = name === "levelUp" ? clearSoundLengthRef.current : 0;
+    const length = playSound(sound, delay);
+    if (name === "lineClear" || name === "tetris") {
+      clearSoundLengthRef.current = length;
+    }
   };
 
   // User action callbacks

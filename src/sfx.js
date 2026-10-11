@@ -1,24 +1,51 @@
-// https://m2.material.io/design/sound/sound-resources.html
+/*** Sound Effects ***/
 
-import tap from "./audio/ui_tap-variant-01.wav";
-import lock from "./audio/ui_lock.wav";
-import clear from "./audio/hero_simple-celebration-03.wav";
-import clear4 from "./audio/hero_decorative-celebration-01.wav";
-import levelUp from "./audio/notification_ambient.wav";
-import pause from "./audio/state-change_confirm-up.wav";
-import resume from "./audio/state-change_confirm-down.wav";
-import buzz from "./audio/buzz.wav";
+// G5, kalimba
+import move from "./audio/move.wav";
+
+// G5 C6, kalimba
+import rotate from "./audio/rotate.wav";
+
+// C7 then G6, two 50% pulse ticks 15 ms apart
+import lock from "./audio/lock.wav";
+
+// C5 E5 G5 B5 D6 G6 arpeggio, marimba notes ringing over each other
+import clear from "./audio/clear.wav";
+
+// E. piano chords sliding up by half steps into Cmaj7, over a low brass bass
+// With a short SNES echo
+import tetris from "./audio/tetris.wav";
+
+// Soft e. piano Gadd9 chord, a glockenspiel B6 on top
+import levelUp from "./audio/level-up.wav";
+
+// Clatter: xylophone C4 A3 F3 within 25 ms over a dull thump of air noise
+import stackDrop from "./audio/stack-drop.wav";
+
+// Xylophone rattle during the board shake
+// Then glockenspiel Eb6 D6 Eb6 D6 Db6 C6 over e. piano (Cm, Ab, G)
+import gameOver from "./audio/game-over.wav";
+
+// G5 up to C6, kalimba over a soft e. piano C chord
+import pause from "./audio/pause.wav";
+
+// C6 down to G5, kalimba over a soft e. piano C chord
+import resume from "./audio/resume.wav";
 
 // Sound files and their volume
+// Balanced by loudness: tetris on top, then clear, level up and game over
+// Stack drop, pause and resume below, the frequent move, rotate and lock quietest
 const SFX = {
-  tap: [tap, 1],
-  lock: [lock, 1],
+  move: [move, 1],
+  rotate: [rotate, 0.8],
+  lock: [lock, 0.75],
   clear: [clear, 1],
-  clear4: [clear4, 1],
-  levelUp: [levelUp, 1],
-  pause: [pause, 1],
-  resume: [resume, 1],
-  buzz: [buzz, 0.5],
+  tetris: [tetris, 1],
+  levelUp: [levelUp, 0.85],
+  stackDrop: [stackDrop, 1.25],
+  gameOver: [gameOver, 0.8],
+  pause: [pause, 1.2],
+  resume: [resume, 1.2],
 };
 
 // Web Audio rather than <audio> elements
@@ -54,16 +81,17 @@ export function resumeAudio() {
   if (context.state !== "running") context.resume();
 }
 
-// Play a sound by name
-// Skipped if not decoded yet
-export function playSound(name) {
+// Play a sound by name, optionally delayed (ms)
+// Returns its length (ms), 0 if not decoded yet and skipped
+export function playSound(name, delay = 0) {
   const buffer = buffers[name];
-  if (!buffer) return;
+  if (!buffer) return 0;
 
   const source = context.createBufferSource();
   source.buffer = buffer;
   const gain = context.createGain();
   gain.gain.value = SFX[name][1];
   source.connect(gain).connect(context.destination);
-  source.start();
+  source.start(context.currentTime + delay / 1000);
+  return buffer.duration * 1000;
 }
