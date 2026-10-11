@@ -1,5 +1,6 @@
 import { COLUMNS, BOARD_SIZE } from "./constants";
 import { ONSCREEN_KEYDOWN, ONSCREEN_KEYUP } from "./events";
+import { CYAN, YELLOW, ORANGE, GREEN, MAGENTA, RED } from "./colors";
 
 export function padScore(score) {
   return score.toString().padStart(3, "0");
@@ -82,12 +83,12 @@ export function about() {
     `color: ${color}; font-weight: 900; font-size: 48px; text-shadow: 1px 1px 0 black;`;
 
   const styles = [
-    style("cyan"),
-    style("orange"),
-    style("lime"),
-    style("magenta"),
-    style("yellow"),
-    style("red"),
+    style(CYAN),
+    style(ORANGE),
+    style(GREEN),
+    style(MAGENTA),
+    style(YELLOW),
+    style(RED),
   ];
 
   console.log(

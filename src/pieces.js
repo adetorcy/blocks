@@ -1,4 +1,6 @@
-/*
+import { CYAN, YELLOW, BLUE, ORANGE, GREEN, MAGENTA, RED } from "./colors";
+
+/***
 
 https://harddrop.com/wiki/Nintendo_Rotation_System
 
@@ -12,11 +14,11 @@ with each rotation state made of 4 pairs of (x,y) coordinates
 
 List blocks top to bottom, left to right
 
-*/
+***/
 
 const I_PIECE = {
   id: 1,
-  color: "cyan",
+  color: CYAN,
   rotation: [
     [
       [0, 2],
@@ -50,7 +52,7 @@ const I_PIECE = {
 
 const O_PIECE = {
   id: 2,
-  color: "yellow",
+  color: YELLOW,
   rotation: [
     [
       [1, 1],
@@ -84,7 +86,7 @@ const O_PIECE = {
 
 const J_PIECE = {
   id: 3,
-  color: "blue",
+  color: BLUE,
   rotation: [
     [
       [0, 1],
@@ -118,7 +120,7 @@ const J_PIECE = {
 
 const L_PIECE = {
   id: 4,
-  color: "orange",
+  color: ORANGE,
   rotation: [
     [
       [0, 1],
@@ -152,7 +154,7 @@ const L_PIECE = {
 
 const S_PIECE = {
   id: 5,
-  color: "lime",
+  color: GREEN,
   rotation: [
     [
       [1, 1],
@@ -186,7 +188,7 @@ const S_PIECE = {
 
 const T_PIECE = {
   id: 6,
-  color: "magenta",
+  color: MAGENTA,
   rotation: [
     [
       [0, 1],
@@ -220,7 +222,7 @@ const T_PIECE = {
 
 const Z_PIECE = {
   id: 7,
-  color: "red",
+  color: RED,
   rotation: [
     [
       [0, 1],
