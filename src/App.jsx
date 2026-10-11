@@ -16,9 +16,8 @@ import Game from "./game";
 import Renderer from "./renderer";
 import Loop from "./loop";
 import useGameSnapshot from "./useGameSnapshot";
-import SFX from "./sfx";
+import { playSound, resumeAudio } from "./sfx";
 import {
-  play,
   listenForKeydown,
   listenForKeyup,
   cleanupForKeydown,
@@ -27,13 +26,13 @@ import {
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
-  move: SFX.tap,
-  rotate: SFX.tap,
-  lock: SFX.lock,
-  lineClear: SFX.clear,
-  tetris: SFX.clear4,
-  levelUp: SFX.levelUp,
-  gameOver: SFX.buzz,
+  move: "tap",
+  rotate: "tap",
+  lock: "lock",
+  lineClear: "clear",
+  tetris: "clear4",
+  levelUp: "levelUp",
+  gameOver: "buzz",
 };
 
 function App() {
@@ -62,18 +61,20 @@ function App() {
     }
 
     // Sound effects
-    if (GAME_EVENT_SFX[name]) play(GAME_EVENT_SFX[name]);
+    if (GAME_EVENT_SFX[name]) playSound(GAME_EVENT_SFX[name]);
   };
 
   // User action callbacks
   const showStartMenu = () => setMenu("start");
   const showControlsMenu = () => setMenu("controls");
   const resume = () => {
-    play(SFX.resume);
+    resumeAudio();
+    playSound("resume");
     loopRef.current.start();
     setMenu(null);
   };
   const start = () => {
+    resumeAudio();
     const newGame = new Game(handleGameEvent);
     loopRef.current = new Loop(
       newGame,
@@ -117,7 +118,7 @@ function App() {
       // Pause
       if (event.code === "Enter") {
         event.preventDefault();
-        play(SFX.pause);
+        playSound("pause");
         pause();
         return;
       }
