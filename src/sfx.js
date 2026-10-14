@@ -1,35 +1,35 @@
 /*** Sound Effects ***/
 
-// G5, kalimba
+// G5, GB wave
 import move from "./audio/move.wav";
 
-// G5 C6, kalimba
+// G5 C6, GB wave
 import rotate from "./audio/rotate.wav";
 
-// C7 then G6, two 50% pulse ticks 15 ms apart
+// Low thock, C4 dropping to G3 in 20 ms, GB wave
 import lock from "./audio/lock.wav";
 
-// C5 E5 G5 B5 D6 G6 arpeggio, marimba notes ringing over each other
+// C5 E5 G5 B5 D6 G6 arpeggio, GB wave
 import clear from "./audio/clear.wav";
 
-// E. piano chords sliding up by half steps into Cmaj7, over a low brass bass
-// With a short SNES echo
+// Ab Bb C, each chord struck twice, two organ voices
+// Triangle bass Ab3 Bb3 C4
 import tetris from "./audio/tetris.wav";
 
-// Soft e. piano Gadd9 chord, a glockenspiel B6 on top
+// C6 E6 G6 B6 arpeggio cycling every 60 ms and fading, GB wave
 import levelUp from "./audio/level-up.wav";
 
-// Clatter: xylophone C4 A3 F3 within 25 ms over a dull thump of air noise
+// Noise thump with a triangle dropping C4 to C3
 import stackDrop from "./audio/stack-drop.wav";
 
-// Xylophone rattle during the board shake
-// Then glockenspiel Eb6 D6 Eb6 D6 Db6 C6 over e. piano (Cm, Ab, G)
+// Noise crash then a noise rattle during the board shake
+// Then Eb5 D5 C5 B4 C5, GB wave, vibrato on C5, over a triangle bass C3 Ab2 G2 C3
 import gameOver from "./audio/game-over.wav";
 
-// G5 up to C6, kalimba over a soft e. piano C chord
+// G5 up to C6, GB wave
 import pause from "./audio/pause.wav";
 
-// C6 down to G5, kalimba over a soft e. piano C chord
+// C6 down to G5, GB wave
 import resume from "./audio/resume.wav";
 
 // Sound files and their volume
