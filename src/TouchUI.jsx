@@ -125,15 +125,25 @@ export default function TouchUI({ menu }) {
   return (
     <>
       {isVisible || (
-        <button className="icon-btn show-touch-ui-btn" onClick={toggleIsVisible}>
+        <button
+          className="icon-btn show-touch-ui-btn"
+          onClick={toggleIsVisible}
+        >
           <Icon path={mdiGestureTapButton} size={1} />
         </button>
       )}
-      <div className={isVisible ? "touch-ui visible" : "touch-ui"}>
+      <div
+        className={isVisible ? "touch-ui visible" : "touch-ui"}
+        // Inert when hidden so focus can't stay on a hidden button
+        // Avoids clicking button with Enter or Space at game over
+        inert={!isVisible}
+      >
         <div className="control-buttons">
           <div
             className={
-              controllerStyleLayout ? "arrow-buttons left" : "arrow-buttons right"
+              controllerStyleLayout
+                ? "arrow-buttons left"
+                : "arrow-buttons right"
             }
           >
             <MappedButton
@@ -190,7 +200,9 @@ export default function TouchUI({ menu }) {
           </div>
           <div
             className={
-              controllerStyleLayout ? "action-buttons right" : "action-buttons left"
+              controllerStyleLayout
+                ? "action-buttons right"
+                : "action-buttons left"
             }
           >
             <MappedButton
@@ -199,7 +211,11 @@ export default function TouchUI({ menu }) {
               ref={rotateLeftBtnRef}
             >
               <span className="touch-btn-front large">
-                <Icon className="touch-btn-icon" path={mdiRotateLeftVariant} size={1} />
+                <Icon
+                  className="touch-btn-icon"
+                  path={mdiRotateLeftVariant}
+                  size={1}
+                />
               </span>
             </MappedButton>
             <MappedButton
@@ -208,7 +224,11 @@ export default function TouchUI({ menu }) {
               ref={rotateRightBtnRef}
             >
               <span className="touch-btn-front large">
-                <Icon className="touch-btn-icon" path={mdiRotateRightVariant} size={1} />
+                <Icon
+                  className="touch-btn-icon"
+                  path={mdiRotateRightVariant}
+                  size={1}
+                />
               </span>
             </MappedButton>
             <MappedButton
@@ -217,11 +237,7 @@ export default function TouchUI({ menu }) {
               ref={hardDropBtnRef}
             >
               <span className="touch-btn-front large">
-                <Icon
-                  className="touch-btn-icon"
-                  path={mdiCheckBold}
-                  size={1}
-                />
+                <Icon className="touch-btn-icon" path={mdiCheckBold} size={1} />
               </span>
             </MappedButton>
           </div>
