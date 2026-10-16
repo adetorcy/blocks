@@ -140,6 +140,8 @@ export default function TouchUI({ menu }) {
         // Inert when hidden so focus can't stay on a hidden button
         // Avoids clicking button with Enter or Space at game over
         inert={!isVisible}
+        // A long press would open the context menu
+        onContextMenu={(event) => event.preventDefault()}
       >
         <div className="control-buttons">
           <div
