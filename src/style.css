@@ -12,9 +12,27 @@ body {
   overflow: hidden;
 }
 
+/* The game scales to fit this space (useFitScale) */
 #app {
+  position: fixed;
+  inset: 0;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+
+  /* Touch controls below */
+  &:has(.touch-ui.visible) {
+    bottom: 240px;
+  }
+
+  /* Touch controls on both sides (see TOUCH UI) */
+  @media (orientation: landscape) and (pointer: coarse) {
+    &:has(.touch-ui.visible) {
+      bottom: 0;
+      left: 184px;
+      right: 184px;
+    }
+  }
 }
 
 .game {
@@ -26,16 +44,8 @@ body {
   color: white;
   user-select: none;
   line-height: 1;
-
-  @media (width < 620px) or (height < 864px) {
-    transform-origin: top center;
-    transform: scale(0.75);
-  }
-
-  @media (width < 470px) or (height < 660px) {
-    transform-origin: top center;
-    transform: scale(0.5);
-  }
+  transform-origin: top center;
+  transform: scale(var(--scale, 1));
 }
 
 /**********/
@@ -139,7 +149,7 @@ body {
 .touch-ui {
   box-sizing: border-box;
   position: fixed;
-  bottom: -240px;
+  bottom: 0;
   height: 240px;
   width: 100%;
 
@@ -148,18 +158,48 @@ body {
   row-gap: 24px;
 
   padding: 16px 12px 0;
-  transition: bottom 0.2s linear;
+
+  /* Hidden below the screen */
+  transform: translateY(100%);
+  transition: transform 0.2s linear;
 
   /* No browser gestures on the controls */
-  /* Fast taps would zoom, a held button would select or open a callout */
+  /* Fast taps would zoom and a held button would select or open a callout */
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+
+  /* Landscape on a touch device: buttons on both sides of the game */
+  /* Covers the whole screen but taps outside the buttons reach the game */
+  @media (orientation: landscape) and (pointer: coarse) {
+    top: 0;
+    height: auto;
+    justify-content: center;
+    padding-top: 48px;
+    pointer-events: none;
+
+    button {
+      pointer-events: auto;
+    }
+
+    /* Swap and hide top left and pause top right, away from the thumbs */
+    .system-buttons {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      justify-content: flex-start;
+
+      > :last-child {
+        margin-left: auto;
+      }
+    }
+  }
 }
 
 .touch-ui.visible {
-  bottom: 0;
+  transform: none;
 }
 
 .show-touch-ui-btn {

@@ -16,6 +16,7 @@ import Game from "./game";
 import Renderer from "./renderer";
 import Loop from "./loop";
 import useGameSnapshot from "./useGameSnapshot";
+import useFitScale from "./useFitScale";
 import { playSound, resumeAudio } from "./sfx";
 import {
   listenForKeydown,
@@ -40,6 +41,8 @@ function App() {
   // UI
   const [menu, setMenu] = useState("start");
   const [splash, setSplash] = useState(true);
+  const shellRef = useRef(null);
+  useFitScale(shellRef, !splash);
 
   // Game
   // State so the snapshot hook resubscribes on start and quit
@@ -184,7 +187,7 @@ function App() {
 
   return (
     <>
-      <div className={menu ? "game" : "game nocursor"}>
+      <div ref={shellRef} className={menu ? "game" : "game nocursor"}>
         <div className="card gamearea">
           <canvas
             ref={boardRef}
