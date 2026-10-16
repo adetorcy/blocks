@@ -13,7 +13,10 @@ import {
 import { dispatchKeyDown, dispatchKeyUp } from "./utils";
 
 export default function TouchUI({ menu }) {
-  const [isVisible, setIsVisible] = useState(false);
+  // On by default on touch devices
+  const [isVisible, setIsVisible] = useState(
+    () => window.matchMedia("(pointer: coarse)").matches,
+  );
   const [controllerStyleLayout, setControllerStyleLayout] = useState(true); // D-pad on the left
 
   // On-screen button references
