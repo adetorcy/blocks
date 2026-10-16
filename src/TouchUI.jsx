@@ -7,6 +7,7 @@ import {
   mdiPauseCircleOutline,
   mdiPlay,
   mdiCheckBold,
+  mdiArrowCollapseDown,
   mdiRotateLeftVariant,
   mdiRotateRightVariant,
 } from "@mdi/js";
@@ -242,7 +243,12 @@ export default function TouchUI({ menu }) {
               ref={hardDropBtnRef}
             >
               <span className="touch-btn-front large">
-                <Icon className="touch-btn-icon" path={mdiCheckBold} size={1} />
+                {/* Space confirms in menus and hard drops in game */}
+                <Icon
+                  className="touch-btn-icon"
+                  path={menu ? mdiCheckBold : mdiArrowCollapseDown}
+                  size={1}
+                />
               </span>
             </MappedButton>
           </div>
