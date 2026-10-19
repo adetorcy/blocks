@@ -20,6 +20,11 @@ export default function PauseMenu({ resume, quit }) {
           if (!event.repeat) selectedRef.current.click();
           event.preventDefault();
           break;
+        case "KeyZ":
+          // B goes back to the game
+          if (!event.repeat) resume();
+          event.preventDefault();
+          break;
       }
     }
 

@@ -14,6 +14,11 @@ export default function ControlsMenu({ showStartMenu }) {
           if (!event.repeat) selectedRef.current.click();
           event.preventDefault();
           break;
+        case "KeyZ":
+          // B goes back to the start menu
+          if (!event.repeat) showStartMenu();
+          event.preventDefault();
+          break;
       }
     }
 
