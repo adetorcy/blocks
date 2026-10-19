@@ -89,6 +89,6 @@ export function about() {
   console.log(
     "%cB%cL%cO%cC%cK%cS",
     ...styles,
-    `\n\nversion ${import.meta.env.VITE_APP_VERSION}\n\nadt 2024`,
+    `\n\nv${import.meta.env.VITE_APP_VERSION}`,
   );
 }
