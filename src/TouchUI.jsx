@@ -64,8 +64,10 @@ export default function TouchUI({ menu }) {
         // A long press would open the context menu
         onContextMenu={(event) => event.preventDefault()}
       >
-        <div className="control-buttons">
+        <div className="grip left">
           <DPad />
+        </div>
+        <div className="grip right">
           <div className="face">
             <ActionButtons />
             <MappedButton className="start-btn" code="Enter" ref={startBtnRef}>

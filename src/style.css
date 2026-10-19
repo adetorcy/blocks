@@ -18,9 +18,12 @@
 :root {
   --print: "Barlow Semi Condensed", sans-serif;
 
-  /* Touch controls: outlines and letters, the fill of a held control, labels */
+  /* Touch controls */
+  /* Outlines and button letters */
   --stroke: oklch(0.3 0 0);
+  /* Fill while a control is pressed */
   --pressed: oklch(0.92 0 0);
+  /* START and Hide controls labels */
   --ink: oklch(0.45 0 0);
 }
 
@@ -43,7 +46,7 @@ body {
 
   /* Touch controls below */
   &:has(.touch-ui.visible) {
-    bottom: 240px;
+    bottom: 248px;
   }
 
   /* Touch controls on both sides (see TOUCH UI) */
@@ -157,18 +160,11 @@ body {
 /*** TOUCH UI ***/
 /****************/
 
+/* Covers the whole screen but taps outside the controls reach the game */
 .touch-ui {
-  box-sizing: border-box;
   position: fixed;
-  bottom: 0;
-  height: 240px;
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-  row-gap: 24px;
-
-  padding: 16px 12px 0;
+  inset: 0;
+  pointer-events: none;
 
   /* Hidden below the screen */
   transform: translateY(100%);
@@ -181,18 +177,8 @@ body {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 
-  /* Landscape on a touch device: buttons on both sides of the game */
-  /* Covers the whole screen but taps outside the buttons reach the game */
-  @media (orientation: landscape) and (pointer: coarse) {
-    top: 0;
-    height: auto;
-    justify-content: center;
-    padding-top: 48px;
-    pointer-events: none;
-
-    :is(button, .dpad, .action-buttons) {
-      pointer-events: auto;
-    }
+  :is(button, .dpad, .action-buttons) {
+    pointer-events: auto;
   }
 }
 
@@ -200,10 +186,35 @@ body {
   transform: none;
 }
 
-.control-buttons {
+/* Where each thumb rests, D-pad on the left and buttons on the right */
+/* Controls stay within thumb reach of the bottom corners on any screen */
+/* If that leaves a gap between them and the game, so be it */
+/* Group centers at most 130px from the sides and 144px up */
+.grip {
+  position: absolute;
+  top: calc(100% - 240px);
+  bottom: 48px;
+  width: min(50%, 260px);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+
+  /* Landscape on a touch device: on both sides of the game */
+  /* In the lower 320px, about 180px up on any height */
+  /* The bottom 44px stay clear for Hide controls however short the screen */
+  @media (orientation: landscape) and (pointer: coarse) {
+    top: max(0px, calc(100% - 320px));
+    bottom: 44px;
+    width: 184px;
+  }
+}
+
+.grip.left {
+  left: 0;
+}
+
+.grip.right {
+  right: 0;
 }
 
 /* Hide controls: bottom middle, bottom left corner in landscape */
