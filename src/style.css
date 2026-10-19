@@ -50,7 +50,7 @@ body {
   }
 
   /* Touch controls on both sides (see TOUCH UI) */
-  @media (orientation: landscape) and (pointer: coarse) {
+  @media (orientation: landscape) {
     &:has(.touch-ui.visible) {
       bottom: 0;
       left: 184px;
@@ -206,10 +206,11 @@ body {
   justify-content: center;
   align-items: center;
 
-  /* Landscape on a touch device: on both sides of the game */
+  /* Landscape: on both sides of the game, with any pointer */
+  /* The game is taller than wide so side columns cost it less than a bottom band */
   /* In the lower 320px, about 180px up on any height */
   /* The bottom 44px stay clear for Hide controls however short the screen */
-  @media (orientation: landscape) and (pointer: coarse) {
+  @media (orientation: landscape) {
     top: max(0px, calc(100% - 320px));
     bottom: 44px;
     width: 184px;
@@ -274,7 +275,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
 
-  @media (orientation: landscape) and (pointer: coarse) {
+  @media (orientation: landscape) {
     bottom: 2px;
     left: 4px;
     transform: none;
