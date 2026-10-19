@@ -18,12 +18,7 @@ import Loop from "./loop";
 import useGameSnapshot from "./useGameSnapshot";
 import useFitScale from "./useFitScale";
 import { playSound, resumeAudio } from "./sfx";
-import {
-  listenForKeydown,
-  listenForKeyup,
-  cleanupForKeydown,
-  cleanupForKeyup,
-} from "./utils";
+import { listenForKeydown, listenForKeyup } from "./utils";
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
@@ -151,15 +146,13 @@ function App() {
       if (document.hidden) pause();
     }
 
-    // Add event listeners
-    listenForKeydown(handleKeydown);
-    listenForKeyup(handleKeyup);
+    const stopKeydown = listenForKeydown(handleKeydown);
+    const stopKeyup = listenForKeyup(handleKeyup);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      // Remove event listeners
-      cleanupForKeydown(handleKeydown);
-      cleanupForKeyup(handleKeyup);
+      stopKeydown();
+      stopKeyup();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [menu, game]);

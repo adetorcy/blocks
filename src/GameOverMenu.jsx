@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { listenForKeydown, cleanupForKeydown } from "./utils";
+import { listenForKeydown } from "./utils";
 
 export default function GameOverMenu({ quit }) {
   const selectedRef = useRef(null);
@@ -17,13 +17,7 @@ export default function GameOverMenu({ quit }) {
       }
     }
 
-    // Add event listeners
-    listenForKeydown(handleKeydown);
-
-    return () => {
-      // Remove event listeners
-      cleanupForKeydown(handleKeydown);
-    };
+    return listenForKeydown(handleKeydown);
   }, []);
 
   return (

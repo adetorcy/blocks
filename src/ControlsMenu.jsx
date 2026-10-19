@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { listenForKeydown, cleanupForKeydown } from "./utils";
+import { listenForKeydown } from "./utils";
 
 export default function ControlsMenu({ showStartMenu }) {
   const selectedRef = useRef(null);
@@ -22,13 +22,7 @@ export default function ControlsMenu({ showStartMenu }) {
       }
     }
 
-    // Add event listeners
-    listenForKeydown(handleKeydown);
-
-    return () => {
-      // Remove event listeners
-      cleanupForKeydown(handleKeydown);
-    };
+    return listenForKeydown(handleKeydown);
   }, [showStartMenu]);
 
   return (

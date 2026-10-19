@@ -34,24 +34,26 @@ export function dispatchKeyUp(options) {
   dispatchEvent(new KeyboardEvent(ONSCREEN_KEYUP, options));
 }
 
+// Physical and on-screen keys share one handler
+// Returns the cleanup, so an effect can return it as is
 export function listenForKeydown(handleKeydown) {
   window.addEventListener("keydown", handleKeydown);
   window.addEventListener(ONSCREEN_KEYDOWN, handleKeydown);
-}
 
-export function cleanupForKeydown(handleKeydown) {
-  window.removeEventListener("keydown", handleKeydown);
-  window.removeEventListener(ONSCREEN_KEYDOWN, handleKeydown);
+  return () => {
+    window.removeEventListener("keydown", handleKeydown);
+    window.removeEventListener(ONSCREEN_KEYDOWN, handleKeydown);
+  };
 }
 
 export function listenForKeyup(handleKeyup) {
   window.addEventListener("keyup", handleKeyup);
   window.addEventListener(ONSCREEN_KEYUP, handleKeyup);
-}
 
-export function cleanupForKeyup(handleKeyup) {
-  window.removeEventListener("keyup", handleKeyup);
-  window.removeEventListener(ONSCREEN_KEYUP, handleKeyup);
+  return () => {
+    window.removeEventListener("keyup", handleKeyup);
+    window.removeEventListener(ONSCREEN_KEYUP, handleKeyup);
+  };
 }
 
 // Rough simulation of the piece selection algorithm

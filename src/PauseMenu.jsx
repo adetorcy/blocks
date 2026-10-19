@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { listenForKeydown, cleanupForKeydown } from "./utils";
+import { listenForKeydown } from "./utils";
 
 export default function PauseMenu({ resume, quit }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -28,13 +28,7 @@ export default function PauseMenu({ resume, quit }) {
       }
     }
 
-    // Add event listeners
-    listenForKeydown(handleKeydown);
-
-    return () => {
-      // Remove event listeners
-      cleanupForKeydown(handleKeydown);
-    };
+    return listenForKeydown(handleKeydown);
   }, [resume]);
 
   // Array of callback-label pairs
