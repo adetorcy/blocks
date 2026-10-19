@@ -300,14 +300,17 @@ body {
   transform: translate(-50%, -50%);
   border-radius: 50%;
   box-shadow: inset 0 0 0 2px var(--stroke);
-  display: grid;
-  place-items: center;
   font-family: var(--print);
   font-style: italic;
   font-weight: 700;
   font-size: 26px;
   line-height: 1;
   color: var(--stroke);
+  /* Centre the capital itself, not the line box with room for descenders */
+  /* A block, not a grid: the trim only applies to a block's own lines */
+  text-box: trim-both cap alphabetic;
+  align-content: center;
+  text-align: center;
 }
 
 .action-button[data-pressed] {
