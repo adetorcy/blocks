@@ -218,7 +218,11 @@ describe("game over", () => {
   it("ends when the next piece can't spawn", () => {
     const game = newGame();
     // Stack up to just below the spawn area, no full lines
-    fillRows(game, Array.from({ length: ROWS - 4 }, (_, i) => i + 4), [0]);
+    fillRows(
+      game,
+      Array.from({ length: ROWS - 4 }, (_, i) => i + 4),
+      [0],
+    );
 
     game.onkeydown("Space"); // Locks in the spawn area
     framesUntil(game, () => game.getSnapshot().gameOver);
@@ -287,7 +291,11 @@ describe("snapshot", () => {
 
   it("reports game over", () => {
     const game = newGame();
-    fillRows(game, Array.from({ length: ROWS - 4 }, (_, i) => i + 4), [0]);
+    fillRows(
+      game,
+      Array.from({ length: ROWS - 4 }, (_, i) => i + 4),
+      [0],
+    );
     let calls = 0;
     game.subscribe(() => calls++);
 

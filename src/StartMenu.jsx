@@ -54,7 +54,7 @@ export default function StartMenu({ showControlsMenu, start }) {
           <div className="menu-option" key={i} onClick={callback}>
             {label}
           </div>
-        )
+        ),
       )}
     </div>
   );

@@ -59,7 +59,7 @@ export default function PauseMenu({ resume, quit }) {
           <div className="menu-option" key={i} onClick={callback}>
             {label}
           </div>
-        )
+        ),
       )}
     </div>
   );

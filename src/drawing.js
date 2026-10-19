@@ -9,7 +9,7 @@ import {
 import PIECES from "./pieces";
 
 const colors = Object.fromEntries(
-  PIECES.map((piece) => [piece.id, piece.color])
+  PIECES.map((piece) => [piece.id, piece.color]),
 );
 
 // Draw a single block
@@ -50,7 +50,7 @@ export function drawJammedPiece(ctx, piece) {
     drawBlock(
       ctx,
       (piece.column + x) * BLOCK_SIZE,
-      (piece.row + y - 2) * BLOCK_SIZE
+      (piece.row + y - 2) * BLOCK_SIZE,
     );
   });
 }
@@ -70,7 +70,7 @@ export function drawPreview(ctx, piece) {
     drawBlock(
       ctx,
       (piece.offset[0] + x) * BLOCK_SIZE,
-      (piece.offset[1] + y) * BLOCK_SIZE
+      (piece.offset[1] + y) * BLOCK_SIZE,
     );
   });
 }
