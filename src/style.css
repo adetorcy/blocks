@@ -3,6 +3,22 @@
   src: local("Blocks"), url("./fonts/Blocks6px-Regular.ttf");
 }
 
+/* Font for the touch control labels */
+/* We trimmed it to just what we need: capital letters and space */
+/* pyftsubset BarlowSemiCondensed-BoldItalic.ttf --unicodes="U+0020,U+0041-005A" --name-IDs="*" --flavor=woff2 */
+/* --name-IDs="*" keeps all the metadata including license notice */
+/* https://github.com/google/fonts/tree/main/ofl/barlowsemicondensed */
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  src: url("./fonts/BarlowSemiCondensed-BoldItalic-caps.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+}
+
+:root {
+  --print: "Barlow Semi Condensed", sans-serif;
+}
+
 html {
   font-family: "Blocks";
 }
