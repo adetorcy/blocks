@@ -28,11 +28,11 @@ const ARMS = {
 };
 
 // One-piece D-pad
-// The whole square is the touch area, split by angle around the centre
+// The whole square is the touch area, split by angle around the center
 // So there's no gap between arrows and the thumb can slide from one to the next
 // Sliding releases the old arrow key and presses the new one
 // The pointer is captured so the thumb can drift off the square
-export default function DPad({ className }) {
+export default function DPad() {
   // Direction shown pressed, from touch or a physical arrow key
   const [direction, setDirection] = useState(null);
 
@@ -109,7 +109,7 @@ export default function DPad({ className }) {
 
   return (
     <div
-      className={`dpad ${className}`}
+      className="dpad"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}

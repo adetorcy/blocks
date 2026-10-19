@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { dispatchKeyDown, dispatchKeyUp } from "./utils";
 
 // A hard drops (and confirms in menus), B rotates left
-// Centres in a 132 box, on a 45° line with B low on the left like a Game Boy
+// Centers in a 132 box, on a 45° line with B low on the left like a Game Boy
 const BUTTONS = [
   { name: "B", code: "KeyZ", x: 36, y: 96 },
   { name: "A", code: "Space", x: 96, y: 36 },
@@ -18,10 +18,10 @@ const NAMES = Object.fromEntries(BUTTONS.map(({ name, code }) => [code, name]));
 
 // A and B buttons
 // One touch area for the group, reaching a little past the buttons
-// A touch goes to the nearest button centre, if it's within reach
+// A touch goes to the nearest button center, if it's within reach
 // The button is picked when the finger lands and kept until it lifts
 // Each finger is tracked on its own, a button held by two fingers is one key press
-export default function ActionButtons({ className }) {
+export default function ActionButtons() {
   // Buttons shown pressed, from touch or physical keys
   const [pressed, setPressed] = useState({});
 
@@ -101,7 +101,7 @@ export default function ActionButtons({ className }) {
 
   return (
     <div
-      className={`action-buttons ${className}`}
+      className="action-buttons"
       // Touch area past the box, without taking room in the layout
       style={{ padding: REACH, margin: -REACH }}
       onPointerDown={handlePointerDown}

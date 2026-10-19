@@ -18,9 +18,10 @@
 :root {
   --print: "Barlow Semi Condensed", sans-serif;
 
-  /* Touch controls: outlines, and the fill of a held control */
+  /* Touch controls: outlines and letters, the fill of a held control, labels */
   --stroke: oklch(0.3 0 0);
   --pressed: oklch(0.92 0 0);
+  --ink: oklch(0.45 0 0);
 }
 
 html {
@@ -110,16 +111,6 @@ body {
   }
 }
 
-.icon-btn {
-  box-sizing: border-box;
-  width: 40px;
-  height: 30px;
-  border: none;
-  outline: none;
-  background-color: inherit;
-  cursor: pointer;
-}
-
 .vibrate {
   animation-name: vibrate;
   animation-duration: 250ms;
@@ -202,19 +193,6 @@ body {
     :is(button, .dpad, .action-buttons) {
       pointer-events: auto;
     }
-
-    /* Swap and hide top left and pause top right, away from the thumbs */
-    .system-buttons {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      justify-content: flex-start;
-
-      > :last-child {
-        margin-left: auto;
-      }
-    }
   }
 }
 
@@ -222,33 +200,35 @@ body {
   transform: none;
 }
 
+.control-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Hide controls: bottom middle, bottom left corner in landscape */
+/* Show controls takes the same spot once hidden */
+.hide-touch-ui-btn {
+  position: absolute;
+}
+
 .show-touch-ui-btn {
   position: fixed;
-  left: 0;
-  right: 0;
+}
+
+.touch-ui.visible + .show-touch-ui-btn {
+  visibility: hidden;
+}
+
+:is(.hide-touch-ui-btn, .show-touch-ui-btn) {
   bottom: 6px;
-  margin: 0 auto;
-}
+  left: 50%;
+  transform: translateX(-50%);
 
-.system-buttons {
-  display: flex;
-  justify-content: center;
-  column-gap: 24px;
-}
-
-.control-buttons {
-  display: grid;
-  grid-template-areas: "left right";
-  gap: 16px;
-
-  > .left {
-    grid-area: left;
-    justify-self: start;
-  }
-
-  > .right {
-    grid-area: right;
-    justify-self: end;
+  @media (orientation: landscape) and (pointer: coarse) {
+    bottom: 2px;
+    left: 4px;
+    transform: none;
   }
 }
 
@@ -283,7 +263,7 @@ body {
   fill: var(--pressed);
 }
 
-/* Touch area, sizes and button centres come from ActionButtons */
+/* Touch area, sizes and button centers come from ActionButtons */
 .action-buttons {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -306,7 +286,7 @@ body {
   font-size: 26px;
   line-height: 1;
   color: var(--stroke);
-  /* Centre the capital itself, not the line box with room for descenders */
+  /* Center the capital itself, not the line box with room for descenders */
   /* A block, not a grid: the trim only applies to a block's own lines */
   text-box: trim-both cap alphabetic;
   align-content: center;
@@ -317,40 +297,82 @@ body {
   background: var(--pressed);
 }
 
-.touch-btn {
-  background: hsl(240, 50%, 40%);
-  border-radius: 6px;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  outline: none;
+/* START: just above B and left of A, within reach of the right thumb */
+.face {
+  position: relative;
 }
 
-.touch-btn-front {
-  display: block;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: hsl(240, 50%, 60%);
-  color: white;
-  transform: translateY(-6px);
+.start-btn {
+  position: absolute;
+  top: -14px;
+  left: -10px;
+  width: 58px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* Smaller and secondary, so a thinner outline */
+.start-btn-pill {
+  width: 46px;
+  height: 18px;
+  border-radius: 9px;
+  box-shadow: inset 0 0 0 1.5px var(--stroke);
 }
 
 /* Actual or simulated active state */
-:is(.touch-btn:active, .touch-btn.active) .touch-btn-front {
-  transform: translateY(-2px);
+:is(.start-btn:active, .start-btn.active) .start-btn-pill {
+  background: var(--pressed);
 }
 
-.touch-btn-icon {
-  vertical-align: middle;
+/* START and Hide controls: no button look, just the words */
+:is(.start-btn, .text-btn) {
+  border: none;
+  background: none;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+  font-family: var(--print);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--ink);
 }
 
-.touch-btn.system {
-  background: hsl(0, 0%, 60%);
+/* Padded to a thumb-sized target */
+.text-btn {
+  padding: 14px 12px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.touch-btn-front.system {
-  background: hsl(0, 0%, 85%);
-  color: black;
+.text-btn:active {
+  color: var(--stroke);
+}
+
+/* Chevron from two borders of a turned square, down to hide, up to show */
+/* The label font has none and fallback fonts differ per device */
+.text-btn::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid;
+  border-bottom: 2px solid;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.show-touch-ui-btn::after {
+  transform: translateY(2px) rotate(-135deg);
 }
 
 /*****************/
