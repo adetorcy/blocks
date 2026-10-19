@@ -199,7 +199,7 @@ body {
     padding-top: 48px;
     pointer-events: none;
 
-    :is(button, .dpad) {
+    :is(button, .dpad, .action-buttons) {
       pointer-events: auto;
     }
 
@@ -283,25 +283,35 @@ body {
   fill: var(--pressed);
 }
 
+/* Touch area, sizes and button centres come from ActionButtons */
 .action-buttons {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.action-buttons-box {
+  position: relative;
+  width: 132px;
+  height: 132px;
+}
+
+.action-button {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--stroke);
   display: grid;
-  align-items: center;
-  gap: 24px;
-  grid-template-areas:
-    "z x"
-    "d d";
+  place-items: center;
+  font-family: var(--print);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--stroke);
 }
 
-.ccw-btn {
-  grid-area: z;
-}
-
-.cw-btn {
-  grid-area: x;
-}
-
-.drop-btn {
-  grid-area: d;
+.action-button[data-pressed] {
+  background: var(--pressed);
 }
 
 .touch-btn {
@@ -338,10 +348,6 @@ body {
 .touch-btn-front.system {
   background: hsl(0, 0%, 85%);
   color: black;
-}
-
-.touch-btn-front.large {
-  padding: 12px 14px;
 }
 
 /*****************/

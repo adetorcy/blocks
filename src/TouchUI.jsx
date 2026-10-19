@@ -5,11 +5,8 @@ import {
   mdiDesktopTowerMonitor,
   mdiSwapHorizontal,
   mdiPauseCircleOutline,
-  mdiCheckBold,
-  mdiArrowCollapseDown,
-  mdiRotateLeftVariant,
-  mdiRotateRightVariant,
 } from "@mdi/js";
+import ActionButtons from "./ActionButtons";
 import DPad from "./DPad";
 import { dispatchKeyDown, dispatchKeyUp } from "./utils";
 
@@ -22,9 +19,6 @@ export default function TouchUI({ menu }) {
 
   // On-screen button references
   const pauseBtnRef = useRef(null);
-  const rotateLeftBtnRef = useRef(null);
-  const rotateRightBtnRef = useRef(null);
-  const hardDropBtnRef = useRef(null);
 
   // Pause button highlight: Enter is held and the game pauses or resumes
   const enterDownRef = useRef(false);
@@ -41,15 +35,6 @@ export default function TouchUI({ menu }) {
   useEffect(() => {
     function handleKeydown(event) {
       switch (event.code) {
-        case "KeyZ":
-          rotateLeftBtnRef.current.classList.add("active");
-          break;
-        case "KeyX":
-          rotateRightBtnRef.current.classList.add("active");
-          break;
-        case "Space":
-          hardDropBtnRef.current.classList.add("active");
-          break;
         case "Enter":
           // Highlight is added when the game pauses or resumes, see below
           enterDownRef.current = true;
@@ -59,15 +44,6 @@ export default function TouchUI({ menu }) {
 
     function handleKeyup(event) {
       switch (event.code) {
-        case "KeyZ":
-          rotateLeftBtnRef.current.classList.remove("active");
-          break;
-        case "KeyX":
-          rotateRightBtnRef.current.classList.remove("active");
-          break;
-        case "Space":
-          hardDropBtnRef.current.classList.remove("active");
-          break;
         case "Enter":
           enterDownRef.current = false;
           pauseBtnRef.current.classList.remove("active");
@@ -118,54 +94,7 @@ export default function TouchUI({ menu }) {
       >
         <div className="control-buttons">
           <DPad className={controllerStyleLayout ? "left" : "right"} />
-          <div
-            className={
-              controllerStyleLayout
-                ? "action-buttons right"
-                : "action-buttons left"
-            }
-          >
-            <MappedButton
-              className="touch-btn ccw-btn"
-              code="KeyZ"
-              ref={rotateLeftBtnRef}
-            >
-              <span className="touch-btn-front large">
-                <Icon
-                  className="touch-btn-icon"
-                  path={mdiRotateLeftVariant}
-                  size={1}
-                />
-              </span>
-            </MappedButton>
-            <MappedButton
-              className="touch-btn cw-btn"
-              code="KeyX"
-              ref={rotateRightBtnRef}
-            >
-              <span className="touch-btn-front large">
-                <Icon
-                  className="touch-btn-icon"
-                  path={mdiRotateRightVariant}
-                  size={1}
-                />
-              </span>
-            </MappedButton>
-            <MappedButton
-              className="touch-btn drop-btn"
-              code="Space"
-              ref={hardDropBtnRef}
-            >
-              <span className="touch-btn-front large">
-                {/* Space confirms in menus and hard drops in game */}
-                <Icon
-                  className="touch-btn-icon"
-                  path={menu ? mdiCheckBold : mdiArrowCollapseDown}
-                  size={1}
-                />
-              </span>
-            </MappedButton>
-          </div>
+          <ActionButtons className={controllerStyleLayout ? "right" : "left"} />
         </div>
         <div className="system-buttons">
           <button className="touch-btn system" onClick={toggleLayout}>
