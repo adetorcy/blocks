@@ -48,6 +48,15 @@ export default class Renderer {
     clearPreview(this.previewCanvasCtx);
     drawPreview(this.previewCanvasCtx, game.nextPiece);
 
+    // This will show screen frames, not game frames:
+    // The loop renders once per requestAnimationFrame callback
+    // Which means counter shows the display refresh rate (90 on a 90 Hz phone)
+    // The game itself always runs 60 frames per second (see Loop)
+    // Gravity, DAS, ARE, line clear effects, etc. are counted in game frames
+    // So they run at the same real speed whatever the display does
+    // At 90 Hz two renders out of three run a game frame
+    // The third one just redraws the same state
+    // Pieces only move a whole cell on game frames so the extra redraws don't show
     this.fpsCounter(now);
   }
 
