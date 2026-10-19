@@ -225,7 +225,7 @@ body {
   right: 0;
 }
 
-/* Hide controls: bottom middle, bottom left corner in landscape */
+/* Hide controls: bottom middle, or the bottom left corner in short landscape windows */
 /* Show controls takes the same spot once hidden */
 .hide-touch-ui-btn {
   position: absolute;
@@ -275,7 +275,12 @@ body {
   left: 50%;
   transform: translateX(-50%);
 
-  @media (orientation: landscape) {
+  /* Landscape keeps the middle only when the window is tall enough */
+  /* The game never scales above 1 so it ends 828px down at most */
+  /* (16px margin + 804px game + 8px shadow) */
+  /* That leaves room for the 40px text from 880px up whatever the width */
+  /* Update this if the game gets taller */
+  @media (orientation: landscape) and (height < 880px) {
     bottom: 2px;
     left: 4px;
     transform: none;
