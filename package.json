@@ -11,8 +11,6 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@mdi/js": "^7.4.47",
-    "@mdi/react": "^1.6.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

@@ -22,7 +22,7 @@ function blockFits(board, column, row) {
 
 export function pieceFits(board, piece) {
   return piece.positions.every(([x, y]) =>
-    blockFits(board, piece.column + x, piece.row + y)
+    blockFits(board, piece.column + x, piece.row + y),
   );
 }
 
@@ -89,6 +89,6 @@ export function about() {
   console.log(
     "%cB%cL%cO%cC%cK%cS",
     ...styles,
-    `\n\nversion ${import.meta.env.VITE_APP_VERSION}\n\nadt 2024`
+    `\n\nversion ${import.meta.env.VITE_APP_VERSION}\n\nadt 2024`,
   );
 }
