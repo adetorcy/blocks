@@ -34,22 +34,19 @@ export default function StartMenu({ showControlsMenu, start }) {
 
   return (
     <div className="stack menu">
-      {options.map(([callback, label], i) =>
-        i === selectedIndex ? (
+      {options.map(([callback, label], i) => {
+        const selected = i === selectedIndex;
+        return (
           <div
-            ref={selectedRef}
-            className="menu-option selected"
             key={i}
+            ref={selected ? selectedRef : null}
+            className={selected ? "menu-option selected" : "menu-option"}
             onClick={callback}
           >
             {label}
           </div>
-        ) : (
-          <div className="menu-option" key={i} onClick={callback}>
-            {label}
-          </div>
-        ),
-      )}
+        );
+      })}
     </div>
   );
 }
