@@ -172,16 +172,18 @@ body {
   transform: translateY(100%);
   transition: transform 0.2s ease-in;
 
-  /* No browser gestures on the controls */
-  /* Fast taps would zoom and a held button would select or open a callout */
+  :is(button, .dpad, .action-buttons) {
+    pointer-events: auto;
+  }
+}
+
+/* No browser gestures on the controls */
+/* Fast taps would zoom and a held button would select or open a callout */
+:is(.touch-ui, .show-touch-ui-btn) {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
-
-  :is(button, .dpad, .action-buttons) {
-    pointer-events: auto;
-  }
 }
 
 /* Ease-out as they come back, settling into place */
