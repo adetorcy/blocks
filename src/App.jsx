@@ -4,9 +4,7 @@ import {
   PLAYFIELD_WIDTH,
   PREVIEW_BOX_SIZE,
 } from "./constants";
-import Score from "./Score";
-import Level from "./Level";
-import Lines from "./Lines";
+import Stat from "./Stat";
 import StartMenu from "./StartMenu";
 import ControlsMenu from "./ControlsMenu";
 import PauseMenu from "./PauseMenu";
@@ -201,9 +199,9 @@ function App() {
         <div className="stack dashboard">
           <div className="stack cards">
             <div className="card stack score">
-              <Score score={score} />
-              <Lines lines={lines} />
-              <Level level={level} />
+              <Stat label="SCORE" value={score} />
+              <Stat label="LINES" value={lines} />
+              <Stat label="LEVEL" value={level} />
             </div>
             <div className="card stack preview">
               <div>NEXT</div>

@@ -2,10 +2,6 @@ import { COLUMNS, BOARD_SIZE } from "./constants";
 import { ONSCREEN_KEYDOWN, ONSCREEN_KEYUP } from "./events";
 import { CYAN, YELLOW, ORANGE, GREEN, MAGENTA, RED } from "./colors";
 
-export function padScore(score) {
-  return score.toString().padStart(3, "0");
-}
-
 export function logBoard(board) {
   const strings = [];
 
