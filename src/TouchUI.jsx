@@ -57,10 +57,10 @@ export default function TouchUI({ menu }) {
   return (
     <>
       <div
-        className={isVisible ? "touch-ui visible" : "touch-ui"}
-        // Inert when hidden so focus can't stay on a hidden button
-        // Avoids clicking button with Enter or Space at game over
-        inert={!isVisible}
+        className="touch-ui"
+        // Hidden controls can't be tapped or keep focus
+        // So Enter or Space can't press a hidden button at game over
+        hidden={!isVisible}
         // A long press would open the context menu
         onContextMenu={(event) => event.preventDefault()}
       >
@@ -76,21 +76,17 @@ export default function TouchUI({ menu }) {
             </MappedButton>
           </div>
         </div>
-        <button
-          className="text-btn hide-touch-ui-btn"
-          onClick={toggleIsVisible}
-        >
-          Hide controls
-        </button>
       </div>
-      {/* Takes the place of Hide controls, outside the controls so it stays */}
+      {/* Outside the controls so it stays when they're hidden */}
       <button
-        className="text-btn show-touch-ui-btn"
+        className="touch-ui-toggle"
+        aria-expanded={isVisible}
         onClick={toggleIsVisible}
-        inert={isVisible}
+        // No focus on click or Space and Enter would press it again later
+        onMouseDown={(event) => event.preventDefault()}
         onContextMenu={(event) => event.preventDefault()}
       >
-        Show controls
+        {isVisible ? "Hide controls" : "Show controls"}
       </button>
     </>
   );
