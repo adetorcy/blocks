@@ -88,6 +88,7 @@ export default function TouchUI({ menu }) {
         className="text-btn show-touch-ui-btn"
         onClick={toggleIsVisible}
         inert={isVisible}
+        onContextMenu={(event) => event.preventDefault()}
       >
         Show controls
       </button>
