@@ -17,6 +17,10 @@
 
 :root {
   --print: "Barlow Semi Condensed", sans-serif;
+
+  /* Touch controls: outlines, and the fill of a held control */
+  --stroke: oklch(0.3 0 0);
+  --pressed: oklch(0.92 0 0);
 }
 
 html {
@@ -195,7 +199,7 @@ body {
     padding-top: 48px;
     pointer-events: none;
 
-    button {
+    :is(button, .dpad) {
       pointer-events: auto;
     }
 
@@ -248,30 +252,35 @@ body {
   }
 }
 
-.arrow-buttons {
+/* The whole square is the touch area (DPad) */
+.dpad {
+  width: 164px;
+  height: 164px;
   display: grid;
-  align-items: center;
-  gap: 8px;
-  grid-template-areas:
-    ". u ."
-    "l . r"
-    ". d .";
+  place-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.up-arrow {
-  grid-area: u;
+.dpad-cross {
+  width: 132px;
+  height: 132px;
+  overflow: visible;
 }
 
-.left-arrow {
-  grid-area: l;
+.dpad-rim {
+  fill: none;
+  stroke: var(--stroke);
+  stroke-width: 2;
 }
 
-.right-arrow {
-  grid-area: r;
+.dpad-arrow {
+  fill: var(--stroke);
 }
 
-.down-arrow {
-  grid-area: d;
+/* Only the pressed arm fills, up to the middle square */
+.dpad-arm {
+  fill: var(--pressed);
 }
 
 .action-buttons {

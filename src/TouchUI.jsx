@@ -5,12 +5,12 @@ import {
   mdiDesktopTowerMonitor,
   mdiSwapHorizontal,
   mdiPauseCircleOutline,
-  mdiPlay,
   mdiCheckBold,
   mdiArrowCollapseDown,
   mdiRotateLeftVariant,
   mdiRotateRightVariant,
 } from "@mdi/js";
+import DPad from "./DPad";
 import { dispatchKeyDown, dispatchKeyUp } from "./utils";
 
 export default function TouchUI({ menu }) {
@@ -25,10 +25,6 @@ export default function TouchUI({ menu }) {
   const rotateLeftBtnRef = useRef(null);
   const rotateRightBtnRef = useRef(null);
   const hardDropBtnRef = useRef(null);
-  const arrowUpBtnRef = useRef(null);
-  const arrowLeftBtnRef = useRef(null);
-  const arrowDownBtnRef = useRef(null);
-  const arrowRightBtnRef = useRef(null);
 
   // Pause button highlight: Enter is held and the game pauses or resumes
   const enterDownRef = useRef(false);
@@ -51,18 +47,6 @@ export default function TouchUI({ menu }) {
         case "KeyX":
           rotateRightBtnRef.current.classList.add("active");
           break;
-        case "ArrowUp":
-          arrowUpBtnRef.current.classList.add("active");
-          break;
-        case "ArrowLeft":
-          arrowLeftBtnRef.current.classList.add("active");
-          break;
-        case "ArrowDown":
-          arrowDownBtnRef.current.classList.add("active");
-          break;
-        case "ArrowRight":
-          arrowRightBtnRef.current.classList.add("active");
-          break;
         case "Space":
           hardDropBtnRef.current.classList.add("active");
           break;
@@ -80,18 +64,6 @@ export default function TouchUI({ menu }) {
           break;
         case "KeyX":
           rotateRightBtnRef.current.classList.remove("active");
-          break;
-        case "ArrowUp":
-          arrowUpBtnRef.current.classList.remove("active");
-          break;
-        case "ArrowLeft":
-          arrowLeftBtnRef.current.classList.remove("active");
-          break;
-        case "ArrowDown":
-          arrowDownBtnRef.current.classList.remove("active");
-          break;
-        case "ArrowRight":
-          arrowRightBtnRef.current.classList.remove("active");
           break;
         case "Space":
           hardDropBtnRef.current.classList.remove("active");
@@ -145,65 +117,7 @@ export default function TouchUI({ menu }) {
         onContextMenu={(event) => event.preventDefault()}
       >
         <div className="control-buttons">
-          <div
-            className={
-              controllerStyleLayout
-                ? "arrow-buttons left"
-                : "arrow-buttons right"
-            }
-          >
-            <MappedButton
-              className="touch-btn up-arrow"
-              code="ArrowUp"
-              ref={arrowUpBtnRef}
-            >
-              <span className="touch-btn-front large">
-                <Icon
-                  className="touch-btn-icon"
-                  path={mdiPlay}
-                  rotate={270}
-                  size={1}
-                />
-              </span>
-            </MappedButton>
-            <MappedButton
-              className="touch-btn left-arrow"
-              code="ArrowLeft"
-              ref={arrowLeftBtnRef}
-            >
-              <span className="touch-btn-front large">
-                <Icon
-                  className="touch-btn-icon"
-                  path={mdiPlay}
-                  rotate={180}
-                  size={1}
-                />
-              </span>
-            </MappedButton>
-            <MappedButton
-              className="touch-btn right-arrow"
-              code="ArrowRight"
-              ref={arrowRightBtnRef}
-            >
-              <span className="touch-btn-front large">
-                <Icon className="touch-btn-icon" path={mdiPlay} size={1} />
-              </span>
-            </MappedButton>
-            <MappedButton
-              className="touch-btn down-arrow"
-              code="ArrowDown"
-              ref={arrowDownBtnRef}
-            >
-              <span className="touch-btn-front large">
-                <Icon
-                  className="touch-btn-icon"
-                  path={mdiPlay}
-                  rotate={90}
-                  size={1}
-                />
-              </span>
-            </MappedButton>
-          </div>
+          <DPad className={controllerStyleLayout ? "left" : "right"} />
           <div
             className={
               controllerStyleLayout
