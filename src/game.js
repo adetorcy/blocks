@@ -351,6 +351,8 @@ export default class Game {
   }
 
   // Handle keyboard events
+  // Returns false for keys the game doesn't use
+  // So App only blocks the browser's default action for game keys
   onkeydown(code) {
     switch (code) {
       case "KeyZ":
@@ -386,8 +388,6 @@ export default class Game {
         }
         break;
       default:
-        // Do nothing
-        console.log(`${code} key not supported`);
         return false;
     }
     return true;
