@@ -1,21 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { listenForKeydown } from "./utils";
 
 export default function ControlsMenu({ showStartMenu }) {
-  const selectedRef = useRef(null);
-
   useEffect(() => {
     // Callback for keydown event listener
     function handleKeydown(event) {
       switch (event.code) {
         case "Enter":
         case "Space":
-          // Ignore auto-repeat from a held key
-          if (!event.repeat) selectedRef.current.click();
-          event.preventDefault();
-          break;
         case "KeyZ":
-          // B goes back to the start menu
+          // OK, or B goes back, both to the start menu
+          // Ignore auto-repeat from a held key
           if (!event.repeat) showStartMenu();
           event.preventDefault();
           break;
@@ -35,11 +30,7 @@ export default function ControlsMenu({ showStartMenu }) {
           </div>
         ))}
       </div>
-      <div
-        ref={selectedRef}
-        className="menu-option selected"
-        onClick={showStartMenu}
-      >
+      <div className="menu-option selected" onClick={showStartMenu}>
         OK
       </div>
     </div>
