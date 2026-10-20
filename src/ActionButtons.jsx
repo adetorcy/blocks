@@ -34,8 +34,8 @@ export default function ActionButtons() {
   }
 
   // Number of fingers on a button
-  function fingers(name) {
-    return [...pointersRef.current.values()].filter((x) => x === name).length;
+  function fingers(button) {
+    return [...pointersRef.current.values()].filter((x) => x === button).length;
   }
 
   function nearest(event) {
@@ -62,19 +62,19 @@ export default function ActionButtons() {
 
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
-    if (fingers(button.name) === 0) dispatchKeyDown({ code: button.code });
-    pointersRef.current.set(event.pointerId, button.name);
+    if (fingers(button) === 0) dispatchKeyDown({ code: button.code });
+    pointersRef.current.set(event.pointerId, button);
     show(button.name, true);
   }
 
   function handlePointerEnd(event) {
-    const name = pointersRef.current.get(event.pointerId);
-    if (!name) return;
+    const button = pointersRef.current.get(event.pointerId);
+    if (!button) return;
 
     pointersRef.current.delete(event.pointerId);
-    if (fingers(name) > 0) return;
-    dispatchKeyUp({ code: BUTTONS.find((x) => x.name === name).code });
-    show(name, false);
+    if (fingers(button) > 0) return;
+    dispatchKeyUp({ code: button.code });
+    show(button.name, false);
   }
 
   // Highlight for physical keys
