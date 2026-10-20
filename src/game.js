@@ -22,8 +22,9 @@ import { sequence, pieceFits } from "./utils";
 
 export default class Game {
   constructor(onGameEvent, level = 0, pieceSequence = sequence()) {
-    // Playfield
-    this.board = new Uint8Array(BOARD_SIZE).fill(0);
+    // Playfield, starts empty
+    // A typed array starts all 0 and 0 is an empty cell
+    this.board = new Uint8Array(BOARD_SIZE);
 
     // Pseudo random integers between 0 and 6
     this.sequence = pieceSequence;
@@ -283,10 +284,9 @@ export default class Game {
     // Middle out block clear, for each row
     // Step goes from 5 through 1
     this.cleared.forEach((row) => {
-      const [left, right] = [
-        row * COLUMNS + this.lineClearAnimationStep - 1,
-        (row + 1) * COLUMNS - this.lineClearAnimationStep,
-      ];
+      // Step 5 clears columns 4 and 5, step 1 columns 0 and 9
+      const left = row * COLUMNS + this.lineClearAnimationStep - 1;
+      const right = (row + 1) * COLUMNS - this.lineClearAnimationStep;
       this.board[left] = 0;
       this.board[right] = 0;
     });
@@ -404,9 +404,6 @@ export default class Game {
       case "ArrowRight":
         this.rightDasOn = false;
         break;
-      default:
-        // Do nothing
-        return;
     }
   }
 }
