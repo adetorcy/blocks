@@ -207,21 +207,21 @@ export default class Game {
   }
 
   lock() {
-    // Live piece's lowest row
-    const row = this.livePiece.row + this.livePiece.positions[3][1];
+    // Live piece's blocks on the board as [column, row]
+    // Also kept for the lock effect
+    const blocks = this.livePiece.positions.map(([x, y]) => [
+      this.livePiece.column + x,
+      this.livePiece.row + y,
+    ]);
+
+    // Live piece's lowest row, positions[3] is always the lowest block
+    const row = blocks[3][1];
 
     // Add live piece to the board
-    this.livePiece.positions.forEach(([x, y]) => {
-      this.board[
-        (this.livePiece.row + y) * COLUMNS + this.livePiece.column + x
-      ] = this.livePiece.id;
+    // In the flat board: each block's cell is row * COLUMNS + column
+    blocks.forEach(([x, y]) => {
+      this.board[y * COLUMNS + x] = this.livePiece.id;
     });
-
-    // Copy live piece block positions for lock effect
-    const blocks = this.livePiece.positions.map(([x, y]) => [
-      x + this.livePiece.column,
-      y + this.livePiece.row,
-    ]);
 
     // Live piece is locked
     this.livePiece = null;
@@ -303,10 +303,11 @@ export default class Game {
 
   // Remove a cleared line from the board
   deleteLine(rowIdx) {
-    // Everything before the beginning of that line shifts by 1 row
+    // Rows above the cleared line drop by 1
+    // In the flat board: each cell before the start of that line moves to its index + COLUMNS
     this.board.copyWithin(COLUMNS, 0, rowIdx * COLUMNS);
 
-    // Zero out 1st row
+    // Empty top row
     this.board.fill(0, 0, COLUMNS);
   }
 
