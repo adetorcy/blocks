@@ -95,13 +95,8 @@ body {
 }
 
 .menu-option {
-  border: none;
-  background-color: inherit;
-  font: inherit;
-  color: inherit;
   padding: 0 12px;
   cursor: pointer;
-  outline: none;
 }
 
 .menu-option.selected {
@@ -366,14 +361,14 @@ body {
   padding: 2px;
 }
 
+/* No z-index for board and menu */
+/* Board always comes first in the markup */
 .board {
   grid-area: 1/1;
-  z-index: 0;
 }
 
 .menu {
   grid-area: 1/1;
-  z-index: 1;
   align-self: center;
   justify-self: center;
   align-items: center;
@@ -425,7 +420,6 @@ body {
 
 .fps {
   display: flex;
-  flex-direction: row;
   column-gap: 12px;
   padding: 12px 12px 8px;
 }
