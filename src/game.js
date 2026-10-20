@@ -107,14 +107,14 @@ export default class Game {
 
     if (this.leftDasOn) {
       if (--this.leftDasFramesLeft === 0) {
-        this.moveLeft();
+        this.shift(-1);
         this.leftDasFramesLeft = DAS_FRAMES;
       }
     }
 
     if (this.rightDasOn) {
       if (--this.rightDasFramesLeft === 0) {
-        this.moveRight();
+        this.shift(1);
         this.rightDasFramesLeft = DAS_FRAMES;
       }
     }
@@ -316,11 +316,11 @@ export default class Game {
     }
   }
 
-  // Clockwise
-  rotateRight() {
+  // 1 clockwise, -1 counterclockwise
+  rotate(turn) {
     if (this.livePiece) {
       const step = this.livePiece.step;
-      this.livePiece.step = (this.livePiece.step + 1) % 4;
+      this.livePiece.step = (step + turn + 4) % 4;
       if (pieceFits(this.board, this.livePiece)) {
         this.onGameEvent("rotate");
         this.setGhostPiece();
@@ -330,40 +330,15 @@ export default class Game {
     }
   }
 
-  // Counterclockwise
-  rotateLeft() {
+  // -1 left, 1 right
+  shift(dx) {
     if (this.livePiece) {
-      const step = this.livePiece.step;
-      this.livePiece.step = (this.livePiece.step + 3) % 4;
-      if (pieceFits(this.board, this.livePiece)) {
-        this.onGameEvent("rotate");
-        this.setGhostPiece();
-      } else {
-        this.livePiece.step = step;
-      }
-    }
-  }
-
-  moveLeft() {
-    if (this.livePiece) {
-      this.livePiece.column--;
+      this.livePiece.column += dx;
       if (pieceFits(this.board, this.livePiece)) {
         this.onGameEvent("move");
         this.setGhostPiece();
       } else {
-        this.livePiece.column++;
-      }
-    }
-  }
-
-  moveRight() {
-    if (this.livePiece) {
-      this.livePiece.column++;
-      if (pieceFits(this.board, this.livePiece)) {
-        this.onGameEvent("move");
-        this.setGhostPiece();
-      } else {
-        this.livePiece.column--;
+        this.livePiece.column -= dx;
       }
     }
   }
@@ -384,14 +359,14 @@ export default class Game {
   onkeydown(code) {
     switch (code) {
       case "KeyZ":
-        this.rotateLeft();
+        this.rotate(-1);
         break;
       case "KeyX":
       case "ArrowUp":
-        this.rotateRight();
+        this.rotate(1);
         break;
       case "ArrowLeft":
-        this.moveLeft();
+        this.shift(-1);
         this.leftDasOn = true;
         this.rightDasOn = false;
         this.leftDasFramesLeft = DAS_DELAY;
@@ -402,7 +377,7 @@ export default class Game {
         this.softDropFramesLeft = SOFT_DROP_FRAMES;
         break;
       case "ArrowRight":
-        this.moveRight();
+        this.shift(1);
         this.rightDasOn = true;
         this.leftDasOn = false;
         this.rightDasFramesLeft = DAS_DELAY;
