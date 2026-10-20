@@ -13,7 +13,7 @@ const colors = Object.fromEntries(
 );
 
 // Draw a single block
-export function drawBlock(ctx, x, y) {
+function drawBlock(ctx, x, y) {
   // offset for border effect
   [x, y] = [x + 2, y + 2];
 
@@ -35,7 +35,7 @@ export function drawBlock(ctx, x, y) {
 }
 
 // Draw a single (ghost) block
-export function drawGhostBlock(ctx, x, y) {
+function drawGhostBlock(ctx, x, y) {
   // offset for border effect
   [x, y] = [x + 4, y + 4];
 
@@ -43,14 +43,27 @@ export function drawGhostBlock(ctx, x, y) {
   ctx.strokeRect(x, y, 32, 32);
 }
 
-export function drawJammedPiece(ctx, piece) {
-  ctx.fillStyle = "DarkGray";
+// Live piece, or the jammed piece in gray at game over
+// Blocks on the top 2 rows are clipped
+export function drawPiece(ctx, piece, color = piece.color) {
+  ctx.fillStyle = color;
 
-  piece.rotation[0].forEach(([x, y]) => {
+  piece.positions.forEach(([x, y]) => {
     drawBlock(
       ctx,
       (piece.column + x) * BLOCK_SIZE,
       (piece.row + y - 2) * BLOCK_SIZE,
+    );
+  });
+}
+
+// Outline of the live piece where it would land
+export function drawGhostPiece(ctx, piece, row) {
+  piece.positions.forEach(([x, y]) => {
+    drawGhostBlock(
+      ctx,
+      (piece.column + x) * BLOCK_SIZE,
+      (row + y - 2) * BLOCK_SIZE,
     );
   });
 }
@@ -77,12 +90,11 @@ export function drawPreview(ctx, piece) {
 
 // Draw the board minus the top 2 rows
 export function drawBoard(ctx, board) {
-  let pieceId;
-
   // Iterate over playfield (row, column) positions rather than board indices
   for (let row = 0; row < PLAYFIELD_ROWS; row++) {
     for (let column = 0; column < COLUMNS; column++) {
-      pieceId = board[(row + 2) * COLUMNS + column];
+      // Playfield row 0 is board row 2, below the hidden spawn rows
+      const pieceId = board[(row + 2) * COLUMNS + column];
 
       // Skip empty blocks
       if (pieceId) {

@@ -1,14 +1,13 @@
 import {
   drawBoard,
-  drawBlock,
+  drawPiece,
+  drawGhostPiece,
   drawPreview,
-  drawJammedPiece,
   clearBoard,
   clearPreview,
-  drawGhostBlock,
   drawWhiteBlocks,
 } from "./drawing";
-import { COLUMNS, BLOCK_SIZE } from "./constants";
+import { COLUMNS } from "./constants";
 
 export default class Renderer {
   constructor(boardCanvas, previewCanvas, fpsElement) {
@@ -30,10 +29,10 @@ export default class Renderer {
     drawBoard(this.boardCanvasCtx, game.board);
 
     if (game.gameOver) {
-      drawJammedPiece(this.boardCanvasCtx, game.livePiece);
+      drawPiece(this.boardCanvasCtx, game.livePiece, "DarkGray");
     } else if (game.livePiece) {
-      this.drawGhostPiece(game.livePiece, game.ghostPieceRow);
-      this.drawLivePiece(game.livePiece);
+      drawGhostPiece(this.boardCanvasCtx, game.livePiece, game.ghostPieceRow);
+      drawPiece(this.boardCanvasCtx, game.livePiece);
     }
 
     // Lock effect, skipping blocks already removed by a line clear
@@ -64,28 +63,6 @@ export default class Renderer {
     clearBoard(this.boardCanvasCtx);
     clearPreview(this.previewCanvasCtx);
     this.fpsElement.textContent = 0;
-  }
-
-  drawLivePiece(piece) {
-    // Blocks on top two rows will be clipped
-    this.boardCanvasCtx.fillStyle = piece.color;
-    piece.positions.forEach(([x, y]) => {
-      drawBlock(
-        this.boardCanvasCtx,
-        (piece.column + x) * BLOCK_SIZE,
-        (piece.row - 2 + y) * BLOCK_SIZE,
-      );
-    });
-  }
-
-  drawGhostPiece(piece, row) {
-    piece.positions.forEach(([x, y]) => {
-      drawGhostBlock(
-        this.boardCanvasCtx,
-        (piece.column + x) * BLOCK_SIZE,
-        (row - 2 + y) * BLOCK_SIZE,
-      );
-    });
   }
 
   // Very rough FPS counter that only updates about once per second
