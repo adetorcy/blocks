@@ -295,25 +295,19 @@ export default class Game {
     this.lineClearAnimationStep--;
   }
 
+  // Full row, no empty cell
   lineClearCheck(rowIdx) {
-    const [start, end] = [rowIdx * COLUMNS, (rowIdx + 1) * COLUMNS];
-    for (let i = start; i < end; i++) {
-      if (this.board[i] === 0) return false;
-    }
-    return true;
+    const row = this.board.subarray(rowIdx * COLUMNS, (rowIdx + 1) * COLUMNS);
+    return !row.includes(0);
   }
 
   // Remove a cleared line from the board
   deleteLine(rowIdx) {
     // Everything before the beginning of that line shifts by 1 row
-    for (let i = rowIdx * COLUMNS - 1; i >= 0; i--) {
-      this.board[i + COLUMNS] = this.board[i];
-    }
+    this.board.copyWithin(COLUMNS, 0, rowIdx * COLUMNS);
 
     // Zero out 1st row
-    for (let i = 0; i < COLUMNS; i++) {
-      this.board[i] = 0;
-    }
+    this.board.fill(0, 0, COLUMNS);
   }
 
   // 1 clockwise, -1 counterclockwise
