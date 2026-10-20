@@ -110,17 +110,11 @@ body {
 }
 
 .vibrate {
-  animation-name: vibrate;
-  animation-duration: 250ms;
-  animation-timing-function: linear;
-  animation-iteration-count: 1;
+  animation: vibrate 250ms linear;
 }
 
 .slam {
-  animation-name: slam;
-  animation-duration: 0.2s;
-  animation-timing-function: ease-out;
-  animation-iteration-count: 1;
+  animation: slam 0.2s ease-out;
 }
 
 @keyframes vibrate {
