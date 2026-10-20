@@ -1,4 +1,4 @@
-import { COLUMNS, BOARD_SIZE } from "./constants";
+import { COLUMNS } from "./constants";
 import { CYAN, YELLOW, ORANGE, GREEN, MAGENTA, RED } from "./colors";
 
 // Virtual keyboard events
@@ -6,16 +6,6 @@ import { CYAN, YELLOW, ORANGE, GREEN, MAGENTA, RED } from "./colors";
 // So listeners for physical keys only (like the button highlights) don't get them
 const ONSCREEN_KEYDOWN = "blocks:onscreen-keydown";
 const ONSCREEN_KEYUP = "blocks:onscreen-keyup";
-
-export function logBoard(board) {
-  const strings = [];
-
-  for (let i = 0; i < BOARD_SIZE; i += COLUMNS) {
-    strings.push(board.slice(i, i + COLUMNS).join("\t"));
-  }
-
-  console.log(strings.join("\n").replaceAll("0", "."));
-}
 
 function blockFits(board, column, row) {
   return board[row * COLUMNS + column] === 0 && column >= 0 && column < COLUMNS;
