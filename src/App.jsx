@@ -44,7 +44,7 @@ function App() {
   const loopRef = useRef(null);
   const boardRef = useRef(null);
   const previewRef = useRef(null);
-  const fpsRef = useRef(0);
+  const fpsRef = useRef(null);
 
   // Length of the last line clear or tetris sound
   // Level up comes on the same frame and waits for it to end
