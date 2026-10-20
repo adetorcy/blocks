@@ -1,6 +1,11 @@
 import { COLUMNS, BOARD_SIZE } from "./constants";
-import { ONSCREEN_KEYDOWN, ONSCREEN_KEYUP } from "./events";
 import { CYAN, YELLOW, ORANGE, GREEN, MAGENTA, RED } from "./colors";
+
+// Virtual keyboard events
+// Sent by the on-screen controls under their own names
+// So listeners for physical keys only (like the button highlights) don't get them
+const ONSCREEN_KEYDOWN = "blocks:onscreen-keydown";
+const ONSCREEN_KEYUP = "blocks:onscreen-keyup";
 
 export function logBoard(board) {
   const strings = [];
