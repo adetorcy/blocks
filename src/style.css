@@ -151,8 +151,10 @@ body {
   }
 }
 
+/* Game over: the board shakes one virtual pixel side to side */
+/* 5 steps of 50ms (3 frames), no easing so every frame stays on the grid */
 .vibrate {
-  animation: vibrate 250ms linear;
+  animation: vibrate 250ms step-end;
 }
 
 /* Hard drop: the board jumps down one virtual pixel, then back */
@@ -162,20 +164,20 @@ body {
 }
 
 @keyframes vibrate {
-  10% {
-    transform: skewX(1deg);
+  from {
+    transform: translateX(4px);
   }
-  30% {
-    transform: skewX(-1deg);
+  20% {
+    transform: translateX(-4px);
   }
-  50% {
-    transform: skewX(1deg);
+  40% {
+    transform: translateX(4px);
   }
-  70% {
-    transform: skewX(-1deg);
+  60% {
+    transform: translateX(-4px);
   }
-  90% {
-    transform: skewX(1deg);
+  80% {
+    transform: translateX(4px);
   }
 }
 
