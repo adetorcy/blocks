@@ -17,3 +17,7 @@ export const ORANGE = "oklch(0.79 0.17 71)";
 export const GREEN = "oklch(0.82 0.21 142)";
 export const MAGENTA = "oklch(0.70 0.22 328)";
 export const RED = "oklch(0.66 0.21 29)";
+
+// Card borders from level 1 on, in piece order I, S, T, L, O, Z, J
+// Level 0 is white, level 8 is back to cyan
+export const LEVEL_COLORS = [CYAN, GREEN, MAGENTA, ORANGE, YELLOW, RED, BLUE];

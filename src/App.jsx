@@ -16,6 +16,7 @@ import Loop from "./loop";
 import useGameSnapshot from "./useGameSnapshot";
 import useFitScale from "./useFitScale";
 import { playSound, resumeAudio } from "./sfx";
+import { LEVEL_COLORS } from "./colors";
 import { listenForKeydown, listenForKeyup } from "./utils";
 
 // Sound effect for each game event
@@ -176,9 +177,19 @@ function App() {
 
   if (splash) return <div className="splash">👾</div>;
 
+  // Card borders take the level color, white at level 0 only
+  // From the snapshot, so it changes on the level up frame
+  const line = level
+    ? LEVEL_COLORS[(level - 1) % LEVEL_COLORS.length]
+    : "white";
+
   return (
     <>
-      <div ref={shellRef} className={menu ? "game" : "game nocursor"}>
+      <div
+        ref={shellRef}
+        className={menu ? "game" : "game nocursor"}
+        style={{ "--line": line }}
+      >
         <div className="card gamearea">
           <canvas
             ref={boardRef}

@@ -90,8 +90,8 @@ body {
 /* Chrome gives text on an opaque card subpixel antialiasing (color fringes) */
 /* Stair corners: the 3 corner pixels are cut */
 /* and the pixel diagonally inside closes the line (one background square each) */
+/* --line is the level color, set by App */
 .card {
-  --line: white;
   border: 4px solid var(--line);
   clip-path: polygon(
     8px 0,
