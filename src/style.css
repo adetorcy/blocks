@@ -353,34 +353,73 @@ body {
 /*****************/
 
 .gamearea {
-  display: grid;
+  position: relative;
 }
 
 /* Board and preview */
+/* Block, so no line gap under the canvas */
 /* Canvas pixels stay sharp when the browser scales them (high density screens) */
 canvas {
+  display: block;
   image-rendering: pixelated;
 }
 
-/* No z-index for board and menu */
-/* Board always comes first in the markup */
-.board {
-  grid-area: 1/1;
-}
-
+/* Menus sit at set positions over the board, nothing is centered */
+/* The board is 101×201 virtual pixels (a gap on both sides of the blocks) */
+/* So centered content of an even size would land between virtual pixels */
+/* Offsets look centered, rounded up and left to the 4px grid */
+/* Check them when a label changes */
 .menu {
-  grid-area: 1/1;
-  align-self: center;
-  justify-self: center;
-  align-items: center;
+  position: absolute;
+  align-items: flex-start;
   row-gap: 64px;
 }
 
-.menu-pause {
+.menu-start {
+  top: 344px;
+  left: 128px;
+
+  /* START centered over CONTROLS */
+  > :first-child {
+    margin-left: 20px;
+  }
+}
+
+.menu-controls {
+  top: 248px;
+  left: 64px;
+
+  /* OK centered under the list */
+  > :last-child {
+    margin-left: 108px;
+  }
+}
+
+/* Pause and game over */
+.menu-box {
+  top: 304px;
   outline: 4px solid black;
   border: 4px solid white;
   padding: 36px 24px;
   background-color: black;
+}
+
+.menu-pause {
+  left: 104px;
+
+  /* QUIT centered under CONTINUE */
+  > :last-child {
+    margin-left: 28px;
+  }
+}
+
+.menu-game-over {
+  left: 100px;
+
+  /* OK centered under GAME OVER */
+  > :last-child {
+    margin-left: 44px;
+  }
 }
 
 .controls-list {

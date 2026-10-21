@@ -21,7 +21,7 @@ export default function ControlsMenu({ showStartMenu }) {
   }, [showStartMenu]);
 
   return (
-    <div className="stack menu">
+    <div className="stack menu menu-controls">
       <div className="stack controls-list">
         {controls.map(([keyName, action], i) => (
           <div key={i} className="controls-list-item">

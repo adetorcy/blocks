@@ -33,7 +33,7 @@ export default function StartMenu({ showControlsMenu, start }) {
   ];
 
   return (
-    <div className="stack menu">
+    <div className="stack menu menu-start">
       {options.map(([callback, label], i) => {
         const selected = i === selectedIndex;
         return (
