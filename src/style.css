@@ -72,6 +72,11 @@ body {
   line-height: 1;
   transform-origin: top center;
   transform: scale(var(--scale, 1));
+  /* Shift onto device pixels (useFitScale) */
+  /* A layout offset, translate left some text blurry in Chrome */
+  position: relative;
+  left: var(--snap-x, 0);
+  top: var(--snap-y, 0);
 }
 
 /**********/
