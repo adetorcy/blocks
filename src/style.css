@@ -155,8 +155,10 @@ body {
   animation: vibrate 250ms linear;
 }
 
+/* Hard drop: the board jumps down one virtual pixel, then back */
+/* No easing, so every frame stays on the grid */
 .slam {
-  animation: slam 0.2s ease-out;
+  animation: slam 0.2s step-end;
 }
 
 @keyframes vibrate {
@@ -178,8 +180,11 @@ body {
 }
 
 @keyframes slam {
-  20% {
-    transform: translateY(5px);
+  from {
+    transform: translateY(4px);
+  }
+  50% {
+    transform: none;
   }
 }
 
