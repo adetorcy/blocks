@@ -2,6 +2,7 @@ import {
   COLUMNS,
   PLAYFIELD_ROWS,
   BLOCK_SIZE,
+  BLOCK_GAP,
   PLAYFIELD_WIDTH,
   PLAYFIELD_HEIGHT,
   PREVIEW_BOX_SIZE,
@@ -14,8 +15,8 @@ const colors = Object.fromEntries(
 
 // Draw a single block
 function drawBlock(ctx, x, y) {
-  // offset for border effect
-  [x, y] = [x + 2, y + 2];
+  // Gap on the left and top
+  [x, y] = [x + BLOCK_GAP, y + BLOCK_GAP];
 
   // draw main square
   ctx.fillRect(x, y, 36, 36);
@@ -36,8 +37,9 @@ function drawBlock(ctx, x, y) {
 
 // Draw a single (ghost) block
 function drawGhostBlock(ctx, x, y) {
-  // offset for border effect
-  [x, y] = [x + 4, y + 4];
+  // The 4px line is centered on the rectangle's edge
+  // So the outline covers the same 36px square as a block
+  [x, y] = [x + BLOCK_GAP + 2, y + BLOCK_GAP + 2];
 
   // draw main square
   ctx.strokeRect(x, y, 32, 32);
@@ -72,7 +74,12 @@ export function drawWhiteBlocks(ctx, blocks) {
   ctx.fillStyle = "white";
 
   blocks.forEach(([x, y]) => {
-    ctx.fillRect(x * BLOCK_SIZE + 2, (y - 2) * BLOCK_SIZE + 2, 36, 36);
+    ctx.fillRect(
+      x * BLOCK_SIZE + BLOCK_GAP,
+      (y - 2) * BLOCK_SIZE + BLOCK_GAP,
+      36,
+      36,
+    );
   });
 }
 

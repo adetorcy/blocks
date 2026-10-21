@@ -354,7 +354,12 @@ body {
 
 .gamearea {
   display: grid;
-  padding: 2px;
+}
+
+/* Board and preview */
+/* Canvas pixels stay sharp when the browser scales them (high density screens) */
+canvas {
+  image-rendering: pixelated;
 }
 
 /* No z-index for board and menu */

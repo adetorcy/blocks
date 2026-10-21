@@ -6,13 +6,19 @@ export const BOARD_SIZE = ROWS * COLUMNS;
 // Block size in pixels
 export const BLOCK_SIZE = 40;
 
+// Gap between blocks in pixels (one virtual pixel)
+// Blocks are drawn this far into their cell, the gap on their left and top
+// Canvases get this much extra for the gap after the last block
+// So the board and preview canvases fill their cards on the 4px grid
+export const BLOCK_GAP = 4;
+
 // Playfield
 export const PLAYFIELD_ROWS = 20;
-export const PLAYFIELD_HEIGHT = PLAYFIELD_ROWS * BLOCK_SIZE;
-export const PLAYFIELD_WIDTH = COLUMNS * BLOCK_SIZE;
+export const PLAYFIELD_HEIGHT = PLAYFIELD_ROWS * BLOCK_SIZE + BLOCK_GAP;
+export const PLAYFIELD_WIDTH = COLUMNS * BLOCK_SIZE + BLOCK_GAP;
 
 // Preview box
-export const PREVIEW_BOX_SIZE = 4 * BLOCK_SIZE;
+export const PREVIEW_BOX_SIZE = 4 * BLOCK_SIZE + BLOCK_GAP;
 
 // Line clear animation
 export const LINE_CLEAR_STEP_FRAMES = 4;
