@@ -1,6 +1,8 @@
+/* Game font, built from src/fonts/Blocks6px.txt (npm run font) */
+/* A font pixel is exactly 4px at 24px */
 @font-face {
   font-family: "Blocks";
-  src: local("Blocks"), url("./fonts/Blocks6px-Regular.ttf");
+  src: url("./fonts/Blocks6px.ttf") format("truetype");
 }
 
 /* Font for the touch control labels */
