@@ -22,15 +22,18 @@
 
   /* Touch controls */
   /* Outlines and button letters */
-  --stroke: oklch(0.3 0 0);
+  --stroke: white;
   /* Fill while a control is pressed */
-  --pressed: oklch(0.92 0 0);
+  --pressed: oklch(0.35 0 0);
   /* START and Hide controls labels */
-  --ink: oklch(0.45 0 0);
+  --ink: oklch(0.75 0 0);
 }
 
+/* Dark page, browser UI and overscroll included */
 html {
   font-family: "Blocks";
+  color-scheme: dark;
+  background-color: black;
 }
 
 body {
@@ -83,9 +86,10 @@ body {
 /*** UI ***/
 /**********/
 
+/* No background, the page is black */
+/* Chrome gives text on an opaque card subpixel antialiasing (color fringes) */
 .card {
-  background-color: black;
-  box-shadow: 8px 8px gray;
+  border: 4px solid white;
 }
 
 .stack {
@@ -218,7 +222,7 @@ body {
 
   /* Landscape keeps the middle only when the window is tall enough */
   /* The game never scales above 1 so it ends 828px down at most */
-  /* (16px margin + 804px game + 8px shadow) */
+  /* (16px margin + 812px game, borders included) */
   /* That leaves room for the 40px text from 880px up whatever the width */
   /* Update this if the game gets taller */
   @media (orientation: landscape) and (height < 880px) {

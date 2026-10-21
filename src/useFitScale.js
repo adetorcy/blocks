@@ -3,9 +3,6 @@ import { useEffect } from "react";
 // Space around the game
 const MARGIN = 16;
 
-// Card shadow sticks out past the game box
-const SHADOW = 8;
-
 // Scales the game to fit its container (the screen minus the touch controls)
 // Sets --scale on the game element for its transform
 // Never above 1 or the canvases would blur
@@ -29,10 +26,8 @@ export default function useFitScale(ref, enabled) {
     // Then the game's corner moves to the nearest device pixel
     // Every size in the game is a multiple of 4, so every edge lands on one
     function fit() {
-      const width =
-        (container.clientWidth - 2 * MARGIN) / (game.offsetWidth + SHADOW);
-      const height =
-        (container.clientHeight - 2 * MARGIN) / (game.offsetHeight + SHADOW);
+      const width = (container.clientWidth - 2 * MARGIN) / game.offsetWidth;
+      const height = (container.clientHeight - 2 * MARGIN) / game.offsetHeight;
       const scale = Math.min(width, height);
 
       // Device pixels per virtual pixel at scale 1
