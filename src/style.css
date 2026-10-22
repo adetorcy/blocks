@@ -399,6 +399,7 @@ canvas {
 /* The board is 101×201 virtual pixels (a gap on both sides of the blocks) */
 /* So centered content of an even size would land between virtual pixels */
 /* Offsets look centered, rounded up and left to the 4px grid */
+/* Labels are centered on their ink, without the spacing column after the last glyph */
 /* Check them when a label changes */
 .menu {
   position: absolute;
@@ -406,10 +407,15 @@ canvas {
   row-gap: 64px;
 }
 
-/* Lines left aligned, as in the windows */
+/* Options centered on the board */
 .menu-start {
   top: 344px;
-  left: 128px;
+  left: 132px;
+
+  /* START over CONTROLS */
+  > :first-child {
+    margin-left: 20px;
+  }
 }
 
 .menu-controls {
@@ -430,8 +436,8 @@ canvas {
 /* The 4px page-color outline keeps the edges off the blocks next to it */
 /* Own compositing layer: Chrome then draws its text in grayscale */
 /* In the page layer the opaque window gave it color fringes (see .card) */
-/* Same size and place for pause and game over, so labels can change */
-/* as long as they fit: 212px wide with the outline, centered across the board */
+/* Same size and place for pause and game over */
+/* 212px wide with the outline, centered across the board */
 /* One top for both, the taller pause window is centered (rounded up) */
 /* Same colors whatever the level */
 .menu-box {
@@ -471,7 +477,25 @@ canvas {
   left: 0;
 }
 
-/* Gray bar inside the edge, text lined up with the options */
+/* Options centered on the board, as in the start menu */
+.menu-pause {
+  /* CONTINUE, 2px left of center */
+  > :nth-child(2) {
+    margin-left: 16px;
+  }
+
+  /* QUIT */
+  > :nth-child(3) {
+    margin-left: 48px;
+  }
+}
+
+/* OK */
+.menu-game-over > :nth-child(2) {
+  margin-left: 60px;
+}
+
+/* Full width gray bar inside the edges */
 .menu-title {
   align-self: stretch;
   margin: 0 -12px;

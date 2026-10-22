@@ -23,27 +23,37 @@ export default function useFitScale(ref, enabled) {
     // Below 1 the scale snaps down to the nearest step where it does
     // e.g. steps of 1/12 on a 3x phone (3 device pixels per CSS pixel)
     // Above that the game stays at 1, so browser zoom isn't undone
-    // Then the game's corner moves to the nearest device pixel
-    // Every size in the game is a multiple of 4, so every edge lands on one
+    // Then the position snaps too (below), so every edge lands on a device pixel
+    // (every size in the game is a multiple of 4)
     function fit() {
       const width = (container.clientWidth - 2 * MARGIN) / game.offsetWidth;
       const height = (container.clientHeight - 2 * MARGIN) / game.offsetHeight;
-      const scale = Math.min(width, height);
+      const fitted = Math.min(width, height);
 
       // Device pixels per virtual pixel at scale 1
       const pixel = 4 * devicePixelRatio;
-      game.style.setProperty(
-        "--scale",
-        scale < 1 ? Math.max(1, Math.floor(scale * pixel)) / pixel : 1,
-      );
+      const scale =
+        fitted < 1 ? Math.max(1, Math.floor(fitted * pixel)) / pixel : 1;
+      game.style.setProperty("--scale", scale);
+
+      // Chrome draws a scaled element from its layout position rounded to whole CSS pixels
+      // A half pixel there (odd screen width) put the whole game one device pixel off
+      // So the layout position snaps to whole CSS pixels that are also whole device pixels
+      // e.g. multiples of 8 at a 2.625 ratio (21 device pixels)
+      // Scaled from the top center, the corner then lands on a device pixel too
+      const step =
+        [1, 2, 3, 4, 5, 6, 7, 8].find((n) =>
+          Number.isInteger(n * devicePixelRatio),
+        ) ?? 1;
+      const snap = (n) => Math.round(n / step) * step - n;
 
       // Measured without the previous shift
       game.style.setProperty("--snap-x", "0px");
       game.style.setProperty("--snap-y", "0px");
       const { left, top } = game.getBoundingClientRect();
-      const snap = (n) =>
-        Math.round(n * devicePixelRatio) / devicePixelRatio - n;
-      game.style.setProperty("--snap-x", `${snap(left)}px`);
+      // Layout position, before the scale
+      const x = left - (game.offsetWidth * (1 - scale)) / 2;
+      game.style.setProperty("--snap-x", `${snap(x)}px`);
       game.style.setProperty("--snap-y", `${snap(top)}px`);
     }
 
