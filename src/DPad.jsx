@@ -15,7 +15,7 @@ const DIRECTIONS = Object.fromEntries(
 // Radius of the middle where no arrow is pressed
 const DEAD_ZONE = 10;
 
-// Cross outline, in a 132 box
+// Cross shape, in a 132 box
 const CROSS =
   "M45 9a8 8 0 0 1 8-8h26a8 8 0 0 1 8 8v36h36a8 8 0 0 1 8 8v26a8 8 0 0 1-8 8h-36v36a8 8 0 0 1-8 8h-26a8 8 0 0 1-8-8v-36h-36a8 8 0 0 1-8-8v-26a8 8 0 0 1 8-8h36z";
 
@@ -116,10 +116,10 @@ export default function DPad() {
       onPointerCancel={handlePointerEnd}
       onLostPointerCapture={handlePointerEnd}
     >
-      {/* Arms first so a filled arm never covers the outline */}
+      {/* The pressed arm over the cross, the arrows over both */}
       <svg className="dpad-cross" viewBox="0 0 132 132" aria-hidden="true">
+        <path className="dpad-body" d={CROSS} />
         {direction && <path className="dpad-arm" d={ARMS[direction]} />}
-        <path className="dpad-rim" d={CROSS} />
         {[0, 90, 180, 270].map((angle) => (
           <path
             key={angle}
