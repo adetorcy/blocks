@@ -27,6 +27,8 @@
   --black: oklch(0.16 0 0);
   /* The jammed piece's gray (DarkGray in renderer.js), for the menu windows */
   --gray: darkgray;
+  /* Shaded edges of the menu windows, darker than --gray */
+  --shade: oklch(0.6 0 0);
 
   /* Touch controls */
   /* Filled shapes, no outlines: the game's cards are white outlines */
@@ -128,7 +130,8 @@ body {
 
 @keyframes blinker {
   50% {
-    color: hsl(15, 70%, 60%);
+    /* RED in colors.js */
+    color: oklch(0.66 0.21 29);
   }
 }
 
@@ -420,7 +423,7 @@ canvas {
 
 /* Pause and game over: a raised window over the board, opaque to hide the stack */
 /* Only overlays are raised, everything else is flat */
-/* Lit from the top left like the blocks: 4px edges, white top and left, gray right and bottom */
+/* Lit from the top left like the blocks: 4px edges, white top and left, shaded right and bottom */
 /* Inset shadows, since two border colors meet on a diagonal at the corners */
 /* The 4px page-color outline keeps the edges off the blocks next to it */
 /* Own compositing layer: Chrome then draws its text in grayscale */
@@ -437,7 +440,7 @@ canvas {
   outline: 4px solid var(--black);
   box-shadow:
     inset 4px 4px 0 var(--white),
-    inset -4px -4px 0 var(--gray);
+    inset -4px -4px 0 var(--shade);
   row-gap: 32px;
   padding: 4px 16px 36px;
   background-color: var(--black);
