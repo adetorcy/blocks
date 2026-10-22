@@ -433,14 +433,10 @@ canvas {
   row-gap: 64px;
 }
 
+/* Lines left aligned, as in the windows */
 .menu-start {
   top: 344px;
   left: 128px;
-
-  /* START centered over CONTROLS */
-  > :first-child {
-    margin-left: 20px;
-  }
 }
 
 .menu-controls {
@@ -458,7 +454,14 @@ canvas {
 /* Same stair shape (an outline would be cut by the clip-path) */
 /* Own compositing layer: Chrome then draws its text in grayscale */
 /* In the page layer the opaque window gave it color fringes (see .card) */
+/* Same size and place for pause and game over, so labels can change */
+/* as long as they fit: 212px wide, centered across the board */
+/* One top for both, the taller pause window is centered (rounded up) */
 .menu-frame {
+  top: 296px;
+  left: 96px;
+  box-sizing: border-box;
+  width: 212px;
   padding: 4px;
   background-color: var(--black);
   clip-path: var(--stair);
@@ -480,17 +483,6 @@ canvas {
   padding: 12px 24px;
   background-color: var(--line);
   color: var(--black);
-}
-
-/* Windows centered on the board, rounded up and left */
-.menu-pause {
-  top: 296px;
-  left: 112px;
-}
-
-.menu-game-over {
-  top: 324px;
-  left: 96px;
 }
 
 .controls-list {
