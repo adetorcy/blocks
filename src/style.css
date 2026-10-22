@@ -425,6 +425,7 @@ canvas {
 /* Only overlays are raised, everything else is flat */
 /* Lit from the top left like the blocks: 4px edges, white top and left, shaded right and bottom */
 /* Inset shadows, since two border colors meet on a diagonal at the corners */
+/* Where the white and shaded edges meet, a gray square in between (see below) */
 /* The 4px page-color outline keeps the edges off the blocks next to it */
 /* Own compositing layer: Chrome then draws its text in grayscale */
 /* In the page layer the opaque window gave it color fringes (see .card) */
@@ -445,6 +446,28 @@ canvas {
   padding: 4px 16px 36px;
   background-color: var(--black);
   will-change: transform;
+}
+
+/* Top right and bottom left squares in the in-between tone */
+/* The gray (0.73) is about halfway from the white (0.9) to the shade (0.6) */
+/* So the light turns into the shade instead of stopping on it */
+.menu-box::before,
+.menu-box::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: var(--gray);
+}
+
+.menu-box::before {
+  top: 0;
+  right: 0;
+}
+
+.menu-box::after {
+  bottom: 0;
+  left: 0;
 }
 
 /* Gray bar inside the edge, text lined up with the options */
