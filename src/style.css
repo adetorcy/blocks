@@ -20,14 +20,20 @@
 :root {
   --print: "Barlow Semi Condensed", sans-serif;
 
+  /* One white and one black for the whole screen, softer than pure */
+  /* Pure white glared on pure black, most of all on phones (OLED black is off) */
+  /* White is WHITE in colors.js too (canvas), keep them the same */
+  --white: oklch(0.9 0 0);
+  --black: oklch(0.16 0 0);
+
   /* Touch controls */
   /* Filled shapes, no outlines: the game's cards are white outlines */
   /* and white lines on black look blurry next to the crisp game */
-  --fill: oklch(0.3 0 0);
+  --fill: oklch(0.34 0 0);
   /* Fill while a control is pressed */
-  --pressed: oklch(0.45 0 0);
-  /* Arrows and button letters, cut out in black */
-  --mark: black;
+  --pressed: oklch(0.49 0 0);
+  /* Arrows and button letters, cut out in the page color */
+  --mark: var(--black);
   /* START and Hide controls labels */
   --ink: oklch(0.6 0 0);
 }
@@ -36,7 +42,7 @@
 html {
   font-family: "Blocks";
   color-scheme: dark;
-  background-color: black;
+  background-color: var(--black);
 }
 
 body {
@@ -73,7 +79,7 @@ body {
   justify-content: center;
   column-gap: 16px;
   margin-top: 16px;
-  color: white;
+  color: var(--white);
   user-select: none;
   line-height: 1;
   transform-origin: top center;
@@ -89,7 +95,7 @@ body {
 /*** UI ***/
 /**********/
 
-/* No background color, the page is black */
+/* No background color, the page shows through */
 /* Chrome gives text on an opaque card subpixel antialiasing (color fringes) */
 /* Stair corners: the 3 corner pixels are cut */
 /* and the pixel diagonally inside closes the line (one background square each) */
@@ -394,7 +400,7 @@ body {
 }
 
 .touch-ui-toggle:active {
-  color: white;
+  color: var(--white);
 }
 
 /*****************/
@@ -447,10 +453,10 @@ canvas {
 /* Pause and game over */
 .menu-box {
   top: 304px;
-  outline: 4px solid black;
-  border: 4px solid white;
+  outline: 4px solid var(--black);
+  border: 4px solid var(--white);
   padding: 36px 24px;
-  background-color: black;
+  background-color: var(--black);
 }
 
 .menu-pause {

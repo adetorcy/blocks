@@ -181,7 +181,7 @@ function App() {
   // From the snapshot, so it changes on the level up frame
   const line = level
     ? LEVEL_COLORS[(level - 1) % LEVEL_COLORS.length]
-    : "white";
+    : "var(--white)";
 
   return (
     <>

@@ -8,6 +8,7 @@ import {
   PREVIEW_BOX_SIZE,
 } from "./constants";
 import PIECES from "./pieces";
+import { WHITE } from "./colors";
 
 const colors = Object.fromEntries(
   PIECES.map((piece) => [piece.id, piece.color]),
@@ -23,7 +24,7 @@ function drawBlock(ctx, x, y) {
 
   // save color and switch to white
   const color = ctx.fillStyle;
-  ctx.fillStyle = "white";
+  ctx.fillStyle = WHITE;
 
   // draw white square in corner
   ctx.fillRect(x, y, 8, 8);
@@ -71,7 +72,7 @@ export function drawGhostPiece(ctx, piece, row) {
 }
 
 export function drawWhiteBlocks(ctx, blocks) {
-  ctx.fillStyle = "white";
+  ctx.fillStyle = WHITE;
 
   blocks.forEach(([x, y]) => {
     ctx.fillRect(
