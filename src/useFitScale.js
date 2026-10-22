@@ -12,10 +12,8 @@ const MARGIN = 16;
 // (Container query units would mean rewriting every size in the game)
 // Here CSS lays out the container and we measure it and divide
 // Then snaps scale and position so virtual pixels stay crisp (see fit)
-export default function useFitScale(ref, enabled) {
+export default function useFitScale(ref) {
   useEffect(() => {
-    if (!enabled) return;
-
     const game = ref.current;
     const container = game.parentElement;
 
@@ -65,5 +63,5 @@ export default function useFitScale(ref, enabled) {
     observer.observe(game);
 
     return () => observer.disconnect();
-  }, [ref, enabled]);
+  }, [ref]);
 }

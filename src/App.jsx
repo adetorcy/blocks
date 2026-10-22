@@ -10,6 +10,7 @@ import ControlsMenu from "./ControlsMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
 import TouchUI from "./TouchUI";
+import Splash from "./Splash";
 import Game from "./game";
 import Renderer from "./renderer";
 import Loop from "./loop";
@@ -33,10 +34,11 @@ const GAME_EVENT_SFX = {
 
 function App() {
   // UI
-  const [menu, setMenu] = useState("start");
-  const [splash, setSplash] = useState(true);
+  // The game renders under the splash so it's sized when the splash ends
+  // Splash screen hides resizing jerkiness
+  const [menu, setMenu] = useState("splash");
   const shellRef = useRef(null);
-  useFitScale(shellRef, !splash);
+  useFitScale(shellRef);
 
   // Game
   // State so the snapshot hook resubscribes on start and quit
@@ -170,12 +172,11 @@ function App() {
     return () => clearTimeout(timeoutID);
   }, [gameOver]);
 
-  // One time splash screen effect
+  // One time splash screen
+  // Its blocks land by 1.08s and the text shows at 1.2s (style.css)
   useEffect(() => {
-    setTimeout(() => setSplash(false), 500);
+    setTimeout(() => setMenu("start"), 2400);
   }, []);
-
-  if (splash) return <div className="splash">👾</div>;
 
   // Card borders take the level color, white at level 0 only
   // From the snapshot, so it changes on the level up frame
@@ -229,6 +230,8 @@ function App() {
         </div>
       </div>
       <TouchUI menu={menu} />
+      {/* Last so it covers the game */}
+      {menu === "splash" && <Splash />}
     </>
   );
 }

@@ -96,6 +96,92 @@ body {
   top: var(--snap-y, 0);
 }
 
+/**************/
+/*** SPLASH ***/
+/**************/
+
+/* Covers the whole screen while the game sizes itself underneath */
+/* (fonts loading, touch controls showing) */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--black);
+}
+
+/* GAME OF FALLING over BLOCKS made of blocks (Splash.jsx) */
+/* Scaled to fit and snapped like the game (useFitScale) */
+/* Rows of blocks fall in bottom first and land by 1.08s, then the text shows */
+.splash {
+  /* Full width on narrow screens too, the scale fits it */
+  flex: none;
+  /* Scaled from the top center, half the width must land on device pixels */
+  /* A multiple of 16 does at the usual ratios (8px steps at 2.625) */
+  width: 672px;
+  /* 264px tall, centered on the screen, scaled from the top */
+  margin-top: calc((100dvh - 264px * var(--scale, 1)) / 2);
+  color: var(--white);
+  font-size: 48px;
+  line-height: 1;
+  transform-origin: top center;
+  transform: scale(var(--scale, 1));
+  position: relative;
+  left: var(--snap-x, 0);
+  top: var(--snap-y, 0);
+  /* Own compositing layer, or the cover gives the text color fringes (see .menu-box) */
+  will-change: transform;
+}
+
+/* A font pixel is 8px at 48px */
+/* 112px in centers the text, 2px left of the blocks */
+.splash-text {
+  padding-left: 112px;
+  animation: splash-show 0s 1.2s backwards;
+}
+
+/* 5 rows of 32px cells, the last gaps included */
+/* BLOCKS is 668px wide, centered 2px left */
+.splash-blocks {
+  position: relative;
+  height: 160px;
+  margin-top: 56px;
+}
+
+/* Game blocks a bit smaller: 28px in a 32px cell, the gap after them */
+/* Each row falls in steps of one cell, from above the screen */
+.splash-block {
+  position: absolute;
+  left: calc(var(--x) * 32px);
+  top: calc(var(--y) * 32px);
+  width: 28px;
+  height: 28px;
+  background-color: currentColor;
+  animation: splash-fall 0.48s steps(48) calc((4 - var(--y)) * 0.15s) backwards;
+
+  /* White corner, as on the game's blocks */
+  &::before {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    box-shadow: inset 4px 4px 0 var(--white);
+  }
+}
+
+@keyframes splash-fall {
+  from {
+    transform: translateY(-1536px);
+  }
+}
+
+@keyframes splash-show {
+  from {
+    visibility: hidden;
+  }
+}
+
 /**********/
 /*** UI ***/
 /**********/
@@ -110,14 +196,6 @@ body {
 .stack {
   display: flex;
   flex-direction: column;
-}
-
-.splash {
-  height: 100dvh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 48px;
 }
 
 .menu-option {
