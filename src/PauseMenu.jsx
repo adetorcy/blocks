@@ -38,20 +38,23 @@ export default function PauseMenu({ resume, quit }) {
   ];
 
   return (
-    <div className="stack menu menu-box menu-pause">
-      {options.map(([callback, label], i) => {
-        const selected = i === selectedIndex;
-        return (
-          <div
-            key={i}
-            ref={selected ? selectedRef : null}
-            className={selected ? "menu-option selected" : "menu-option"}
-            onClick={callback}
-          >
-            {label}
-          </div>
-        );
-      })}
+    <div className="menu menu-frame menu-pause">
+      <div className="stack card menu-box">
+        <div className="menu-title">PAUSE</div>
+        {options.map(([callback, label], i) => {
+          const selected = i === selectedIndex;
+          return (
+            <div
+              key={i}
+              ref={selected ? selectedRef : null}
+              className={selected ? "menu-option selected" : "menu-option"}
+              onClick={callback}
+            >
+              {label}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
