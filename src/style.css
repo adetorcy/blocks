@@ -477,8 +477,12 @@ canvas {
   left: 0;
 }
 
-/* Options centered on the board, as in the start menu */
+/* Titles and options centered on the board, as in the start menu */
 .menu-pause {
+  .menu-title {
+    padding-left: 60px;
+  }
+
   /* CONTINUE, 2px left of center */
   > :nth-child(2) {
     margin-left: 16px;
@@ -496,6 +500,7 @@ canvas {
 }
 
 /* Full width gray bar inside the edges */
+/* 24px in centers GAME OVER, 2px left */
 .menu-title {
   align-self: stretch;
   margin: 0 -12px;
