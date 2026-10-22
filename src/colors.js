@@ -21,6 +21,9 @@ export const RED = "oklch(0.66 0.21 29)";
 // Block highlights and the lock flash, --white in style.css too
 export const WHITE = "oklch(0.9 0 0)";
 
+// Jammed piece at game over, --gray in style.css too
+export const GRAY = "DarkGray";
+
 // More card border colors, halfway between two piece colors
 // Hue and lightness in between, chroma capped to stay in sRGB
 // The warm gaps are tight, so coral, lime and gold sit close to their neighbors

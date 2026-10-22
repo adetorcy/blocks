@@ -193,7 +193,6 @@ function App() {
         <div className="card gamearea">
           <canvas
             ref={boardRef}
-            className="board"
             height={PLAYFIELD_HEIGHT}
             width={PLAYFIELD_WIDTH}
           ></canvas>

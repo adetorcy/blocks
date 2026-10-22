@@ -8,6 +8,7 @@ import {
   drawWhiteBlocks,
 } from "./drawing";
 import { COLUMNS } from "./constants";
+import { GRAY } from "./colors";
 
 export default class Renderer {
   constructor(boardCanvas, previewCanvas, fpsElement) {
@@ -29,7 +30,7 @@ export default class Renderer {
     drawBoard(this.boardCanvasCtx, game.board);
 
     if (game.gameOver) {
-      drawPiece(this.boardCanvasCtx, game.livePiece, "DarkGray");
+      drawPiece(this.boardCanvasCtx, game.livePiece, GRAY);
     } else if (game.livePiece) {
       drawGhostPiece(this.boardCanvasCtx, game.livePiece, game.ghostPieceRow);
       drawPiece(this.boardCanvasCtx, game.livePiece);

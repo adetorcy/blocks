@@ -23,9 +23,10 @@
   /* One white and one black for the whole screen, softer than pure */
   /* Pure white glared on pure black, most of all on phones (OLED black is off) */
   /* White is WHITE in colors.js too (canvas), keep them the same */
+  /* Black is the theme-color in index.html too (#0d0d0d) */
   --white: oklch(0.9 0 0);
   --black: oklch(0.16 0 0);
-  /* The jammed piece's gray (DarkGray in renderer.js), for the menu windows */
+  /* The jammed piece's gray (GRAY in colors.js), for the menu windows */
   --gray: darkgray;
   /* Shaded edges of the menu windows, darker than --gray */
   --shade: oklch(0.6 0 0);
