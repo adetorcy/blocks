@@ -19,7 +19,7 @@ export default function GameOverMenu({ quit }) {
   }, [quit]);
 
   return (
-    <div className="stack menu card menu-box menu-game-over">
+    <div className="stack menu menu-box menu-game-over">
       <div className="menu-title">GAME OVER</div>
       <div className="menu-option selected" onClick={quit}>
         OK

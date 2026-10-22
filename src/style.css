@@ -25,6 +25,8 @@
   /* White is WHITE in colors.js too (canvas), keep them the same */
   --white: oklch(0.9 0 0);
   --black: oklch(0.16 0 0);
+  /* The jammed piece's gray (DarkGray in renderer.js), for the menu windows */
+  --gray: darkgray;
 
   /* Touch controls */
   /* Filled shapes, no outlines: the game's cards are white outlines */
@@ -416,31 +418,38 @@ canvas {
   }
 }
 
-/* Pause and game over: a card over the board, opaque to hide the stack */
-/* The 4px page-color outline keeps its border off the blocks next to it */
+/* Pause and game over: a raised window over the board, opaque to hide the stack */
+/* Only overlays are raised, everything else is flat */
+/* Lit from the top left like the blocks: 4px edges, white top and left, gray right and bottom */
+/* Inset shadows, since two border colors meet on a diagonal at the corners */
+/* The 4px page-color outline keeps the edges off the blocks next to it */
 /* Own compositing layer: Chrome then draws its text in grayscale */
-/* In the page layer the opaque card gave it color fringes (see .card) */
+/* In the page layer the opaque window gave it color fringes (see .card) */
 /* Same size and place for pause and game over, so labels can change */
 /* as long as they fit: 212px wide with the outline, centered across the board */
 /* One top for both, the taller pause window is centered (rounded up) */
+/* Same colors whatever the level */
 .menu-box {
   top: 300px;
   left: 100px;
   box-sizing: border-box;
   width: 204px;
   outline: 4px solid var(--black);
+  box-shadow:
+    inset 4px 4px 0 var(--white),
+    inset -4px -4px 0 var(--gray);
   row-gap: 32px;
-  padding: 0 12px 32px;
+  padding: 4px 16px 36px;
   background-color: var(--black);
   will-change: transform;
 }
 
-/* Full width bar in the level color, text lined up with the options */
+/* Gray bar inside the edge, text lined up with the options */
 .menu-title {
   align-self: stretch;
   margin: 0 -12px;
   padding: 12px 24px;
-  background-color: var(--line);
+  background-color: var(--gray);
   color: var(--black);
 }
 

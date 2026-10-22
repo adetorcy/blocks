@@ -38,7 +38,7 @@ export default function PauseMenu({ resume, quit }) {
   ];
 
   return (
-    <div className="stack menu card menu-box menu-pause">
+    <div className="stack menu menu-box menu-pause">
       <div className="menu-title">PAUSE</div>
       {options.map(([callback, label], i) => {
         const selected = i === selectedIndex;
