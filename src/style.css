@@ -30,6 +30,8 @@
   --gray: darkgray;
   /* Shaded edges of the menu windows, darker than --gray */
   --shade: oklch(0.6 0 0);
+  /* Menu options not available, clearly dimmer than --white but readable */
+  --disabled: oklch(0.5 0 0);
 
   /* Touch controls */
   /* Filled shapes, no outlines: the game's cards are white outlines */
@@ -201,6 +203,12 @@ body {
 .menu-option {
   padding: 0 12px;
   cursor: pointer;
+}
+
+/* Options not there yet */
+.menu-option.disabled {
+  color: var(--disabled);
+  cursor: default;
 }
 
 .menu-option.selected {
@@ -485,14 +493,29 @@ canvas {
   row-gap: 64px;
 }
 
-/* Options centered on the board */
+/* Options centered on the board, the list too */
+/* Left edge at the widest, CREATE 2P GAME */
 .menu-start {
-  top: 344px;
-  left: 132px;
+  top: 232px;
+  left: 80px;
+  row-gap: 40px;
 
-  /* START over CONTROLS */
-  > :first-child {
+  /* START 1P GAME */
+  > :nth-child(1) {
+    margin-left: 8px;
+  }
+  /* JOIN 2P GAME */
+  > :nth-child(3) {
     margin-left: 20px;
+  }
+  /* CONTROLS and SETTINGS */
+  > :nth-child(4),
+  > :nth-child(5) {
+    margin-left: 52px;
+  }
+  /* ABOUT */
+  > :nth-child(6) {
+    margin-left: 72px;
   }
 }
 
