@@ -1,5 +1,4 @@
 import { COLUMNS } from "./constants";
-import { CYAN, YELLOW, ORANGE, GREEN, MAGENTA, RED } from "./colors";
 
 // Virtual keyboard events
 // Sent by the on-screen controls under their own names
@@ -64,24 +63,4 @@ export function* sequence() {
 
     yield roll;
   }
-}
-
-export function about() {
-  const style = (color) =>
-    `color: ${color}; font-weight: 900; font-size: 48px; text-shadow: 1px 1px 0 black;`;
-
-  const styles = [
-    style(CYAN),
-    style(ORANGE),
-    style(GREEN),
-    style(MAGENTA),
-    style(YELLOW),
-    style(RED),
-  ];
-
-  console.log(
-    "%cB%cL%cO%cC%cK%cS",
-    ...styles,
-    `\n\nv${import.meta.env.VITE_APP_VERSION}`,
-  );
 }
