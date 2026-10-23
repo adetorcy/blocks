@@ -98,69 +98,70 @@ body {
   top: var(--snap-y, 0);
 }
 
-/**************/
-/*** SPLASH ***/
-/**************/
+/************/
+/*** HOME ***/
+/************/
 
-/* Covers the whole screen while the game sizes itself underneath */
-/* (fonts loading, touch controls showing) */
-.splash-screen {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  background-color: var(--black);
+/* The home page and the screens it opens use the whole game area */
+/* The cards stay laid out, so starting a game shows them at their size */
+.game.home > :is(.gamearea, .dashboard) {
+  visibility: hidden;
 }
 
-/* GAME OF FALLING over BLOCKS made of blocks (Splash.jsx) */
-/* Scaled to fit and snapped like the game (useFitScale) */
-/* Rows of blocks fall in bottom first and land by 1.08s, then the text shows */
-.splash {
-  /* Full width on narrow screens too, the scale fits it */
-  flex: none;
-  /* Scaled from the top center, half the width must land on device pixels */
-  /* A multiple of 16 does at the usual ratios (8px steps at 2.625) */
-  width: 672px;
-  /* 264px tall, centered on the screen, scaled from the top */
-  margin-top: calc((100dvh - 264px * var(--scale, 1)) / 2);
-  color: var(--white);
-  font-size: 48px;
-  line-height: 1;
-  transform-origin: top center;
-  transform: scale(var(--scale, 1));
-  position: relative;
-  left: var(--snap-x, 0);
-  top: var(--snap-y, 0);
-  /* Own compositing layer, or the cover gives the text color fringes (see .menu-box) */
-  will-change: transform;
-}
-
-/* A font pixel is 8px at 48px */
-/* 112px in centers the text, 2px left of the blocks */
-.splash-text {
-  padding-left: 112px;
-  animation: splash-show 0s 1.2s backwards;
-}
-
-/* 5 rows of 32px cells, the last gaps included */
-/* BLOCKS is 668px wide, centered 2px left */
-.splash-blocks {
-  position: relative;
-  height: 160px;
-  margin-top: 56px;
-}
-
-/* Game blocks a bit smaller: 28px in a 32px cell, the gap after them */
-/* Each row falls in steps of one cell, from above the screen */
-.splash-block {
+/* Positions from the game area's corner (624 x 812), the cards' outer corner */
+.home-page {
   position: absolute;
-  left: calc(var(--x) * 32px);
-  top: calc(var(--y) * 32px);
-  width: 28px;
-  height: 28px;
+  inset: 0;
+}
+
+/* GAME OF FALLING over BLOCKS made of blocks (Title.jsx) */
+/* BLOCKS is 500px wide, centered 2px left */
+.title {
+  position: absolute;
+  top: 116px;
+  left: 60px;
+}
+
+/* Centered 2px left, between lines out to the edges of BLOCKS */
+.title-text {
+  position: relative;
+  margin-left: 140px;
+
+  /* 4px lines on the letters' middle row, 16px from them */
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    width: 124px;
+    height: 4px;
+    background-color: currentColor;
+  }
+
+  &::before {
+    left: -140px;
+  }
+
+  &::after {
+    left: 236px;
+  }
+}
+
+/* 5 rows of 24px cells, the last gaps included */
+.title-blocks {
+  position: relative;
+  height: 120px;
+  margin-top: 20px;
+}
+
+/* Game blocks smaller: 20px in a 24px cell, the gap after them */
+.title-block {
+  position: absolute;
+  left: calc(var(--x) * 24px);
+  top: calc(var(--y) * 24px);
+  width: 20px;
+  height: 20px;
   background-color: currentColor;
-  animation: splash-fall 0.48s steps(48) calc((4 - var(--y)) * 0.15s) backwards;
 
   /* White corner, as on the game's blocks */
   &::before {
@@ -172,13 +173,31 @@ body {
   }
 }
 
-@keyframes splash-fall {
-  from {
-    transform: translateY(-1536px);
+/* Intro, once per page load (App) */
+/* Rows of blocks fall in bottom first, a cell every 15ms, and land by 0.81s */
+/* 14 cells is above the screen whatever the scale (the game sits at the top) */
+/* Then the text and the options show together at 1s */
+.intro {
+  .title-block {
+    animation: title-fall 0.21s steps(14) calc((4 - var(--y)) * 0.15s) backwards;
+  }
+
+  .title-text {
+    animation: home-show 0s 1s backwards;
+  }
+
+  .menu-start {
+    animation: home-show 0s 1s backwards;
   }
 }
 
-@keyframes splash-show {
+@keyframes title-fall {
+  from {
+    transform: translateY(-336px);
+  }
+}
+
+@keyframes home-show {
   from {
     visibility: hidden;
   }
@@ -481,9 +500,9 @@ canvas {
   image-rendering: pixelated;
 }
 
-/* Menus sit at set positions over the board, nothing is centered */
-/* The board is 101×201 virtual pixels (a gap on both sides of the blocks) */
-/* So centered content of an even size would land between virtual pixels */
+/* Menus sit at set positions, nothing is centered */
+/* Home pages on the game area (156×203 virtual pixels), windows over the board (101×201) */
+/* Centered content of the wrong size would land between virtual pixels */
 /* Offsets look centered, rounded up and left to the 4px grid */
 /* Labels are centered on their ink, without the spacing column after the last glyph */
 /* Check them when a label changes */
@@ -493,35 +512,36 @@ canvas {
   row-gap: 64px;
 }
 
-/* Options centered on the board, the list too */
-/* Left edge at the widest, CREATE 2P GAME */
+/* Options under the title, centered on the game area */
+/* Left edge at the widest, CREATE 2P GAME, the others 2px left of center */
 .menu-start {
-  top: 232px;
-  left: 80px;
+  top: 356px;
+  left: 192px;
   row-gap: 40px;
 
   /* START 1P GAME */
   > :nth-child(1) {
-    margin-left: 8px;
+    margin-left: 4px;
   }
   /* JOIN 2P GAME */
   > :nth-child(3) {
-    margin-left: 20px;
+    margin-left: 16px;
   }
   /* CONTROLS and SETTINGS */
   > :nth-child(4),
   > :nth-child(5) {
-    margin-left: 52px;
+    margin-left: 48px;
   }
   /* ABOUT */
   > :nth-child(6) {
-    margin-left: 72px;
+    margin-left: 68px;
   }
 }
 
+/* Centered on the game area */
 .menu-controls {
-  top: 248px;
-  left: 64px;
+  top: 252px;
+  left: 176px;
 
   /* OK centered under the list */
   > :last-child {

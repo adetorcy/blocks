@@ -10,7 +10,6 @@ import ControlsMenu from "./ControlsMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
 import TouchUI from "./TouchUI";
-import Splash from "./Splash";
 import Game from "./game";
 import Renderer from "./renderer";
 import Loop from "./loop";
@@ -34,9 +33,11 @@ const GAME_EVENT_SFX = {
 
 function App() {
   // UI
-  // The game renders under the splash so it's sized when the splash ends
-  // Splash screen hides resizing jerkiness
-  const [menu, setMenu] = useState("splash");
+  // The cards are laid out from the start and hidden
+  // So they're sized and scaled by the time a game starts (no jerkiness)
+  const [menu, setMenu] = useState("start");
+  // Title intro, once per page load
+  const [intro, setIntro] = useState(true);
   const shellRef = useRef(null);
   useFitScale(shellRef);
 
@@ -76,7 +77,10 @@ function App() {
 
   // User action callbacks
   const showStartMenu = () => setMenu("start");
-  const showControlsMenu = () => setMenu("controls");
+  const showControlsMenu = () => {
+    setIntro(false);
+    setMenu("controls");
+  };
   const resume = () => {
     resumeAudio();
     playSound("resume");
@@ -84,6 +88,7 @@ function App() {
     setMenu(null);
   };
   const start = () => {
+    setIntro(false);
     resumeAudio();
     const newGame = new Game(handleGameEvent);
     loopRef.current = new Loop(
@@ -172,11 +177,8 @@ function App() {
     return () => clearTimeout(timeoutID);
   }, [gameOver]);
 
-  // One time splash screen
-  // Its blocks land by 1.08s and the text shows at 1.2s (style.css)
-  useEffect(() => {
-    setTimeout(() => setMenu("start"), 2400);
-  }, []);
+  // The home page and the screens it opens, cards hidden
+  const home = menu === "start" || menu === "controls";
 
   // Card borders take the level color, white at level 0 only
   // From the snapshot, so it changes on the level up frame
@@ -188,7 +190,7 @@ function App() {
     <>
       <div
         ref={shellRef}
-        className={menu ? "game" : "game nocursor"}
+        className={`game${menu ? "" : " nocursor"}${home ? " home" : ""}`}
         style={{ "--line": line }}
       >
         <div className="card gamearea">
@@ -198,10 +200,8 @@ function App() {
             width={PLAYFIELD_WIDTH}
           ></canvas>
           {
-            // Overlay menu
+            // Windows over the board
             {
-              start: <StartMenu {...{ showControlsMenu, start }} />,
-              controls: <ControlsMenu {...{ showStartMenu }} />,
               pause: <PauseMenu {...{ resume, quit }} />,
               gameOver: <GameOverMenu {...{ quit }} />,
             }[menu] || null
@@ -228,10 +228,15 @@ function App() {
             <div>FPS</div>
           </div>
         </div>
+        {
+          // Home pages, on the whole game area
+          {
+            start: <StartMenu {...{ intro, showControlsMenu, start }} />,
+            controls: <ControlsMenu {...{ showStartMenu }} />,
+          }[menu] || null
+        }
       </div>
       <TouchUI menu={menu} />
-      {/* Last so it covers the game */}
-      {menu === "splash" && <Splash />}
     </>
   );
 }

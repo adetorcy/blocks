@@ -1,5 +1,3 @@
-import { useRef } from "react";
-import useFitScale from "./useFitScale";
 import { LEVEL_COLORS } from "./colors";
 
 // BLOCKS as in the Blocks font (Blocks6px.txt), without the spacing column
@@ -27,23 +25,20 @@ LETTERS.forEach((rows, i) => {
   column += rows[0].length + 1;
 });
 
-export default function Splash() {
-  const ref = useRef(null);
-  useFitScale(ref);
-
+// GAME OF FALLING over BLOCKS made of blocks, at the top of the home page
+// The intro class on a parent plays its intro (style.css)
+export default function Title() {
   return (
-    <div className="splash-screen">
-      <div ref={ref} className="splash">
-        <div className="splash-text">GAME OF FALLING</div>
-        <div className="splash-blocks">
-          {BLOCKS.map(({ x, y, color }) => (
-            <div
-              key={`${x},${y}`}
-              className="splash-block"
-              style={{ "--x": x, "--y": y, color }}
-            ></div>
-          ))}
-        </div>
+    <div className="title">
+      <div className="title-text">GAME OF FALLING</div>
+      <div className="title-blocks">
+        {BLOCKS.map(({ x, y, color }) => (
+          <div
+            key={`${x},${y}`}
+            className="title-block"
+            style={{ "--x": x, "--y": y, color }}
+          ></div>
+        ))}
       </div>
     </div>
   );
