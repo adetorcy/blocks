@@ -551,6 +551,26 @@ canvas {
   }
 }
 
+/* BLOCKS and the version at the top, OK where it is on the controls screen */
+.menu-about {
+  top: 116px;
+  left: 0;
+  right: 0;
+  row-gap: 588px;
+
+  /* Centered on its ink, so 2px right of the box's center */
+  /* Digits are 16px and dots 8px, so any version lands on the grid */
+  > :first-child {
+    align-self: center;
+    margin-left: 4px;
+  }
+
+  /* OK */
+  > :last-child {
+    margin-left: 284px;
+  }
+}
+
 /* Pause and game over: a raised window over the board, opaque to hide the stack */
 /* Only overlays are raised, everything else is flat */
 /* Lit from the top left like the blocks: 4px edges, white top and left, shaded right and bottom */

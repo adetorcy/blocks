@@ -9,13 +9,18 @@ const OPTIONS = [
   [null, "CREATE 2P GAME"],
   [null, "JOIN 2P GAME"],
   ["controls", "CONTROLS"],
-  [null, "ABOUT"],
+  ["about", "ABOUT"],
 ];
 
 // Indexes the arrows go through
 const ENABLED = OPTIONS.flatMap(([action], i) => (action ? [i] : []));
 
-export default function StartMenu({ intro, showControlsMenu, start }) {
+export default function StartMenu({
+  intro,
+  showAboutMenu,
+  showControlsMenu,
+  start,
+}) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selectedRef = useRef(null);
 
@@ -38,7 +43,7 @@ export default function StartMenu({ intro, showControlsMenu, start }) {
     return listenForMenuInput(handleMenuInput);
   }, []);
 
-  const actions = { start, controls: showControlsMenu };
+  const actions = { start, controls: showControlsMenu, about: showAboutMenu };
 
   return (
     <div className={intro ? "home-page intro" : "home-page"}>

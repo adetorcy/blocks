@@ -7,6 +7,7 @@ import {
 import Stat from "./Stat";
 import StartMenu from "./StartMenu";
 import ControlsMenu from "./ControlsMenu";
+import AboutMenu from "./AboutMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
 import TouchUI from "./TouchUI";
@@ -88,6 +89,10 @@ function App() {
   const showControlsMenu = () => {
     setIntro(false);
     setMenu("controls");
+  };
+  const showAboutMenu = () => {
+    setIntro(false);
+    setMenu("about");
   };
   const resume = () => {
     resumeAudio();
@@ -210,7 +215,7 @@ function App() {
   }, [gameOver]);
 
   // The home page and the screens it opens, cards hidden
-  const home = menu === "start" || menu === "controls";
+  const home = menu === "start" || menu === "controls" || menu === "about";
 
   // Card borders take the level color, white at level 0 only
   // From the snapshot, so it changes on the level up frame
@@ -263,12 +268,17 @@ function App() {
         {
           // Home pages, on the whole game area
           {
-            start: <StartMenu {...{ intro, showControlsMenu, start }} />,
+            start: (
+              <StartMenu
+                {...{ intro, showAboutMenu, showControlsMenu, start }}
+              />
+            ),
             controls: (
               <ControlsMenu
                 {...{ controlType, pickControlType, showStartMenu }}
               />
             ),
+            about: <AboutMenu {...{ showStartMenu }} />,
           }[menu] || null
         }
       </div>
