@@ -537,14 +537,18 @@ canvas {
   }
 }
 
-/* Centered on the game area */
+/* Control types at the top, the table under them, OK at the bottom */
+/* Left edge at the table's action column, the table centered on the game area */
+/* Positions are for the glyphs, options have 12px padding */
 .menu-controls {
-  top: 252px;
-  left: 176px;
+  top: 116px;
+  left: 68px;
+  row-gap: 72px;
 
-  /* OK centered under the list */
+  /* OK centered, lower */
   > :last-child {
-    margin-left: 108px;
+    margin-top: 28px;
+    margin-left: 216px;
   }
 }
 
@@ -629,14 +633,46 @@ canvas {
   color: var(--black);
 }
 
-.controls-list {
-  row-gap: 8px;
+/* TYPE 1 TYPE 2 TYPE 3, centered as a row, 48px between the glyphs */
+.control-types {
+  display: flex;
+  margin-left: 52px;
+  column-gap: 20px;
 }
 
-.controls-list-item {
-  display: flex;
-  justify-content: space-between;
-  column-gap: 24px;
+/* Types not picked, gray but still clickable */
+.control-type:not(.current) {
+  color: var(--disabled);
+}
+
+/* The picked type underlined under its ink, 4px below the line */
+/* White even while the label blinks */
+.control-type.current {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 28px;
+    left: 12px;
+    width: calc(100% - 28px);
+    height: 4px;
+    background-color: var(--white);
+  }
+}
+
+/* Actions, keys and touch buttons, KEYS and TOUCH over them */
+/* Fixed columns, sized for the widest cell of any type */
+/* So the table doesn't move when the type changes */
+.controls-table {
+  display: grid;
+  grid-template-columns: 176px 168px auto;
+  gap: 32px;
+  white-space: nowrap;
+
+  .gray {
+    color: var(--disabled);
+  }
 }
 
 /*****************/

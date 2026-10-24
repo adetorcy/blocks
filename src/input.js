@@ -41,6 +41,7 @@ const MENU_KEYS = {
   ArrowRight: "right",
   Enter: "confirm",
   Space: "confirm",
+  Escape: "back",
   KeyZ: "back",
 };
 

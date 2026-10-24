@@ -18,7 +18,7 @@ import useFitScale from "./useFitScale";
 import { playSound, resumeAudio } from "./sfx";
 import { LEVEL_COLORS } from "./colors";
 import { listenForPress, listenForRelease } from "./input";
-import { BUTTON_ACTIONS, KEY_ACTIONS } from "./controls";
+import { TYPES, loadControlType, saveControlType } from "./controls";
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
@@ -41,6 +41,9 @@ function App() {
   const [intro, setIntro] = useState(true);
   const shellRef = useRef(null);
   useFitScale(shellRef);
+
+  // Control type, an index in TYPES
+  const [controlType, setControlType] = useState(loadControlType);
 
   // Game
   // State so the snapshot hook resubscribes on start and quit
@@ -78,6 +81,10 @@ function App() {
 
   // User action callbacks
   const showStartMenu = () => setMenu("start");
+  const pickControlType = (type) => {
+    saveControlType(type);
+    setControlType(type);
+  };
   const showControlsMenu = () => {
     setIntro(false);
     setMenu("controls");
@@ -121,6 +128,8 @@ function App() {
       setMenu("pause");
     }
 
+    const { keys, buttons } = TYPES[controlType];
+
     // Keys and buttons held down, each with its action
     // An action stays held until all its inputs are released
     // So letting go of one of two keys for the same action doesn't stop DAS
@@ -151,7 +160,7 @@ function App() {
     }
 
     function handleKeydown(event) {
-      const action = KEY_ACTIONS[event.code];
+      const action = keys[event.code];
       if (!action) return;
 
       event.preventDefault();
@@ -165,7 +174,7 @@ function App() {
 
     // Button names are capitals, so they never clash with key codes
     function handleButtonPress(button) {
-      const action = BUTTON_ACTIONS[button];
+      const action = buttons[button];
       if (action) press(button, action);
     }
 
@@ -184,7 +193,7 @@ function App() {
       stopRelease();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [menu, game]);
+  }, [menu, game, controlType]);
 
   // Game over: vibrate then show menu
   useEffect(() => {
@@ -255,7 +264,11 @@ function App() {
           // Home pages, on the whole game area
           {
             start: <StartMenu {...{ intro, showControlsMenu, start }} />,
-            controls: <ControlsMenu {...{ showStartMenu }} />,
+            controls: (
+              <ControlsMenu
+                {...{ controlType, pickControlType, showStartMenu }}
+              />
+            ),
           }[menu] || null
         }
       </div>
