@@ -637,12 +637,18 @@ canvas {
   }
 }
 
-/* One left-aligned block, lines closer than menu options */
-/* Centered on its widest line, PLUS HARD DROP, GHOST PIECE */
-/* Check it when the text changes */
+/* Centered lines, closer than menu options */
+/* A centered line can fall 2px off the grid, depending on its width */
+/* Check every line when the text changes */
 .about-text {
-  margin-left: 116px;
+  align-self: stretch;
+  align-items: center;
   row-gap: 16px;
+
+  /* FAN REMAKE OF A, 2px right once centered */
+  > :first-child {
+    margin-left: 4px;
+  }
 }
 
 /***************************/
