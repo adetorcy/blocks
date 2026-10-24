@@ -81,7 +81,7 @@ describe("hard drop", () => {
     const game = newGame(); // O piece, columns 4-5
     const ghostRow = game.ghostPieceRow;
 
-    game.onkeydown("Space");
+    game.press("hardDrop");
 
     expect(game.livePiece).toBeNull();
     expect(ghostRow).toBe(BOTTOM - 2);
@@ -93,7 +93,7 @@ describe("hard drop", () => {
   it("spawns the next piece after ARE frames", () => {
     const game = newGame();
 
-    game.onkeydown("Space");
+    game.press("hardDrop");
     const n = framesUntil(game, () => game.livePiece !== null);
 
     expect(n).toBe(ARE[BOTTOM]);
@@ -102,8 +102,8 @@ describe("hard drop", () => {
   it("does nothing without a live piece", () => {
     const game = newGame();
 
-    game.onkeydown("Space");
-    game.onkeydown("Space"); // During ARE
+    game.press("hardDrop");
+    game.press("hardDrop"); // During ARE
 
     expect(game.gameEvents).toEqual(["hardDrop", "lock"]);
   });
@@ -114,8 +114,8 @@ describe("DAS", () => {
     const game = newGame(); // O piece at column 3, blocks in columns 4-5
     const column = game.livePiece.column;
 
-    // Immediate shift on key press
-    game.onkeydown("ArrowLeft");
+    // Immediate shift on press
+    game.press("moveLeft");
     expect(game.livePiece.column).toBe(column - 1);
 
     // Initial delay
@@ -136,12 +136,12 @@ describe("DAS", () => {
     expect(game.gameEvents).toEqual(["move", "move", "move", "move"]);
   });
 
-  it("stops on key release", () => {
+  it("stops on release", () => {
     const game = newGame();
     const column = game.livePiece.column;
 
-    game.onkeydown("ArrowRight");
-    game.keyup("ArrowRight");
+    game.press("moveRight");
+    game.release("moveRight");
     frames(game, DAS_DELAY * 2);
 
     expect(game.livePiece.column).toBe(column + 1);
@@ -153,7 +153,7 @@ describe("line clears", () => {
     const game = newGame();
     fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]); // Room for the O piece
 
-    game.onkeydown("Space");
+    game.press("hardDrop");
 
     expect(game.gameEvents).toEqual(["hardDrop", "lineClear"]);
     expect(game.getSnapshot()).toMatchObject({ score: 100, lines: 2 });
@@ -168,7 +168,7 @@ describe("line clears", () => {
     const game = newGame();
     fillRows(game, [BOTTOM], [4, 5]);
 
-    game.onkeydown("Space");
+    game.press("hardDrop");
     const n = framesUntil(game, () => game.gameEvents.includes("stackDrop"));
 
     // 5 animation steps, then one more step before the rows are removed
@@ -179,8 +179,8 @@ describe("line clears", () => {
     const game = newGame({ level: 3, pieces: repeat(I) });
     fillRows(game, [BOTTOM - 3, BOTTOM - 2, BOTTOM - 1, BOTTOM], [5]);
 
-    game.onkeydown("KeyX"); // Vertical I piece in column 5
-    game.onkeydown("Space");
+    game.press("rotateRight"); // Vertical I piece in column 5
+    game.press("hardDrop");
 
     expect(game.gameEvents).toEqual(["rotate", "hardDrop", "tetris"]);
     expect(game.getSnapshot()).toMatchObject({ score: 1200 * 4, lines: 4 });
@@ -205,7 +205,7 @@ describe("level up", () => {
     game.lines = 8; // Skip ahead, internal field
     fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]);
 
-    game.onkeydown("Space");
+    game.press("hardDrop");
 
     expect(game.getSnapshot()).toMatchObject({ lines: 10, level: 1 });
     expect(game.delay).toBe(GRAVITY_TABLE[1]);
@@ -224,7 +224,7 @@ describe("game over", () => {
       [0],
     );
 
-    game.onkeydown("Space"); // Locks in the spawn area
+    game.press("hardDrop"); // Locks in the spawn area
     framesUntil(game, () => game.getSnapshot().gameOver);
 
     expect(game.livePiece).not.toBeNull(); // Jammed piece
@@ -249,7 +249,7 @@ describe("snapshot", () => {
     let calls = 0;
     game.subscribe(() => calls++);
 
-    game.onkeydown("Space");
+    game.press("hardDrop");
 
     expect(calls).toBe(1);
     expect(game.getSnapshot()).not.toBe(before);
@@ -268,8 +268,8 @@ describe("snapshot", () => {
     let calls = 0;
     game.subscribe(() => calls++);
 
-    game.onkeydown("ArrowLeft");
-    game.onkeydown("Space"); // Lock without line clear
+    game.press("moveLeft");
+    game.press("hardDrop"); // Lock without line clear
     frames(game, 100);
 
     expect(calls).toBe(0);
@@ -283,7 +283,7 @@ describe("snapshot", () => {
     const unsubscribe = game.subscribe(() => calls++);
 
     unsubscribe();
-    game.onkeydown("Space");
+    game.press("hardDrop");
 
     expect(calls).toBe(0);
     expect(game.getSnapshot().lines).toBe(1);
@@ -299,7 +299,7 @@ describe("snapshot", () => {
     let calls = 0;
     game.subscribe(() => calls++);
 
-    game.onkeydown("Space");
+    game.press("hardDrop");
     framesUntil(game, () => game.getSnapshot().gameOver);
 
     expect(calls).toBe(1);

@@ -450,8 +450,7 @@ body {
   background: var(--fill);
 }
 
-/* Actual or simulated active state */
-:is(.start-btn:active, .start-btn.active) .start-btn-pill {
+.start-btn:active .start-btn-pill {
   background: var(--pressed);
 }
 

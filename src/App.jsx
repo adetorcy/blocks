@@ -17,7 +17,8 @@ import useGameSnapshot from "./useGameSnapshot";
 import useFitScale from "./useFitScale";
 import { playSound, resumeAudio } from "./sfx";
 import { LEVEL_COLORS } from "./colors";
-import { listenForKeydown, listenForKeyup } from "./utils";
+import { listenForPress, listenForRelease } from "./input";
+import { BUTTON_ACTIONS, KEY_ACTIONS } from "./controls";
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
@@ -107,7 +108,7 @@ function App() {
     setMenu("start");
   };
 
-  // Listen for keyboard events (physical and on-screen) and tab visibility
+  // Listen for keys, touch buttons and tab visibility
   useEffect(() => {
     // Only if game is running
     if (menu) return;
@@ -120,30 +121,52 @@ function App() {
       setMenu("pause");
     }
 
-    function handleKeydown(event) {
-      // Ignore auto-repeat from held keys, DAS handles held keys
-      if (event.repeat) {
-        event.preventDefault();
-        return;
-      }
+    // Keys and buttons held down, each with its action
+    // An action stays held until all its inputs are released
+    // So letting go of one of two keys for the same action doesn't stop DAS
+    const held = new Map();
+    const isHeld = (action) => [...held.values()].includes(action);
 
+    function press(input, action) {
       // Game over, ignore input until the menu shows
       if (game.gameOver) return;
 
-      // Pause
-      if (event.code === "Enter") {
-        event.preventDefault();
+      if (action === "pause") {
         playSound("pause");
         pause();
         return;
       }
 
-      // Game
-      if (game.onkeydown(event.code)) event.preventDefault();
+      const wasHeld = isHeld(action);
+      held.set(input, action);
+      if (!wasHeld) game.press(action);
+    }
+
+    function release(input) {
+      const action = held.get(input);
+      if (!action) return;
+
+      held.delete(input);
+      if (!isHeld(action)) game.release(action);
+    }
+
+    function handleKeydown(event) {
+      const action = KEY_ACTIONS[event.code];
+      if (!action) return;
+
+      event.preventDefault();
+      // Ignore auto-repeat from held keys, DAS handles held keys
+      if (!event.repeat) press(event.code, action);
     }
 
     function handleKeyup(event) {
-      game.keyup(event.code);
+      release(event.code);
+    }
+
+    // Button names are capitals, so they never clash with key codes
+    function handleButtonPress(button) {
+      const action = BUTTON_ACTIONS[button];
+      if (action) press(button, action);
     }
 
     // Auto-pause when the tab is hidden
@@ -152,13 +175,13 @@ function App() {
       if (document.hidden) pause();
     }
 
-    const stopKeydown = listenForKeydown(handleKeydown);
-    const stopKeyup = listenForKeyup(handleKeyup);
+    const stopPress = listenForPress(handleKeydown, handleButtonPress);
+    const stopRelease = listenForRelease(handleKeyup, release);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      stopKeydown();
-      stopKeyup();
+      stopPress();
+      stopRelease();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [menu, game]);
@@ -236,7 +259,7 @@ function App() {
           }[menu] || null
         }
       </div>
-      <TouchUI menu={menu} />
+      <TouchUI />
     </>
   );
 }

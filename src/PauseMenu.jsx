@@ -1,34 +1,23 @@
 import { useEffect, useRef, useState } from "react";
-import { listenForKeydown } from "./utils";
+import { listenForMenuInput } from "./input";
 
 export default function PauseMenu({ resume, quit }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selectedRef = useRef(null);
 
   useEffect(() => {
-    // Callback for keydown event listener
-    function handleKeydown(event) {
-      switch (event.code) {
-        case "ArrowUp":
-        case "ArrowDown":
-          setSelectedIndex((index) => (index + 1) % 2);
-          event.preventDefault();
-          break;
-        case "Enter":
-        case "Space":
-          // Ignore auto-repeat from a held key
-          if (!event.repeat) selectedRef.current.click();
-          event.preventDefault();
-          break;
-        case "KeyZ":
-          // B goes back to the game
-          if (!event.repeat) resume();
-          event.preventDefault();
-          break;
+    function handleMenuInput(name, repeat) {
+      if (name === "up" || name === "down") {
+        setSelectedIndex((index) => (index + 1) % 2);
       }
+      // Ignore auto-repeat from a held key
+      if (repeat) return;
+      if (name === "confirm") selectedRef.current.click();
+      // Back to the game
+      if (name === "back") resume();
     }
 
-    return listenForKeydown(handleKeydown);
+    return listenForMenuInput(handleMenuInput);
   }, [resume]);
 
   // Array of callback-label pairs

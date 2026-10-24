@@ -1,21 +1,14 @@
 import { useEffect } from "react";
-import { listenForKeydown } from "./utils";
+import { listenForMenuInput } from "./input";
 
 export default function GameOverMenu({ quit }) {
   useEffect(() => {
-    // Callback for keydown event listener
-    function handleKeydown(event) {
-      switch (event.code) {
-        case "Enter":
-        case "Space":
-          // Ignore auto-repeat from a held key
-          if (!event.repeat) quit();
-          event.preventDefault();
-          break;
-      }
+    function handleMenuInput(name, repeat) {
+      // Ignore auto-repeat from a held key
+      if (name === "confirm" && !repeat) quit();
     }
 
-    return listenForKeydown(handleKeydown);
+    return listenForMenuInput(handleMenuInput);
   }, [quit]);
 
   return (

@@ -350,58 +350,51 @@ export default class Game {
     }
   }
 
-  // Handle keyboard events
-  // Returns false for keys the game doesn't use
-  // So App only blocks the browser's default action for game keys
-  onkeydown(code) {
-    switch (code) {
-      case "KeyZ":
+  // Player input, by action (keys and touch buttons are mapped in controls.js)
+  press(action) {
+    switch (action) {
+      case "rotateLeft":
         this.rotate(-1);
         break;
-      case "KeyX":
-      case "ArrowUp":
+      case "rotateRight":
         this.rotate(1);
         break;
-      case "ArrowLeft":
+      case "moveLeft":
         this.shift(-1);
         this.leftDasOn = true;
         this.rightDasOn = false;
         this.leftDasFramesLeft = DAS_DELAY;
         break;
-      case "ArrowDown":
+      case "softDrop":
         this.moveDown();
         this.softDropOn = true;
         this.softDropFramesLeft = SOFT_DROP_FRAMES;
         break;
-      case "ArrowRight":
+      case "moveRight":
         this.shift(1);
         this.rightDasOn = true;
         this.leftDasOn = false;
         this.rightDasFramesLeft = DAS_DELAY;
         break;
-      case "Space":
-        // Hard drop
+      case "hardDrop":
         if (this.livePiece) {
           this.onGameEvent("hardDrop");
           this.livePiece.row = this.ghostPieceRow;
           this.lock();
         }
         break;
-      default:
-        return false;
     }
-    return true;
   }
 
-  keyup(code) {
-    switch (code) {
-      case "ArrowLeft":
+  release(action) {
+    switch (action) {
+      case "moveLeft":
         this.leftDasOn = false;
         break;
-      case "ArrowDown":
+      case "softDrop":
         this.softDropOn = false;
         break;
-      case "ArrowRight":
+      case "moveRight":
         this.rightDasOn = false;
         break;
     }

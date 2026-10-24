@@ -1,23 +1,15 @@
 import { useEffect } from "react";
-import { listenForKeydown } from "./utils";
+import { listenForMenuInput } from "./input";
 
 export default function ControlsMenu({ showStartMenu }) {
   useEffect(() => {
-    // Callback for keydown event listener
-    function handleKeydown(event) {
-      switch (event.code) {
-        case "Enter":
-        case "Space":
-        case "KeyZ":
-          // OK, or B goes back, both to the start menu
-          // Ignore auto-repeat from a held key
-          if (!event.repeat) showStartMenu();
-          event.preventDefault();
-          break;
-      }
+    function handleMenuInput(name, repeat) {
+      // OK, or back, both to the start menu
+      // Ignore auto-repeat from a held key
+      if ((name === "confirm" || name === "back") && !repeat) showStartMenu();
     }
 
-    return listenForKeydown(handleKeydown);
+    return listenForMenuInput(handleMenuInput);
   }, [showStartMenu]);
 
   return (

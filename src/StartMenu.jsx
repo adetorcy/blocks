@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { listenForKeydown } from "./utils";
+import { listenForMenuInput } from "./input";
 import Title from "./Title";
 
 // Action-label pairs, no action for options not there yet
@@ -29,27 +29,14 @@ export default function StartMenu({ intro, showControlsMenu, start }) {
       });
     }
 
-    // Callback for keydown event listener
-    function handleKeydown(event) {
-      switch (event.code) {
-        case "ArrowUp":
-          move(-1);
-          event.preventDefault();
-          break;
-        case "ArrowDown":
-          move(1);
-          event.preventDefault();
-          break;
-        case "Enter":
-        case "Space":
-          // Ignore auto-repeat from a held key
-          if (!event.repeat) selectedRef.current.click();
-          event.preventDefault();
-          break;
-      }
+    function handleMenuInput(name, repeat) {
+      if (name === "up") move(-1);
+      if (name === "down") move(1);
+      // Ignore auto-repeat from a held key
+      if (name === "confirm" && !repeat) selectedRef.current.click();
     }
 
-    return listenForKeydown(handleKeydown);
+    return listenForMenuInput(handleMenuInput);
   }, []);
 
   const actions = { start, controls: showControlsMenu };

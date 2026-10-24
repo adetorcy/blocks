@@ -1,16 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { dispatchKeyDown, dispatchKeyUp } from "./utils";
+import { useRef, useState } from "react";
+import { pressButton, releaseButton } from "./input";
 
-// Arrow key for each direction and back
-const KEYS = {
-  up: "ArrowUp",
-  down: "ArrowDown",
-  left: "ArrowLeft",
-  right: "ArrowRight",
+// Button name for each direction
+const BUTTONS = {
+  up: "UP",
+  down: "DOWN",
+  left: "LEFT",
+  right: "RIGHT",
 };
-const DIRECTIONS = Object.fromEntries(
-  Object.entries(KEYS).map(([direction, code]) => [code, direction]),
-);
 
 // Radius of the middle where no arrow is pressed
 const DEAD_ZONE = 10;
@@ -30,23 +27,23 @@ const ARMS = {
 // One-piece D-pad
 // The whole square is the touch area, split by angle around the center
 // So there's no gap between arrows and the thumb can slide from one to the next
-// Sliding releases the old arrow key and presses the new one
+// Sliding releases the old arrow and presses the new one
 // The pointer is captured so the thumb can drift off the square
 export default function DPad() {
-  // Direction shown pressed, from touch or a physical arrow key
+  // Direction shown pressed
   const [direction, setDirection] = useState(null);
 
   // Touch in progress and the arrow it holds
   const pointerRef = useRef(null);
-  const touchDirectionRef = useRef(null);
+  const directionRef = useRef(null);
 
   function press(next) {
-    const current = touchDirectionRef.current;
+    const current = directionRef.current;
     if (next === current) return;
 
-    if (current) dispatchKeyUp({ code: KEYS[current] });
-    if (next) dispatchKeyDown({ code: KEYS[next] });
-    touchDirectionRef.current = next;
+    if (current) releaseButton(BUTTONS[current]);
+    if (next) pressButton(BUTTONS[next]);
+    directionRef.current = next;
     setDirection(next);
   }
 
@@ -84,28 +81,6 @@ export default function DPad() {
     pointerRef.current = null;
     press(null);
   }
-
-  // Highlight for physical arrow keys
-  useEffect(() => {
-    function handleKeydown(event) {
-      const pressed = DIRECTIONS[event.code];
-      if (pressed) setDirection(pressed);
-    }
-
-    function handleKeyup(event) {
-      const released = DIRECTIONS[event.code];
-      if (released) setDirection((x) => (x === released ? null : x));
-    }
-
-    // Only listen for physical keyboard events here
-    window.addEventListener("keydown", handleKeydown);
-    window.addEventListener("keyup", handleKeyup);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeydown);
-      window.removeEventListener("keyup", handleKeyup);
-    };
-  }, []);
 
   return (
     <div

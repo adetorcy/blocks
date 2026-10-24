@@ -1,11 +1,5 @@
 import { COLUMNS } from "./constants";
 
-// Virtual keyboard events
-// Sent by the on-screen controls under their own names
-// So listeners for physical keys only (like the button highlights) don't get them
-const ONSCREEN_KEYDOWN = "blocks:onscreen-keydown";
-const ONSCREEN_KEYUP = "blocks:onscreen-keyup";
-
 function blockFits(board, column, row) {
   return board[row * COLUMNS + column] === 0 && column >= 0 && column < COLUMNS;
 }
@@ -14,36 +8,6 @@ export function pieceFits(board, piece) {
   return piece.positions.every(([x, y]) =>
     blockFits(board, piece.column + x, piece.row + y),
   );
-}
-
-export function dispatchKeyDown(options) {
-  dispatchEvent(new KeyboardEvent(ONSCREEN_KEYDOWN, options));
-}
-
-export function dispatchKeyUp(options) {
-  dispatchEvent(new KeyboardEvent(ONSCREEN_KEYUP, options));
-}
-
-// Physical and on-screen keys share one handler
-// Returns the cleanup, so an effect can return it as is
-export function listenForKeydown(handleKeydown) {
-  window.addEventListener("keydown", handleKeydown);
-  window.addEventListener(ONSCREEN_KEYDOWN, handleKeydown);
-
-  return () => {
-    window.removeEventListener("keydown", handleKeydown);
-    window.removeEventListener(ONSCREEN_KEYDOWN, handleKeydown);
-  };
-}
-
-export function listenForKeyup(handleKeyup) {
-  window.addEventListener("keyup", handleKeyup);
-  window.addEventListener(ONSCREEN_KEYUP, handleKeyup);
-
-  return () => {
-    window.removeEventListener("keyup", handleKeyup);
-    window.removeEventListener(ONSCREEN_KEYUP, handleKeyup);
-  };
 }
 
 // Rough simulation of the piece selection algorithm
