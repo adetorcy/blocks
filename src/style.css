@@ -1,3 +1,7 @@
+/*************/
+/*** FONTS ***/
+/*************/
+
 /* Game font, built from src/fonts/Blocks6px.txt (npm run font) */
 /* A font pixel is exactly 4px at 24px */
 @font-face {
@@ -16,6 +20,10 @@
   font-weight: 700;
   font-style: italic;
 }
+
+/************/
+/*** PAGE ***/
+/************/
 
 :root {
   --print: "Barlow Semi Condensed", sans-serif;
@@ -217,28 +225,6 @@ body {
 .stack {
   display: flex;
   flex-direction: column;
-}
-
-.menu-option {
-  padding: 0 12px;
-  cursor: pointer;
-}
-
-/* Options not there yet */
-.menu-option.disabled {
-  color: var(--disabled);
-  cursor: default;
-}
-
-.menu-option.selected {
-  animation: blinker 0.6s step-start infinite;
-}
-
-@keyframes blinker {
-  50% {
-    /* RED in colors.js */
-    color: oklch(0.66 0.21 29);
-  }
 }
 
 /* Game over: the board shakes one virtual pixel side to side */
@@ -499,6 +485,10 @@ canvas {
   image-rendering: pixelated;
 }
 
+/*************/
+/*** MENUS ***/
+/*************/
+
 /* Menus sit at set positions, nothing is centered */
 /* Home pages on the game area (156×203 virtual pixels), windows over the board (101×201) */
 /* Centered content of the wrong size would land between virtual pixels */
@@ -510,6 +500,32 @@ canvas {
   align-items: flex-start;
   row-gap: 64px;
 }
+
+.menu-option {
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+/* Options not there yet */
+.menu-option.disabled {
+  color: var(--disabled);
+  cursor: default;
+}
+
+.menu-option.selected {
+  animation: blinker 0.6s step-start infinite;
+}
+
+@keyframes blinker {
+  50% {
+    /* RED in colors.js */
+    color: oklch(0.66 0.21 29);
+  }
+}
+
+/******************/
+/*** START MENU ***/
+/******************/
 
 /* Options under the title, centered on the game area */
 /* Left edge at the widest, CREATE 2P GAME, the others 2px left of center */
@@ -536,6 +552,10 @@ canvas {
   }
 }
 
+/***********************/
+/*** CONTROLS SCREEN ***/
+/***********************/
+
 /* Control types at the top, the table under them, OK at the bottom */
 /* Left edge at the table's action column, the table centered on the game area */
 /* Positions are for the glyphs, options have 12px padding */
@@ -551,12 +571,57 @@ canvas {
   }
 }
 
-/* BLOCKS and the version at the top, OK where it is on the controls screen */
+/* TYPE 1 TYPE 2 TYPE 3, centered as a row, 48px between the glyphs */
+.control-types {
+  display: flex;
+  margin-left: 52px;
+  column-gap: 20px;
+}
+
+/* Types not picked, gray but still clickable */
+.control-type:not(.current) {
+  color: var(--disabled);
+}
+
+/* The picked type underlined under its ink, 4px below the line */
+/* White even while the label blinks */
+.control-type.current {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 28px;
+    left: 12px;
+    width: calc(100% - 28px);
+    height: 4px;
+    background-color: var(--white);
+  }
+}
+
+/* Actions, keys and touch buttons, KEYS and TOUCH over them */
+/* Fixed columns, sized for the widest cell of any type */
+/* So the table doesn't move when the type changes */
+.controls-table {
+  display: grid;
+  grid-template-columns: 176px 168px auto;
+  gap: 32px;
+  white-space: nowrap;
+
+  .gray {
+    color: var(--disabled);
+  }
+}
+
+/********************/
+/*** ABOUT SCREEN ***/
+/********************/
+
+/* BLOCKS and the version at the top, OK under it */
 .menu-about {
   top: 116px;
   left: 0;
   right: 0;
-  row-gap: 588px;
 
   /* Centered on its ink, so 2px right of the box's center */
   /* Digits are 16px and dots 8px, so any version lands on the grid */
@@ -570,6 +635,10 @@ canvas {
     margin-left: 284px;
   }
 }
+
+/***************************/
+/*** PAUSE AND GAME OVER ***/
+/***************************/
 
 /* Pause and game over: a raised window over the board, opaque to hide the stack */
 /* Only overlays are raised, everything else is flat */
@@ -650,48 +719,6 @@ canvas {
   padding: 12px 24px;
   background-color: var(--gray);
   color: var(--black);
-}
-
-/* TYPE 1 TYPE 2 TYPE 3, centered as a row, 48px between the glyphs */
-.control-types {
-  display: flex;
-  margin-left: 52px;
-  column-gap: 20px;
-}
-
-/* Types not picked, gray but still clickable */
-.control-type:not(.current) {
-  color: var(--disabled);
-}
-
-/* The picked type underlined under its ink, 4px below the line */
-/* White even while the label blinks */
-.control-type.current {
-  position: relative;
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 28px;
-    left: 12px;
-    width: calc(100% - 28px);
-    height: 4px;
-    background-color: var(--white);
-  }
-}
-
-/* Actions, keys and touch buttons, KEYS and TOUCH over them */
-/* Fixed columns, sized for the widest cell of any type */
-/* So the table doesn't move when the type changes */
-.controls-table {
-  display: grid;
-  grid-template-columns: 176px 168px auto;
-  gap: 32px;
-  white-space: nowrap;
-
-  .gray {
-    color: var(--disabled);
-  }
 }
 
 /*****************/
