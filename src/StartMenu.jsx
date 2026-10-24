@@ -9,7 +9,6 @@ const OPTIONS = [
   [null, "CREATE 2P GAME"],
   [null, "JOIN 2P GAME"],
   ["controls", "CONTROLS"],
-  [null, "SETTINGS"],
   [null, "ABOUT"],
 ];
 

@@ -526,13 +526,12 @@ canvas {
   > :nth-child(3) {
     margin-left: 16px;
   }
-  /* CONTROLS and SETTINGS */
-  > :nth-child(4),
-  > :nth-child(5) {
+  /* CONTROLS */
+  > :nth-child(4) {
     margin-left: 48px;
   }
   /* ABOUT */
-  > :nth-child(6) {
+  > :nth-child(5) {
     margin-left: 68px;
   }
 }
