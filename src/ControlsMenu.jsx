@@ -14,7 +14,9 @@ const ACTIONS = [
 ];
 
 // Key code to label: ArrowLeft is LEFT, KeyA is A, Space is SPACE
-const keyLabel = (code) => code.replace(/^(Arrow|Key)/, "").toUpperCase();
+// Escape is ESC, short enough for the KEYS column
+const keyLabel = (code) =>
+  code === "Escape" ? "ESC" : code.replace(/^(Arrow|Key)/, "").toUpperCase();
 
 // The inputs mapped to an action, NONE in gray if there are none
 // Button names are their own labels

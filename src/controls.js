@@ -6,6 +6,7 @@
 
 // The same in every type
 // Arrows and WASD both move, Z X for arrow players, J K for WASD players
+// Enter pauses like START, Esc like most PC games
 const KEYS = {
   ArrowLeft: "moveLeft",
   KeyA: "moveLeft",
@@ -18,6 +19,7 @@ const KEYS = {
   KeyX: "rotateRight",
   KeyK: "rotateRight",
   Enter: "pause",
+  Escape: "pause",
 };
 
 const BUTTONS = {
