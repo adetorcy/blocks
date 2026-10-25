@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { listenForMenuInput } from "./input";
 import { version } from "../package.json";
 
-const DESCRIPTION = ["FAN REMAKE OF A", "CLASSIC PUZZLE GAME"];
+const DESCRIPTION = ["UNOFFICIAL REMAKE OF A", "WELL-KNOWN PUZZLE GAME"];
 
 export default function AboutMenu({ showStartMenu }) {
   useEffect(() => {

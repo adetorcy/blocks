@@ -645,8 +645,9 @@ canvas {
   align-items: center;
   row-gap: 16px;
 
-  /* FAN REMAKE OF A, 2px right once centered */
-  > :first-child {
+  /* Centered, both lines would fall half a font pixel off the grid */
+  /* A 4px margin moves them 2px right */
+  > * {
     margin-left: 4px;
   }
 }
