@@ -23,5 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# Miscellaneous reference material
-reference
+# Misc
+scratch
