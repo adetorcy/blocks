@@ -175,6 +175,18 @@ describe("line clears", () => {
     expect(n).toBe(6 * LINE_CLEAR_STEP_FRAMES);
   });
 
+  it("spawns the next piece ARE frames after the stack drops", () => {
+    const game = newGame();
+    fillRows(game, [BOTTOM], [4, 5]);
+
+    game.press("hardDrop");
+    framesUntil(game, () => game.gameEvents.includes("stackDrop"));
+    const n = framesUntil(game, () => game.livePiece !== null);
+
+    // ARE from the lock height, as without a line clear
+    expect(n).toBe(ARE[BOTTOM]);
+  });
+
   it("scores a tetris times level + 1", () => {
     const game = newGame({ level: 3, pieces: repeat(I) });
     fillRows(game, [BOTTOM - 3, BOTTOM - 2, BOTTOM - 1, BOTTOM], [5]);

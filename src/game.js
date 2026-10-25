@@ -52,6 +52,7 @@ export default class Game {
     // Line clearing
     this.cleared = []; // Indices of cleared lines
     this.lineClearAnimationStep = 0;
+    this.entryDelay = 0; // ARE once the stack drops
 
     // Lock effect: { blocks, framesLeft } while active
     this.lockFlash = null;
@@ -157,9 +158,12 @@ export default class Game {
     }
 
     // Remove any cleared lines from the board, the stack drops
+    // Then ARE before the next piece
     if (this.cleared.length) {
       while (this.cleared.length) this.deleteLine(this.cleared.pop());
       this.onGameEvent("stackDrop");
+      this.framesRemaining = this.entryDelay;
+      return;
     }
 
     // Step through piece sequence
@@ -253,6 +257,9 @@ export default class Game {
     // Start line clear animation
     this.framesRemaining = LINE_CLEAR_STEP_FRAMES;
     this.lineClearAnimationStep = 5;
+
+    // ARE still comes after, from the lock height, like on the NES
+    this.entryDelay = ARE[row];
   }
 
   reward(lines) {
