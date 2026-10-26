@@ -1,5 +1,7 @@
 /*** Sound Effects ***/
 
+// Square, triangle and GB wave are band-limited (Clean in the sound lab), so they don't alias
+
 // G5, GB wave
 import move from "./audio/move.wav";
 
@@ -13,7 +15,7 @@ import lock from "./audio/lock.wav";
 import clear from "./audio/clear.wav";
 
 // Four coins zigzagging to C5 C6 E5 C6, short note then long
-// Band-limited square, low-passed at 5 kHz, echo darker on every repeat
+// Square, low-passed at 5 kHz, echo darker on every repeat
 import tetris from "./audio/tetris.wav";
 
 // C6 E6 G6 B6 arpeggio cycling every 60 ms and fading, GB wave
