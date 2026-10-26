@@ -12,8 +12,8 @@ import lock from "./audio/lock.wav";
 // C5 E5 G5 B5 D6 G6 arpeggio, GB wave
 import clear from "./audio/clear.wav";
 
-// Ab Bb C, each chord struck twice, two organ voices
-// Triangle bass Ab3 Bb3 C4
+// Four coins zigzagging to C5 C6 E5 C6, short note then long
+// Band-limited square, low-passed at 5 kHz, echo darker on every repeat
 import tetris from "./audio/tetris.wav";
 
 // C6 E6 G6 B6 arpeggio cycling every 60 ms and fading, GB wave
