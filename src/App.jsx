@@ -197,6 +197,8 @@ function App() {
       stopPress();
       stopRelease();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      // Leaving play (pause, hidden tab, game over) lets go of everything held
+      for (const action of held.values()) game.release(action);
     };
   }, [menu, game, controlType]);
 
