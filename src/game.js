@@ -59,6 +59,11 @@ export default class Game {
 
     this.gameOver = false;
 
+    // Game frames run so far, the current one included
+    // Events from frame() happen on frame frameCount, game over too
+    // 2P results compare frames, not when messages arrive
+    this.frameCount = 0;
+
     // UI subscribers and initial snapshot
     this.listeners = new Set();
     this.notify();
@@ -98,6 +103,8 @@ export default class Game {
 
   // Advance the game by one frame (run 60 times per second by the loop)
   frame() {
+    this.frameCount++;
+
     // Lock effect countdown
     if (this.lockFlash && --this.lockFlash.framesLeft === 0) {
       this.lockFlash = null;

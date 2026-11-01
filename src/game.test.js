@@ -244,6 +244,30 @@ describe("game over", () => {
   });
 });
 
+describe("frame count", () => {
+  it("starts at 0 and counts every frame", () => {
+    const game = newGame();
+    expect(game.frameCount).toBe(0);
+
+    frames(game, 100);
+    expect(game.frameCount).toBe(100);
+  });
+
+  it("gives the frame game over happened on", () => {
+    const game = newGame();
+    fillRows(
+      game,
+      Array.from({ length: ROWS - 4 }, (_, i) => i + 4),
+      [0],
+    );
+
+    game.press("hardDrop");
+    const n = framesUntil(game, () => game.gameOver);
+
+    expect(game.frameCount).toBe(n);
+  });
+});
+
 describe("snapshot", () => {
   it("starts with the starting level", () => {
     expect(newGame({ level: 5 }).getSnapshot()).toEqual({
