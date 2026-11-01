@@ -9,6 +9,7 @@ import {
   SOFT_DROP_FRAMES,
   DAS_DELAY,
   DAS_FRAMES,
+  GARBAGE_ROWS,
 } from "./constants";
 import { sequence, pieceFits } from "./utils";
 
@@ -31,6 +32,7 @@ export default class Game {
 
     // Reports game events by name (move, lock, tetris...)
     // The UI decides what to do with them (sounds, visual effects)
+    // garbage also passes the rows for the opponent (2P)
     this.onGameEvent = onGameEvent;
 
     // Initial values
@@ -260,6 +262,7 @@ export default class Game {
 
     // Update player progress
     this.reward(this.cleared.length);
+    this.reportGarbage(blocks);
 
     // Start line clear animation
     this.framesRemaining = LINE_CLEAR_STEP_FRAMES;
@@ -292,6 +295,30 @@ export default class Game {
     }
 
     this.notify();
+  }
+
+  // Garbage for the opponent (2P), TGM style
+  // Copies of the bottom cleared rows without the piece that cleared them
+  // So each row has holes where that piece was
+  // Rows top to bottom, as on the board, each a plain array of piece ids
+  reportGarbage(blocks) {
+    const count = GARBAGE_ROWS[this.cleared.length];
+    if (!count) return;
+
+    // this.cleared is bottom up
+    const rows = this.cleared
+      .slice(0, count)
+      .reverse()
+      .map((rowIdx) => {
+        const start = rowIdx * COLUMNS;
+        const row = Array.from(this.board.subarray(start, start + COLUMNS));
+        blocks.forEach(([x, y]) => {
+          if (y === rowIdx) row[x] = 0;
+        });
+        return row;
+      });
+
+    this.onGameEvent("garbage", rows);
   }
 
   lineClearAnimation() {

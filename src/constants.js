@@ -42,5 +42,9 @@ export const ARE = [
 export const DAS_DELAY = 15;
 export const DAS_FRAMES = 2;
 
+// 2P garbage rows sent by lines cleared, Game Boy rules: a single sends none
+// https://tetris.wiki/Tetris_(Game_Boy)
+export const GARBAGE_ROWS = [0, 0, 1, 2, 4];
+
 // Soft drop is 1/3 G
 export const SOFT_DROP_FRAMES = 3;

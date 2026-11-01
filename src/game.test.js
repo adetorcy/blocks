@@ -24,10 +24,20 @@ function* repeat(...indices) {
 }
 
 // New game recording game events in game.gameEvents
+// And the rows of each garbage event in game.garbage
 function newGame({ level = 0, pieces = repeat(O) } = {}) {
   const gameEvents = [];
-  const game = new Game((name) => gameEvents.push(name), level, pieces);
+  const garbage = [];
+  const game = new Game(
+    (name, rows) => {
+      gameEvents.push(name);
+      if (name === "garbage") garbage.push(rows);
+    },
+    level,
+    pieces,
+  );
   game.gameEvents = gameEvents;
+  game.garbage = garbage;
   return game;
 }
 
@@ -155,13 +165,18 @@ describe("line clears", () => {
 
     game.press("hardDrop");
 
-    expect(game.gameEvents).toEqual(["hardDrop", "lineClear"]);
+    expect(game.gameEvents).toEqual(["hardDrop", "lineClear", "garbage"]);
     expect(game.getSnapshot()).toMatchObject({ score: 100, lines: 2 });
 
     // After the line clear animation the next piece spawns on an empty board
     framesUntil(game, () => game.livePiece !== null);
     expect(game.board.every((id) => id === 0)).toBe(true);
-    expect(game.gameEvents).toEqual(["hardDrop", "lineClear", "stackDrop"]);
+    expect(game.gameEvents).toEqual([
+      "hardDrop",
+      "lineClear",
+      "garbage",
+      "stackDrop",
+    ]);
   });
 
   it("drops the stack when the animation ends", () => {
@@ -194,8 +209,67 @@ describe("line clears", () => {
     game.press("rotateRight"); // Vertical I piece in column 5
     game.press("hardDrop");
 
-    expect(game.gameEvents).toEqual(["rotate", "hardDrop", "tetris"]);
+    expect(game.gameEvents).toEqual([
+      "rotate",
+      "hardDrop",
+      "tetris",
+      "garbage",
+    ]);
     expect(game.getSnapshot()).toMatchObject({ score: 1200 * 4, lines: 4 });
+  });
+});
+
+describe("garbage", () => {
+  // A filled row with holes in the given columns, 9 like fillRows
+  const row = (...holes) =>
+    Array.from({ length: COLUMNS }, (_, column) =>
+      holes.includes(column) ? 0 : 9,
+    );
+
+  it("sends nothing for a single", () => {
+    const game = newGame();
+    fillRows(game, [BOTTOM], [4, 5]);
+
+    game.press("hardDrop");
+
+    expect(game.gameEvents).toEqual(["hardDrop", "lineClear"]);
+  });
+
+  it("sends the bottom row of a double, without the piece", () => {
+    const game = newGame(); // O piece, columns 4-5
+    fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]);
+
+    game.press("hardDrop");
+
+    expect(game.garbage).toEqual([[row(4, 5)]]);
+  });
+
+  it("sends the bottom 2 rows of a triple, top to bottom", () => {
+    const game = newGame({ pieces: repeat(I) });
+    fillRows(game, [BOTTOM - 2, BOTTOM - 1, BOTTOM], [5]);
+    fillRows(game, [BOTTOM - 3], [4, 5]); // Not cleared
+    game.board[(BOTTOM - 2) * COLUMNS] = 1; // Cleared, not sent
+    game.board[(BOTTOM - 1) * COLUMNS] = 2; // Sent first
+
+    game.press("rotateRight"); // Vertical I piece in column 5
+    game.press("hardDrop");
+
+    const sent = [row(5), row(5)];
+    sent[0][0] = 2;
+    expect(game.garbage).toEqual([sent]);
+  });
+
+  it("sends all 4 rows of a tetris, top to bottom", () => {
+    const game = newGame({ pieces: repeat(I) });
+    fillRows(game, [BOTTOM - 3, BOTTOM - 2, BOTTOM - 1, BOTTOM], [5]);
+    game.board[(BOTTOM - 3) * COLUMNS] = 1; // Top row
+
+    game.press("rotateRight");
+    game.press("hardDrop");
+
+    const sent = [row(5), row(5), row(5), row(5)];
+    sent[0][0] = 1;
+    expect(game.garbage).toEqual([sent]);
   });
 });
 
@@ -222,7 +296,12 @@ describe("level up", () => {
     expect(game.getSnapshot()).toMatchObject({ lines: 10, level: 1 });
     expect(game.delay).toBe(GRAVITY_TABLE[1]);
     expect(game.nextLevelUp).toBe(20);
-    expect(game.gameEvents).toEqual(["hardDrop", "lineClear", "levelUp"]);
+    expect(game.gameEvents).toEqual([
+      "hardDrop",
+      "lineClear",
+      "levelUp",
+      "garbage",
+    ]);
   });
 });
 
