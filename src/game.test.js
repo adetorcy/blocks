@@ -88,7 +88,7 @@ describe("gravity", () => {
 
 describe("hard drop", () => {
   it("locks the piece on the ghost piece row", () => {
-    const game = newGame(); // O piece, columns 4-5
+    const game = newGame(); // O piece in columns 4-5
     const ghostRow = game.ghostPieceRow;
 
     game.press("hardDrop");
@@ -219,13 +219,26 @@ describe("line clears", () => {
   });
 });
 
-describe("garbage", () => {
-  // A filled row with holes in the given columns, 9 like fillRows
-  const row = (...holes) =>
-    Array.from({ length: COLUMNS }, (_, column) =>
-      holes.includes(column) ? 0 : 9,
-    );
+// A row of 9s like fillRows with holes in the given columns
+const row = (...holes) =>
+  Array.from({ length: COLUMNS }, (_, column) =>
+    holes.includes(column) ? 0 : 9,
+  );
 
+// Garbage pushed in right away as if the next piece had spawned
+function pushGarbageNow(game, rows) {
+  game.receiveGarbage(rows);
+  game.pushGarbage();
+  game.setGhostPiece();
+}
+
+function boardRow(game, rowIdx) {
+  return Array.from(
+    game.board.subarray(rowIdx * COLUMNS, (rowIdx + 1) * COLUMNS),
+  );
+}
+
+describe("garbage", () => {
   it("sends nothing for a single", () => {
     const game = newGame();
     fillRows(game, [BOTTOM], [4, 5]);
@@ -236,7 +249,7 @@ describe("garbage", () => {
   });
 
   it("sends the bottom row of a double, without the piece", () => {
-    const game = newGame(); // O piece, columns 4-5
+    const game = newGame(); // O piece in columns 4-5
     fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]);
 
     game.press("hardDrop");
@@ -270,6 +283,93 @@ describe("garbage", () => {
     const sent = [row(5), row(5), row(5), row(5)];
     sent[0][0] = 1;
     expect(game.garbage).toEqual([sent]);
+  });
+});
+
+describe("garbage in", () => {
+  it("waits for the next spawn", () => {
+    const game = newGame(); // O piece in columns 4-5
+
+    game.receiveGarbage([row(0)]);
+    expect(game.board.every((id) => id === 0)).toBe(true);
+
+    game.press("hardDrop"); // Locks on the bottom 2 rows
+    framesUntil(game, () => game.livePiece !== null);
+
+    // Garbage at the bottom and the O piece one row up
+    expect(boardRow(game, BOTTOM)).toEqual(row(0));
+    expect(cell(game, 4, BOTTOM - 1)).toBe(2);
+    expect(cell(game, 4, BOTTOM - 2)).toBe(2);
+    expect(cell(game, 4, BOTTOM - 3)).toBe(0);
+    expect(game.garbageHeight).toBe(1);
+  });
+
+  it("puts the latest attack at the bottom", () => {
+    const game = newGame();
+    const first = row(1);
+    const second = [row(2), row(3)];
+
+    game.receiveGarbage([first]);
+    game.receiveGarbage(second);
+    game.press("hardDrop");
+    framesUntil(game, () => game.livePiece !== null);
+
+    expect(boardRow(game, BOTTOM - 2)).toEqual(first);
+    expect(boardRow(game, BOTTOM - 1)).toEqual(second[0]);
+    expect(boardRow(game, BOTTOM)).toEqual(second[1]);
+    expect(game.garbageHeight).toBe(3);
+  });
+
+  it("doesn't count cleared garbage rows toward lines", () => {
+    const game = newGame(); // O piece in columns 4-5
+    pushGarbageNow(game, [row(4, 5), row(4, 5)]);
+
+    game.press("hardDrop");
+
+    // Score, sound and garbage sent as for any double
+    expect(game.gameEvents).toEqual(["hardDrop", "lineClear", "garbage"]);
+    expect(game.getSnapshot()).toMatchObject({ score: 100, lines: 0 });
+    expect(game.garbageHeight).toBe(0);
+  });
+
+  it("counts only the rows that aren't garbage", () => {
+    const game = newGame();
+    pushGarbageNow(game, [row(4, 5)]);
+    fillRows(game, [BOTTOM - 1], [4, 5]); // Not garbage
+
+    game.press("hardDrop");
+
+    expect(game.getSnapshot()).toMatchObject({ score: 100, lines: 1 });
+    expect(game.garbageHeight).toBe(0);
+  });
+
+  it("keeps garbage rows marked after a clear above them", () => {
+    const game = newGame();
+    pushGarbageNow(game, [row(0)]);
+    fillRows(game, [BOTTOM - 2, BOTTOM - 1], [4, 5]); // Not garbage
+
+    game.press("hardDrop");
+    framesUntil(game, () => game.gameEvents.includes("stackDrop"));
+
+    expect(game.getSnapshot().lines).toBe(2);
+    expect(boardRow(game, BOTTOM)).toEqual(row(0));
+    expect(game.garbageHeight).toBe(1);
+  });
+
+  it("ends the game when the stack is pushed into the spawn area", () => {
+    const game = newGame();
+    // Stack up to row 6 with no full lines
+    fillRows(
+      game,
+      Array.from({ length: ROWS - 6 }, (_, i) => i + 6),
+      [0],
+    );
+
+    game.press("hardDrop"); // Locks on rows 4-5 just below the spawn area
+    game.receiveGarbage([row(0), row(0)]); // Pushes it into the spawn area
+    framesUntil(game, () => game.gameOver);
+
+    expect(game.gameEvents).toEqual(["hardDrop", "lock", "gameOver"]);
   });
 });
 
@@ -308,7 +408,7 @@ describe("level up", () => {
 describe("game over", () => {
   it("ends when the next piece can't spawn", () => {
     const game = newGame();
-    // Stack up to just below the spawn area, no full lines
+    // Stack up to just below the spawn area with no full lines
     fillRows(
       game,
       Array.from({ length: ROWS - 4 }, (_, i) => i + 4),

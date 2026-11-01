@@ -1,5 +1,6 @@
 import PIECES from "./pieces";
 import {
+  ROWS,
   COLUMNS,
   BOARD_SIZE,
   GRAVITY_TABLE,
@@ -58,6 +59,20 @@ export default class Game {
 
     // Lock effect: { blocks, framesLeft } while active
     this.lockFlash = null;
+
+    // Garbage rows from the opponent (2P)
+    // They wait here for the next piece to spawn
+    this.garbageQueue = [];
+
+    // Garbage rows at the bottom of the board (2P)
+    // Garbage always comes in at the bottom and pushes everything up
+    // Line clears remove rows but keep the others in order
+    // So garbage rows are always the bottom garbageHeight rows
+    // No need to mark each row
+    // Just keep track of how many
+    // Rows from ROWS - garbageHeight down are garbage
+    // Filling their holes doesn't change that
+    this.garbageHeight = 0;
 
     this.gameOver = false;
 
@@ -175,6 +190,9 @@ export default class Game {
       return;
     }
 
+    // Garbage comes in before the next piece (2P)
+    this.pushGarbage();
+
     // Step through piece sequence
     this.livePiece = this.nextPiece;
     this.nextPiece = this.getPiece();
@@ -260,8 +278,21 @@ export default class Game {
       return;
     }
 
+    // Cleared garbage rows (2P) don't count toward lines
+    // They're the bottom garbageHeight rows
+    const garbageLines = this.cleared.filter(
+      (rowIdx) => rowIdx >= ROWS - this.garbageHeight,
+    ).length;
+
+    // Fewer garbage rows once the stack drops
+    // Nothing reads garbageHeight before then
+    this.garbageHeight -= garbageLines;
+
     // Update player progress
-    this.reward(this.cleared.length);
+    this.reward(this.cleared.length, garbageLines);
+
+    // Garbage sent counts cleared garbage rows too
+    // Clearing garbage still lets you fight back
     this.reportGarbage(blocks);
 
     // Start line clear animation
@@ -272,7 +303,10 @@ export default class Game {
     this.entryDelay = ARE[row];
   }
 
-  reward(lines) {
+  // Some of the cleared lines can be garbage rows (2P)
+  // Garbage rows count for score and sounds but not for lines and levels
+  // So garbage is pure pressure and can't help you win the race to level 10
+  reward(lines, garbageLines = 0) {
     if (lines === 4) {
       this.onGameEvent("tetris");
     } else {
@@ -283,8 +317,8 @@ export default class Game {
     // https://tetris.wiki/Scoring
     this.score += (this.level + 1) * [40, 100, 300, 1200][lines - 1];
 
-    // Lines
-    this.lines += lines;
+    // Lines without garbage rows
+    this.lines += lines - garbageLines;
 
     // Level
     if (this.lines >= this.nextLevelUp) {
@@ -319,6 +353,37 @@ export default class Game {
       });
 
     this.onGameEvent("garbage", rows);
+  }
+
+  // Garbage rows from the opponent (2P) listed top to bottom like the board
+  // They wait in a queue for pushGarbage() at the next spawn
+  // So the board never moves under a live piece or during a line clear
+  receiveGarbage(rows) {
+    this.garbageQueue.push(...rows);
+  }
+
+  // Queued garbage comes in at the bottom and the stack rises
+  // Attacks queue in the order they came
+  // So the latest one ends up at the bottom
+  // Blocks pushed out the top are lost
+  // The spawn right after decides game over as usual
+  pushGarbage() {
+    // A board's worth at most
+    // More would push the whole stack out anyway
+    const rows = this.garbageQueue.slice(-ROWS);
+    this.garbageQueue = [];
+    if (!rows.length) return;
+
+    // Every row moves up rows.length rows and the top ones are pushed out
+    // In the flat board: each cell moves rows.length * COLUMNS cells earlier
+    const size = rows.length * COLUMNS;
+    this.board.copyWithin(0, size);
+
+    // Garbage fills the bottom rows
+    // In the flat board: the last rows.length * COLUMNS cells
+    this.board.set(rows.flat(), BOARD_SIZE - size);
+
+    this.garbageHeight = Math.min(ROWS, this.garbageHeight + rows.length);
   }
 
   lineClearAnimation() {
