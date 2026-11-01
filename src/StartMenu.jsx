@@ -6,8 +6,7 @@ import Title from "./Title";
 // Those are grayed out and the arrows skip them
 const OPTIONS = [
   ["start", "START 1P GAME"],
-  [null, "CREATE 2P GAME"],
-  [null, "JOIN 2P GAME"],
+  ["create", "CREATE 2P GAME"],
   ["controls", "CONTROLS"],
   ["about", "ABOUT"],
 ];
@@ -19,6 +18,7 @@ export default function StartMenu({
   intro,
   showAboutMenu,
   showControlsMenu,
+  showNameMenu,
   start,
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -43,7 +43,12 @@ export default function StartMenu({
     return listenForMenuInput(handleMenuInput);
   }, []);
 
-  const actions = { start, controls: showControlsMenu, about: showAboutMenu };
+  const actions = {
+    start,
+    create: showNameMenu,
+    controls: showControlsMenu,
+    about: showAboutMenu,
+  };
 
   return (
     <div className={intro ? "home-page intro" : "home-page"}>

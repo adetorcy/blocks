@@ -4,6 +4,16 @@
 // 12 fits the name field and keeps names short enough to read
 export const NAME_LENGTH = 12;
 
+// Any character a name can't have
+const NOT_ALLOWED = /[^\w -]/g;
+
+// Name as it's typed in the field
+// Other characters dropped and cut at NAME_LENGTH
+// Spaces stay so a second word can follow, cleanName() trims them at the end
+export function typedName(text) {
+  return text.replace(NOT_ALLOWED, "").slice(0, NAME_LENGTH);
+}
+
 // Name as it's saved and sent
 // "" when nothing is left
 // Checked on both sides: our own field and the name the opponent sends
@@ -15,7 +25,7 @@ export function cleanName(text) {
   if (typeof text !== "string") return "";
 
   return text
-    .replace(/[^\w -]/g, "")
+    .replace(NOT_ALLOWED, "")
     .replace(/ +/g, " ")
     .trim()
     .slice(0, NAME_LENGTH)

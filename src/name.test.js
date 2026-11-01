@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanName, NAME_LENGTH } from "./name";
+import { cleanName, typedName, NAME_LENGTH } from "./name";
 
 describe("cleanName", () => {
   it("keeps letters, digits, spaces, underscores and dashes", () => {
@@ -40,5 +40,21 @@ describe("cleanName", () => {
     expect(cleanName(undefined)).toBe("");
     expect(cleanName(42)).toBe("");
     expect(cleanName({ name: "Alex" })).toBe("");
+  });
+});
+
+describe("typedName", () => {
+  it("drops other characters as they're typed", () => {
+    expect(typedName("Zoë!")).toBe("Zo");
+  });
+
+  // So a second word can follow
+  it("keeps spaces where they are", () => {
+    expect(typedName(" Alex ")).toBe(" Alex ");
+    expect(typedName("Alex  B")).toBe("Alex  B");
+  });
+
+  it("cuts at NAME_LENGTH", () => {
+    expect(typedName("abcdefghijklmnop")).toBe("abcdefghijkl");
   });
 });

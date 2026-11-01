@@ -538,16 +538,12 @@ canvas {
   > :nth-child(1) {
     margin-left: 4px;
   }
-  /* JOIN 2P GAME */
-  > :nth-child(3) {
-    margin-left: 16px;
-  }
   /* CONTROLS */
-  > :nth-child(4) {
+  > :nth-child(3) {
     margin-left: 48px;
   }
   /* ABOUT */
-  > :nth-child(5) {
+  > :nth-child(4) {
     margin-left: 68px;
   }
 }
@@ -649,6 +645,85 @@ canvas {
   /* A 4px margin moves them 2px right */
   > * {
     margin-left: 4px;
+  }
+}
+
+/**********************/
+/*** 2P NAME SCREEN ***/
+/**********************/
+
+/* Title, YOUR NAME:, the field and OK, centered on the game area */
+/* Labels centered on their ink, rounded up and left to the grid */
+.menu-name {
+  top: 116px;
+  left: 0;
+  row-gap: 40px;
+
+  /* CREATE 2P GAME */
+  > :nth-child(1) {
+    margin-left: 204px;
+  }
+  /* YOUR NAME: */
+  > :nth-child(2) {
+    margin-left: 236px;
+  }
+  /* The field, 16px under the letters of YOUR NAME: */
+  > :nth-child(3) {
+    margin-top: -28px;
+    margin-left: 148px;
+  }
+  /* OK, 64px under the field */
+  > :nth-child(4) {
+    margin-top: 24px;
+    margin-left: 284px;
+  }
+}
+
+/* Sized for 12 M or W (288px) and the caret, so it never scrolls sideways */
+/* A scrolled field would leave the _ behind */
+.name-field {
+  position: relative;
+
+  input {
+    box-sizing: border-box;
+    width: 328px;
+    height: 44px;
+    margin: 0;
+    padding: 8px 8px 4px 12px;
+    border: 4px solid var(--white);
+    border-radius: 0;
+    outline: none;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    /* Our own _ instead (.name-caret) */
+    caret-color: transparent;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+}
+
+/* Over the field, where its text starts (border and padding) */
+/* The hidden copy of the name pushes the _ right after it */
+.name-caret {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  white-space: pre;
+  pointer-events: none;
+
+  > :first-child {
+    visibility: hidden;
+  }
+}
+
+.caret {
+  animation: caret-blink 1s step-start infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    visibility: hidden;
   }
 }
 

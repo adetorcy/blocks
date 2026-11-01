@@ -8,6 +8,7 @@ import Stat from "./Stat";
 import StartMenu from "./StartMenu";
 import ControlsMenu from "./ControlsMenu";
 import AboutMenu from "./AboutMenu";
+import NameMenu from "./NameMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
 import TouchUI from "./TouchUI";
@@ -93,6 +94,10 @@ function App() {
   const showAboutMenu = () => {
     setIntro(false);
     setMenu("about");
+  };
+  const showNameMenu = () => {
+    setIntro(false);
+    setMenu("name");
   };
   const resume = () => {
     resumeAudio();
@@ -217,7 +222,7 @@ function App() {
   }, [gameOver]);
 
   // The home page and the screens it opens, cards hidden
-  const home = menu === "start" || menu === "controls" || menu === "about";
+  const home = ["start", "controls", "about", "name"].includes(menu);
 
   // Card borders take the level color, white at level 0 only
   // From the snapshot, so it changes on the level up frame
@@ -272,7 +277,13 @@ function App() {
           {
             start: (
               <StartMenu
-                {...{ intro, showAboutMenu, showControlsMenu, start }}
+                {...{
+                  intro,
+                  showAboutMenu,
+                  showControlsMenu,
+                  showNameMenu,
+                  start,
+                }}
               />
             ),
             controls: (
@@ -281,6 +292,14 @@ function App() {
               />
             ),
             about: <AboutMenu {...{ showStartMenu }} />,
+            // OK saves the name and goes home for now, no 2P game yet
+            name: (
+              <NameMenu
+                title="CREATE 2P GAME"
+                confirm={showStartMenu}
+                back={showStartMenu}
+              />
+            ),
           }[menu] || null
         }
       </div>
