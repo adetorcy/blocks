@@ -55,12 +55,21 @@ const MENU_BUTTONS = {
   B: "back",
 };
 
+// Keys that still work in a text field (the 2P name)
+// Enter is OK and Esc goes back
+// Arrows, Space and Z are typing and stay with the field
+const FIELD_KEYS = ["Enter", "Escape"];
+
 // Calls handleMenuInput(name, repeat) with up, down, left, right, confirm or back
 // repeat is true for auto-repeat from a held key
 export function listenForMenuInput(handleMenuInput) {
   function handleKey(event) {
     const name = MENU_KEYS[event.code];
     if (!name) return;
+
+    // preventDefault would stop the key from typing
+    const inField = event.target instanceof HTMLInputElement;
+    if (inField && !FIELD_KEYS.includes(event.code)) return;
 
     event.preventDefault();
     handleMenuInput(name, event.repeat);
