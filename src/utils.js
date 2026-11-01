@@ -10,19 +10,33 @@ export function pieceFits(board, piece) {
   );
 }
 
+// Random numbers in [0, 1) from a seed, the same seed gives the same numbers
+// Mulberry32: 32-bit integer math only, so every browser gets the same pieces
+// https://github.com/bryc/code/blob/master/jshash/PRNGs.md#mulberry32
+export function seededRandom(seed) {
+  let state = seed | 0;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), state | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // Rough simulation of the piece selection algorithm
 // https://tetrissuomi.wordpress.com/wp-content/uploads/2020/04/nes_tetris_rng.pdf
-export function* sequence() {
-  let roll = Math.trunc(Math.random() * 7);
+// Math.random in 1P, seededRandom in 2P so both players get the same pieces
+export function* sequence(random = Math.random) {
+  let roll = Math.trunc(random() * 7);
 
   yield roll;
 
   while (true) {
     let previous = roll;
 
-    roll = Math.trunc(Math.random() * 8);
+    roll = Math.trunc(random() * 8);
     if (roll === 7 || roll === previous) {
-      roll = Math.trunc(Math.random() * 7);
+      roll = Math.trunc(random() * 7);
     }
 
     yield roll;
