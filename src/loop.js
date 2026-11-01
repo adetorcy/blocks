@@ -42,7 +42,7 @@ export default class Loop {
     this.lastTime = now;
 
     // Run one game frame for each 1/60 second elapsed
-    while (this.elapsed >= FRAME_DURATION && !this.game.gameOver) {
+    while (this.elapsed >= FRAME_DURATION && !this.game.ended) {
       this.game.frame();
       this.elapsed -= FRAME_DURATION;
     }
@@ -50,9 +50,9 @@ export default class Loop {
     // Single redraw from game state
     this.renderer.render(this.game, now);
 
-    // GAME OVER
+    // GAME OVER or FINISHED (2P)
     // final state has been drawn, stop here
-    if (this.game.gameOver) {
+    if (this.game.ended) {
       this.requestID = null;
       return;
     }

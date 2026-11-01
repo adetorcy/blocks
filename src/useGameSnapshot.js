@@ -1,7 +1,13 @@
 import { useSyncExternalStore } from "react";
 
 // Snapshot when no game is running, resets the score card
-const NO_GAME = { score: 0, lines: 0, level: 0, gameOver: false };
+const NO_GAME = {
+  score: 0,
+  lines: 0,
+  level: 0,
+  gameOver: false,
+  finished: false,
+};
 
 function noSubscription() {
   return () => {};

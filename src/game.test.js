@@ -25,7 +25,7 @@ function* repeat(...indices) {
 
 // New game recording game events in game.gameEvents
 // And the rows of each garbage event in game.garbage
-function newGame({ level = 0, pieces = repeat(O) } = {}) {
+function newGame({ level = 0, pieces = repeat(O), targetLines } = {}) {
   const gameEvents = [];
   const garbage = [];
   const game = new Game(
@@ -33,8 +33,7 @@ function newGame({ level = 0, pieces = repeat(O) } = {}) {
       gameEvents.push(name);
       if (name === "garbage") garbage.push(rows);
     },
-    level,
-    pieces,
+    { level, pieceSequence: pieces, targetLines },
   );
   game.gameEvents = gameEvents;
   game.garbage = garbage;
@@ -423,6 +422,74 @@ describe("game over", () => {
   });
 });
 
+describe("finish", () => {
+  it("finishes on the frame the target is reached", () => {
+    const game = newGame({ targetLines: 2 });
+    fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]);
+    frames(game, 5);
+
+    game.press("hardDrop");
+
+    expect(game.finishFrame).toBe(5);
+    expect(game.gameEvents).toEqual([
+      "hardDrop",
+      "lineClear",
+      "finish",
+      "garbage",
+    ]);
+  });
+
+  it("stops after the clear plays out with no next piece", () => {
+    const game = newGame({ targetLines: 2 });
+    fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]);
+    let calls = 0;
+    game.subscribe(() => calls++);
+
+    game.press("hardDrop");
+    expect(game.finished).toBe(false);
+    const n = framesUntil(game, () => game.finished);
+
+    // Line clear animation and stack drop then ARE as before a spawn
+    expect(n).toBe(6 * LINE_CLEAR_STEP_FRAMES + ARE[BOTTOM]);
+    expect(game.ended).toBe(true);
+    expect(game.livePiece).toBeNull();
+    expect(game.getSnapshot()).toMatchObject({ finished: true, lines: 2 });
+    expect(calls).toBe(2); // Line clear then finish
+  });
+
+  it("doesn't finish below the target", () => {
+    const game = newGame({ targetLines: 3 });
+    fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]);
+
+    game.press("hardDrop");
+    framesUntil(game, () => game.livePiece !== null);
+
+    expect(game.finishFrame).toBeNull();
+    expect(game.gameEvents).not.toContain("finish");
+  });
+
+  it("doesn't count cleared garbage rows", () => {
+    const game = newGame({ targetLines: 2 });
+    pushGarbageNow(game, [row(4, 5), row(4, 5)]);
+
+    game.press("hardDrop");
+
+    expect(game.finishFrame).toBeNull();
+  });
+
+  it("never finishes in 1P", () => {
+    const game = newGame();
+    game.lines = 98; // Skip ahead, internal field
+    fillRows(game, [BOTTOM - 1, BOTTOM], [4, 5]);
+
+    game.press("hardDrop");
+    framesUntil(game, () => game.livePiece !== null);
+
+    expect(game.getSnapshot().lines).toBe(100);
+    expect(game.finishFrame).toBeNull();
+  });
+});
+
 describe("frame count", () => {
   it("starts at 0 and counts every frame", () => {
     const game = newGame();
@@ -454,6 +521,7 @@ describe("snapshot", () => {
       lines: 0,
       level: 5,
       gameOver: false,
+      finished: false,
     });
   });
 
@@ -473,6 +541,7 @@ describe("snapshot", () => {
       lines: 2,
       level: 8,
       gameOver: false,
+      finished: false,
     });
   });
 

@@ -23,7 +23,10 @@ import { sequence, pieceFits } from "./utils";
  **/
 
 export default class Game {
-  constructor(onGameEvent, level = 0, pieceSequence = sequence()) {
+  constructor(
+    onGameEvent,
+    { level = 0, pieceSequence = sequence(), targetLines = null } = {},
+  ) {
     // Playfield, starts empty
     // A typed array starts all 0 and 0 is an empty cell
     this.board = new Uint8Array(BOARD_SIZE);
@@ -76,6 +79,21 @@ export default class Game {
 
     this.gameOver = false;
 
+    // Lines to win the match (2P) or null in 1P
+    // Lines and not levels so the goal is what the dashboard shows
+    // Garbage rows don't count toward them (see garbageHeight)
+    this.targetLines = targetLines;
+
+    // Frame of the clear that reached targetLines (2P)
+    // Results compare it with the opponent's frame
+    // A hard drop between frames counts as the last frame run
+    this.finishFrame = null;
+
+    // Play stopped after reaching targetLines (2P)
+    // The clear that reached it plays out first
+    // Then no piece spawns
+    this.finished = false;
+
     // Game frames run so far, the current one included
     // Events from frame() happen on frame frameCount, game over too
     // 2P results compare frames, not when messages arrive
@@ -114,8 +132,14 @@ export default class Game {
       lines: this.lines,
       level: this.level,
       gameOver: this.gameOver,
+      finished: this.finished,
     };
     this.listeners.forEach((callback) => callback());
+  }
+
+  // Play has stopped by game over or by finishing (2P)
+  get ended() {
+    return this.gameOver || this.finished;
   }
 
   // Advance the game by one frame (run 60 times per second by the loop)
@@ -164,6 +188,7 @@ export default class Game {
      * Line clear animation moves one step
      * A new piece spawns
      * The game ends
+     * The game finishes (2P)
      **/
 
     if (this.livePiece) {
@@ -187,6 +212,18 @@ export default class Game {
       while (this.cleared.length) this.deleteLine(this.cleared.pop());
       this.onGameEvent("stackDrop");
       this.framesRemaining = this.entryDelay;
+      return;
+    }
+
+    /**
+     * FINISHED (2P)
+     **/
+
+    // Target reached and the clear has played out
+    // No next piece so nothing can top you out after that
+    if (this.finishFrame !== null) {
+      this.finished = true;
+      this.notify();
       return;
     }
 
@@ -326,6 +363,14 @@ export default class Game {
       this.level++;
       this.delay = GRAVITY_TABLE[this.level] || 1;
       this.nextLevelUp += 10;
+    }
+
+    // Target reached on this frame (2P)
+    // Results decide who won
+    // Play stops once the clear plays out
+    if (this.targetLines && this.lines >= this.targetLines) {
+      this.finishFrame = this.frameCount;
+      this.onGameEvent("finish");
     }
 
     this.notify();
