@@ -652,13 +652,17 @@ canvas {
 /*** 2P SETUP SCREENS ***/
 /************************/
 
-/* Name, waiting and error screens, centered on the game area like About */
+/* Name, waiting, joining, VS and error screens, centered on the game area like About */
 /* Labels centered on their ink, rounded up and left to the grid */
 /* Check the offsets when a label changes */
 
 /* CREATE 2P GAME */
 .setup-title {
   margin-left: 204px;
+}
+/* JOIN 2P GAME */
+.setup-title.join {
+  margin-left: 220px;
 }
 
 /* Title, YOUR NAME:, the field and OK */
@@ -768,12 +772,61 @@ canvas {
   }
 }
 
+/* Title, JOINING..., CANCEL */
+.menu-joining {
+  top: 116px;
+  left: 0;
+  row-gap: 40px;
+
+  .joining {
+    margin-left: 252px;
+    color: var(--disabled);
+  }
+
+  /* CANCEL, 12px padding */
+  > :last-child {
+    margin-left: 260px;
+  }
+}
+
+/* Title, VS and the other player's name, CANCEL */
+/* The name line is centered when it's known (centeredLeft) */
+.menu-vs {
+  top: 116px;
+  left: 0;
+  row-gap: 40px;
+
+  /* CANCEL, 12px padding */
+  > :last-child {
+    margin-left: 260px;
+  }
+}
+
 /* Title, what went wrong, OK */
+/* OK where CANCEL is on the joining screen */
 .menu-error {
   top: 116px;
   left: 0;
   row-gap: 40px;
 
+  /* INVALID LINK */
+  .error-link,
+  .error-password {
+    margin-left: 236px;
+  }
+  /* GAME NOT FOUND */
+  .error-timeout {
+    margin-left: 200px;
+  }
+  /* GAME FULL */
+  .error-full {
+    margin-left: 244px;
+  }
+  /* VERSION MISMATCH */
+  .error-version {
+    margin-left: 188px;
+  }
+  /* CAN'T CONNECT */
   .error-failed {
     margin-left: 220px;
   }
@@ -859,12 +912,18 @@ canvas {
   margin-left: 60px;
 }
 
-/* CANCEL? over the 2P waiting screen */
+/* CANCEL? over the 2P waiting and VS screens */
 /* Centered on the game area like the screen's text, not on the board */
-/* Edge 16px under the letters of WAITING..., which stays in view */
+/* Edge 16px under the letters of WAITING... or VS, which stay in view */
 .menu-cancel {
-  top: 320px;
   left: 208px;
+
+  &.over-waiting {
+    top: 320px;
+  }
+  &.over-vs {
+    top: 216px;
+  }
 
   .menu-title {
     padding-left: 48px;

@@ -129,14 +129,13 @@ export function connect(
   let lastHeard = 0;
   let silent = false;
   let left = false;
-  let failed = false;
   let beatTimer = null;
   let joinTimer = null;
 
-  // Only once and never after the opponent is in
+  // Once, since it leaves the room
+  // Never after the opponent is in or after a CANCEL (Trystero may still be loading)
   function fail(reason) {
-    if (failed || opponent) return;
-    failed = true;
+    if (left || opponent) return;
     leave();
     onError(reason);
   }

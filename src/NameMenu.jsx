@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { listenForMenuInput } from "./input";
 import { cleanName, typedName, loadName, saveName, NAME_LENGTH } from "./name";
+import SetupTitle from "./SetupTitle";
 
 // Saved and passed on if anything's left once cleaned
 // Nothing happens otherwise and OK is grayed out
@@ -14,7 +15,7 @@ function submit(name, confirm) {
 // 2P name, asked after CREATE 2P GAME or on opening a join link
 // Prefilled with the saved name so later visits are one OK
 // Enter in the field is OK and Esc goes back (see listenForMenuInput)
-export default function NameMenu({ title, confirm, back }) {
+export default function NameMenu({ side, confirm, back }) {
   const [name, setName] = useState(loadName);
   const [focused, setFocused] = useState(false);
   const ready = cleanName(name) !== "";
@@ -42,7 +43,7 @@ export default function NameMenu({ title, confirm, back }) {
 
   return (
     <div className="stack menu menu-name">
-      <div className="setup-title">{title}</div>
+      <SetupTitle side={side} />
       <div>YOUR NAME:</div>
       <div className="name-field">
         <input

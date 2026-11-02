@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { listenForMenuInput, listenForRelease } from "./input";
+import SetupTitle from "./SetupTitle";
+import CancelWindow from "./CancelWindow";
 
 // Share sheet on phones, COPY LINK everywhere
 const canShare = typeof navigator.share === "function";
@@ -82,7 +84,7 @@ export default function WaitingMenu({ link, cancel }) {
   return (
     <>
       <div className="stack menu menu-waiting">
-        <div className="setup-title">CREATE 2P GAME</div>
+        <SetupTitle side="create" />
         <div>SEND THE LINK</div>
         <div>TO PLAYER 2</div>
         <div className="waiting">WAITING...</div>
@@ -101,53 +103,12 @@ export default function WaitingMenu({ link, cancel }) {
         })}
       </div>
       {confirming && (
-        <CancelWindow no={() => setConfirming(false)} yes={cancel} />
+        <CancelWindow
+          className="over-waiting"
+          no={() => setConfirming(false)}
+          yes={cancel}
+        />
       )}
     </>
-  );
-}
-
-// CANCEL? over the waiting screen, the pause window
-// NO first and selected, so a double press keeps the room
-function CancelWindow({ no, yes }) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const selectedRef = useRef(null);
-
-  useEffect(() => {
-    function handleMenuInput(name, repeat) {
-      if (name === "up" || name === "down") {
-        setSelectedIndex((index) => (index + 1) % 2);
-      }
-      // Ignore auto-repeat from a held key
-      if (repeat) return;
-      if (name === "confirm") selectedRef.current.click();
-      if (name === "back") no();
-    }
-
-    return listenForMenuInput(handleMenuInput);
-  }, [no]);
-
-  const options = [
-    [no, "NO"],
-    [yes, "YES"],
-  ];
-
-  return (
-    <div className="stack menu menu-box menu-cancel">
-      <div className="menu-title">CANCEL?</div>
-      {options.map(([callback, label], i) => {
-        const selected = i === selectedIndex;
-        return (
-          <div
-            key={label}
-            ref={selected ? selectedRef : null}
-            className={selected ? "menu-option selected" : "menu-option"}
-            onClick={callback}
-          >
-            {label}
-          </div>
-        );
-      })}
-    </div>
   );
 }

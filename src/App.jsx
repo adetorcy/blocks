@@ -10,6 +10,8 @@ import ControlsMenu from "./ControlsMenu";
 import AboutMenu from "./AboutMenu";
 import NameMenu from "./NameMenu";
 import WaitingMenu from "./WaitingMenu";
+import JoiningMenu from "./JoiningMenu";
+import VsMenu from "./VsMenu";
 import ErrorMenu from "./ErrorMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
@@ -23,7 +25,8 @@ import { playSound, resumeAudio } from "./sfx";
 import { LEVEL_COLORS } from "./colors";
 import { listenForPress, listenForRelease } from "./input";
 import { TYPES, loadControlType, saveControlType } from "./controls";
-import { newRoom, roomLink, connect } from "./transport";
+import { newRoom, roomLink, readRoomLink, connect } from "./transport";
+import { cleanName } from "./name";
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
@@ -37,13 +40,33 @@ const GAME_EVENT_SFX = {
   gameOver: "gameOver",
 };
 
+// Join link: the other player's link opens the game with the room after the #
+// Read once when the page loads
+// Then cleared from the address bar so a reload doesn't join again
+// A link opened in a tab already on the game doesn't reload the page
+// So it's only read in a new tab
+const openedWithLink = location.hash !== "";
+// null for a broken link (INVALID LINK)
+const linkRoom = readRoomLink(location.hash);
+if (openedWithLink) {
+  history.replaceState(null, "", location.pathname + location.search);
+}
+
+// The other player's name when nothing's left of it once cleaned
+const NO_NAME = "PLAYER 2";
+
 function App() {
   // UI
   // The cards are laid out from the start and hidden
   // So they're sized and scaled by the time a game starts (no jerkiness)
-  const [menu, setMenu] = useState("start");
-  // Title intro, once per page load
-  const [intro, setIntro] = useState(true);
+  // Opened with a join link: JOIN 2P GAME, asking YOUR NAME:
+  // INVALID LINK if the link is broken
+  const [menu, setMenu] = useState(() => {
+    if (!openedWithLink) return "start";
+    return linkRoom ? "name" : "setupError";
+  });
+  // Title intro, once per page load, not after a join link
+  const [intro, setIntro] = useState(!openedWithLink);
   const shellRef = useRef(null);
   useFitScale(shellRef);
 
@@ -59,10 +82,18 @@ function App() {
   const previewRef = useRef(null);
   const fpsRef = useRef(null);
 
-  // 2P setup: the connection, the link to send and why it failed
+  // 2P setup
+  // Which side we're on: create, or join from a link
+  const [side, setSide] = useState(openedWithLink ? "join" : "create");
+  // The room from the join link, dropped once used
+  const joinRoomRef = useRef(linkRoom);
   const connectionRef = useRef(null);
+  // The link to send, the other player's name and why setup failed
   const [link, setLink] = useState(null);
-  const [setupError, setSetupError] = useState(null);
+  const [opponentName, setOpponentName] = useState(null);
+  const [setupError, setSetupError] = useState(
+    openedWithLink && !linkRoom ? "link" : null,
+  );
 
   // Length of the last line clear or tetris sound
   // Level up comes on the same frame and waits for it to end
@@ -105,25 +136,53 @@ function App() {
   };
   const showNameMenu = () => {
     setIntro(false);
+    setSide("create");
     setMenu("name");
   };
-  // A new room, waiting for the opponent to open its link
-  const createGame = () => {
-    const room = newRoom();
-    connectionRef.current = connect(room, {
-      joining: false,
-      // The opponent can't join yet, no join screens
-      onOpen: () => {},
-      onMessage: () => {},
+  // Both sides connect the same way
+  // Each sends its name once connected
+  // Receiving the other player's name shows VS and their name
+  // A room left with CANCEL can still call back on its way out
+  // Only the current connection counts
+  const connectRoom = (room, name, joining) => {
+    const current = () => connectionRef.current === connection;
+    const connection = connect(room, {
+      joining,
+      onOpen: () => connection.send({ type: "hello", name }),
+      onMessage: (message) => {
+        if (!current() || message.type !== "hello") return;
+        setOpponentName(cleanName(message.name) || NO_NAME);
+        setMenu("vs");
+      },
+      // Silence only matters once the match starts
       onSilence: () => {},
       onError: (reason) => {
+        if (!current()) return;
         connectionRef.current = null;
         setSetupError(reason);
         setMenu("setupError");
       },
     });
+    connectionRef.current = connection;
+  };
+  // A new room, waiting for the other player to open its link
+  const createGame = (name) => {
+    const room = newRoom();
+    connectRoom(room, name, false);
     setLink(roomLink(room, location.href));
     setMenu("waiting");
+  };
+  // Into the room from the join link
+  // The link works once, CANCEL or an error drops it
+  const joinGame = (name) => {
+    connectRoom(joinRoomRef.current, name, true);
+    joinRoomRef.current = null;
+    setMenu("joining");
+  };
+  // Back home from the name screen drops the join link too
+  const leaveNameMenu = () => {
+    joinRoomRef.current = null;
+    showStartMenu();
   };
   // Leave the room, the link stops working
   const cancelGame = () => {
@@ -260,6 +319,8 @@ function App() {
     "about",
     "name",
     "waiting",
+    "joining",
+    "vs",
     "setupError",
   ].includes(menu);
 
@@ -333,18 +394,16 @@ function App() {
             about: <AboutMenu {...{ showStartMenu }} />,
             name: (
               <NameMenu
-                title="CREATE 2P GAME"
-                confirm={createGame}
-                back={showStartMenu}
+                side={side}
+                confirm={side === "join" ? joinGame : createGame}
+                back={leaveNameMenu}
               />
             ),
             waiting: <WaitingMenu link={link} cancel={cancelGame} />,
+            joining: <JoiningMenu cancel={cancelGame} />,
+            vs: <VsMenu side={side} name={opponentName} cancel={cancelGame} />,
             setupError: (
-              <ErrorMenu
-                title="CREATE 2P GAME"
-                reason={setupError}
-                ok={showStartMenu}
-              />
+              <ErrorMenu side={side} reason={setupError} ok={showStartMenu} />
             ),
           }[menu] || null
         }
