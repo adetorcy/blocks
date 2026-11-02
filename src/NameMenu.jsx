@@ -51,7 +51,6 @@ export default function NameMenu({ side, confirm, back }) {
           maxLength={NAME_LENGTH}
           autoFocus
           autoComplete="nickname"
-          autoCapitalize="characters"
           autoCorrect="off"
           spellCheck={false}
           enterKeyHint="done"
