@@ -648,21 +648,25 @@ canvas {
   }
 }
 
-/**********************/
-/*** 2P NAME SCREEN ***/
-/**********************/
+/************************/
+/*** 2P SETUP SCREENS ***/
+/************************/
 
-/* Title, YOUR NAME:, the field and OK, centered on the game area */
+/* Name, waiting and error screens, centered on the game area like About */
 /* Labels centered on their ink, rounded up and left to the grid */
+/* Check the offsets when a label changes */
+
+/* CREATE 2P GAME */
+.setup-title {
+  margin-left: 204px;
+}
+
+/* Title, YOUR NAME:, the field and OK */
 .menu-name {
   top: 116px;
   left: 0;
   row-gap: 40px;
 
-  /* CREATE 2P GAME */
-  > :nth-child(1) {
-    margin-left: 204px;
-  }
   /* YOUR NAME: */
   > :nth-child(2) {
     margin-left: 236px;
@@ -724,6 +728,59 @@ canvas {
 @keyframes caret-blink {
   50% {
     visibility: hidden;
+  }
+}
+
+/* Title, SEND THE LINK TO PLAYER 2, WAITING..., the options */
+/* Options 64px apart as in the start menu, SHARE LINK only with a share sheet */
+.menu-waiting {
+  top: 116px;
+  left: 0;
+  row-gap: 40px;
+
+  /* SEND THE LINK */
+  > :nth-child(2) {
+    margin-left: 220px;
+  }
+  /* TO PLAYER 2, the line right under it */
+  > :nth-child(3) {
+    margin-top: -24px;
+    margin-left: 232px;
+  }
+
+  .waiting {
+    margin-left: 248px;
+    color: var(--disabled);
+  }
+
+  /* Options have 12px padding */
+  .share {
+    margin-left: 228px;
+  }
+  .copy {
+    margin-left: 240px;
+  }
+  .copied {
+    margin-left: 228px;
+  }
+  .cancel {
+    margin-left: 260px;
+  }
+}
+
+/* Title, what went wrong, OK */
+.menu-error {
+  top: 116px;
+  left: 0;
+  row-gap: 40px;
+
+  .error-failed {
+    margin-left: 220px;
+  }
+
+  /* OK */
+  > :last-child {
+    margin-left: 284px;
   }
 }
 
@@ -800,6 +857,28 @@ canvas {
 /* OK */
 .menu-game-over > :nth-child(2) {
   margin-left: 60px;
+}
+
+/* CANCEL? over the 2P waiting screen */
+/* Centered on the game area like the screen's text, not on the board */
+/* Edge 16px under the letters of WAITING..., which stays in view */
+.menu-cancel {
+  top: 320px;
+  left: 208px;
+
+  .menu-title {
+    padding-left: 48px;
+  }
+
+  /* NO */
+  > :nth-child(2) {
+    margin-left: 60px;
+  }
+
+  /* YES */
+  > :nth-child(3) {
+    margin-left: 52px;
+  }
 }
 
 /* Full width gray bar inside the edges */

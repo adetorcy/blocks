@@ -60,8 +60,9 @@ const MENU_BUTTONS = {
 // Arrows, Space and Z are typing and stay with the field
 const FIELD_KEYS = ["Enter", "Escape"];
 
-// Calls handleMenuInput(name, repeat) with up, down, left, right, confirm or back
+// Calls handleMenuInput(name, repeat, touch) with up, down, left, right, confirm or back
 // repeat is true for auto-repeat from a held key
+// touch is true for touch buttons (sent on press)
 export function listenForMenuInput(handleMenuInput) {
   function handleKey(event) {
     const name = MENU_KEYS[event.code];
@@ -72,12 +73,12 @@ export function listenForMenuInput(handleMenuInput) {
     if (inField && !FIELD_KEYS.includes(event.code)) return;
 
     event.preventDefault();
-    handleMenuInput(name, event.repeat);
+    handleMenuInput(name, event.repeat, false);
   }
 
   function handleButton(button) {
     const name = MENU_BUTTONS[button];
-    if (name) handleMenuInput(name, false);
+    if (name) handleMenuInput(name, false, true);
   }
 
   return listenForPress(handleKey, handleButton);

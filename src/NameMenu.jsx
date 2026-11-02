@@ -42,7 +42,7 @@ export default function NameMenu({ title, confirm, back }) {
 
   return (
     <div className="stack menu menu-name">
-      <div>{title}</div>
+      <div className="setup-title">{title}</div>
       <div>YOUR NAME:</div>
       <div className="name-field">
         <input

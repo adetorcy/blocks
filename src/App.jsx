@@ -9,6 +9,8 @@ import StartMenu from "./StartMenu";
 import ControlsMenu from "./ControlsMenu";
 import AboutMenu from "./AboutMenu";
 import NameMenu from "./NameMenu";
+import WaitingMenu from "./WaitingMenu";
+import ErrorMenu from "./ErrorMenu";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
 import TouchUI from "./TouchUI";
@@ -21,6 +23,7 @@ import { playSound, resumeAudio } from "./sfx";
 import { LEVEL_COLORS } from "./colors";
 import { listenForPress, listenForRelease } from "./input";
 import { TYPES, loadControlType, saveControlType } from "./controls";
+import { newRoom, roomLink, connect } from "./transport";
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
@@ -55,6 +58,11 @@ function App() {
   const boardRef = useRef(null);
   const previewRef = useRef(null);
   const fpsRef = useRef(null);
+
+  // 2P setup: the connection, the link to send and why it failed
+  const connectionRef = useRef(null);
+  const [link, setLink] = useState(null);
+  const [setupError, setSetupError] = useState(null);
 
   // Length of the last line clear or tetris sound
   // Level up comes on the same frame and waits for it to end
@@ -98,6 +106,30 @@ function App() {
   const showNameMenu = () => {
     setIntro(false);
     setMenu("name");
+  };
+  // A new room, waiting for the opponent to open its link
+  const createGame = () => {
+    const room = newRoom();
+    connectionRef.current = connect(room, {
+      joining: false,
+      // The opponent can't join yet, no join screens
+      onOpen: () => {},
+      onMessage: () => {},
+      onSilence: () => {},
+      onError: (reason) => {
+        connectionRef.current = null;
+        setSetupError(reason);
+        setMenu("setupError");
+      },
+    });
+    setLink(roomLink(room, location.href));
+    setMenu("waiting");
+  };
+  // Leave the room, the link stops working
+  const cancelGame = () => {
+    connectionRef.current?.leave();
+    connectionRef.current = null;
+    setMenu("start");
   };
   const resume = () => {
     resumeAudio();
@@ -222,7 +254,14 @@ function App() {
   }, [gameOver]);
 
   // The home page and the screens it opens, cards hidden
-  const home = ["start", "controls", "about", "name"].includes(menu);
+  const home = [
+    "start",
+    "controls",
+    "about",
+    "name",
+    "waiting",
+    "setupError",
+  ].includes(menu);
 
   // Card borders take the level color, white at level 0 only
   // From the snapshot, so it changes on the level up frame
@@ -292,12 +331,19 @@ function App() {
               />
             ),
             about: <AboutMenu {...{ showStartMenu }} />,
-            // OK saves the name and goes home for now, no 2P game yet
             name: (
               <NameMenu
                 title="CREATE 2P GAME"
-                confirm={showStartMenu}
+                confirm={createGame}
                 back={showStartMenu}
+              />
+            ),
+            waiting: <WaitingMenu link={link} cancel={cancelGame} />,
+            setupError: (
+              <ErrorMenu
+                title="CREATE 2P GAME"
+                reason={setupError}
+                ok={showStartMenu}
               />
             ),
           }[menu] || null
