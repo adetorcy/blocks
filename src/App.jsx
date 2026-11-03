@@ -122,6 +122,8 @@ function App() {
   // How each side's game ended, { frame, reason } (see matchResult)
   const ourEndRef = useRef(null);
   const theirEndRef = useRef(null);
+  // The countdown is over, the 2P game has started
+  const playingRef = useRef(false);
   // Who won, once both ends are known
   const [result, setResult] = useState(null);
 
@@ -238,6 +240,25 @@ function App() {
       },
       // Silence only matters once the match starts
       onSilence: () => {},
+      // They left the room, ours is closed too
+      // Before the game (the countdown included): SAM LEFT
+      // During it they forfeit, unless the result is already known
+      onLeave: () => {
+        if (!current()) return;
+        connectionRef.current = null;
+
+        if (!playingRef.current) {
+          if (loopRef.current) endGame();
+          setSetupError("left");
+          setMenu("setupError");
+          return;
+        }
+
+        if (ourEndRef.current && theirEndRef.current) return;
+        loopRef.current.stop();
+        setResult({ outcome: "win", who: "opponent", reason: "forfeit" });
+        setMenu("result");
+      },
       onError: (reason) => {
         if (!current()) return;
         connectionRef.current = null;
@@ -370,6 +391,7 @@ function App() {
 
     ourEndRef.current = null;
     theirEndRef.current = null;
+    playingRef.current = false;
     setResult(null);
     setOpponentLines(0);
     setOpponentLevel(0);
@@ -386,15 +408,20 @@ function App() {
     setMenu("countdown");
   };
   const endCountdown = () => {
+    playingRef.current = true;
     loopRef.current.start();
     setMenu(null);
   };
-  // In 2P we leave the room too
-  const quit = () => {
+  // Stop and clear the game, the dashboard resets
+  const endGame = () => {
     loopRef.current.stop();
     loopRef.current.renderer.clear();
     loopRef.current = null;
     setGame(null);
+  };
+  // In 2P we leave the room too
+  const quit = () => {
+    endGame();
     leaveRoom();
     setMenu("start");
   };
@@ -489,6 +516,14 @@ function App() {
       for (const action of held.values()) game.release(action);
     };
   }, [menu, game, controlType, multiplayer]);
+
+  // Closing or leaving the page tells the other player (2P)
+  // Best effort, going silent covers the rest
+  useEffect(() => {
+    const leave = () => connectionRef.current?.leave();
+    window.addEventListener("pagehide", leave);
+    return () => window.removeEventListener("pagehide", leave);
+  }, []);
 
   // Game over: vibrate then show menu
   // 2P shows the result instead, once both games have ended
@@ -624,7 +659,13 @@ function App() {
             vs: (
               <VsMenu name={opponentName} ready={ready} cancel={cancelGame} />
             ),
-            setupError: <ErrorMenu reason={setupError} ok={showStartMenu} />,
+            setupError: (
+              <ErrorMenu
+                reason={setupError}
+                name={opponentName}
+                ok={cancelGame}
+              />
+            ),
           }[menu] || null
         }
       </div>

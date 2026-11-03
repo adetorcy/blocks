@@ -29,6 +29,9 @@ const BEAT_INTERVAL = 1000;
 // So silence doesn't mean they left
 const SILENCE_TIMEOUT = 3000;
 
+// Time for the bye to go out before the room closes
+const BYE_DELAY = 200;
+
 // Largest message we accept
 // Trystero drops anything bigger
 // A board is 220 cells or about 500 bytes as JSON
@@ -110,6 +113,7 @@ function joinErrorReason(error) {
 //   onOpen() once the opponent is connected
 //   onMessage(message) for each game message from them
 //   onSilence(silent) when they go silent and when they're heard again
+//   onLeave() when they leave the room, ours then closes too
 //   onError(reason) if joining fails: full, version, password, timeout or failed
 // The creator only gets failed (Trystero didn't load)
 // Other join errors are the joiner's and the creator keeps waiting
@@ -117,7 +121,7 @@ function joinErrorReason(error) {
 // Trystero loads in the background
 export function connect(
   room,
-  { joining, onOpen, onMessage, onSilence, onError },
+  { joining, onOpen, onMessage, onSilence, onLeave, onError },
 ) {
   // Opponent's peer ID: the first one through the handshake
   // Kept when they drop so they can come back
@@ -126,6 +130,7 @@ export function connect(
   let trysteroRoom = null;
   let sendGame = null;
   let sendBeat = null;
+  let sendBye = null;
   let lastHeard = 0;
   let silent = false;
   let left = false;
@@ -196,8 +201,10 @@ export function connect(
 
     const game = trysteroRoom.makeAction("game");
     const beatAction = trysteroRoom.makeAction("beat");
+    const byeAction = trysteroRoom.makeAction("bye");
     sendGame = game.send;
     sendBeat = beatAction.send;
+    sendBye = byeAction.send;
 
     // Only the opponent's messages count
     game.onMessage = (data, { peerId }) => {
@@ -208,6 +215,13 @@ export function connect(
 
     beatAction.onMessage = (data, { peerId }) => {
       if (peerId === opponent) heard();
+    };
+
+    // They left: nobody else can join, so the room is done
+    byeAction.onMessage = (data, { peerId }) => {
+      if (peerId !== opponent || left) return;
+      close();
+      onLeave();
     };
 
     trysteroRoom.onPeerJoin = (peerId) => {
@@ -235,12 +249,28 @@ export function connect(
     }
   }
 
-  function leave() {
-    if (left) return;
+  // Stop the heartbeat and leave the room
+  function close() {
     left = true;
     clearInterval(beatTimer);
     clearTimeout(joinTimer);
     trysteroRoom?.leave();
+  }
+
+  // Tell the opponent we're leaving, then close
+  // Closing at once could drop the bye
+  function leave() {
+    if (left) return;
+    if (!opponent) {
+      close();
+      return;
+    }
+
+    left = true;
+    clearInterval(beatTimer);
+    sendBye(0, { target: opponent })
+      .catch(dropped)
+      .finally(() => setTimeout(close, BYE_DELAY));
   }
 
   // Offline or the chunk failed to load

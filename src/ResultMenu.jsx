@@ -8,6 +8,8 @@ const TITLES = { win: "YOU WIN!", lose: "YOU LOSE", draw: "DRAW" };
 const REASONS = {
   finish: `REACHED ${TARGET_LINES} LINES`,
   topOut: "TOPPED OUT",
+  // "The game" fills the line under a short name
+  forfeit: "FORFEITED THE GAME",
 };
 
 // The window's middle in the game area (left 44, 320 wide with the outline)

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { listenForMenuInput } from "./input";
+import { centeredLeft } from "./text";
 import SetupTitle from "./SetupTitle";
 
 // What went wrong for each setup error, one terse line
@@ -15,7 +16,10 @@ const MESSAGES = {
 };
 
 // 2P setup error under the screen's title, OK goes home
-export default function ErrorMenu({ reason, ok }) {
+// left: the other player left before the game, SAM LEFT centered at runtime
+export default function ErrorMenu({ reason, name, ok }) {
+  const text = reason === "left" ? `${name} LEFT` : MESSAGES[reason];
+
   useEffect(() => {
     function handleMenuInput(name, repeat) {
       // OK, or back, both home
@@ -29,7 +33,12 @@ export default function ErrorMenu({ reason, ok }) {
   return (
     <div className="stack menu menu-error">
       <SetupTitle />
-      <div className={`error-${reason}`}>{MESSAGES[reason]}</div>
+      <div
+        className={`error-${reason}`}
+        style={reason === "left" ? { marginLeft: centeredLeft(text) } : null}
+      >
+        {text}
+      </div>
       <div className="menu-option selected" onClick={ok}>
         OK
       </div>
