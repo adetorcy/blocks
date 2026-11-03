@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { listenForMenuInput } from "./input";
 import { centeredLeft } from "./text";
 import SetupTitle from "./SetupTitle";
-import CancelWindow from "./CancelWindow";
+import ConfirmWindow from "./ConfirmWindow";
 
 // Both players connected, on both sides
 // The other player's name, centered when it's known
@@ -67,8 +67,9 @@ export default function VsMenu({ name, ready, cancel }) {
         </div>
       </div>
       {confirming && (
-        <CancelWindow
-          className="over-vs"
+        <ConfirmWindow
+          title="CANCEL?"
+          className="menu-cancel over-vs"
           no={() => setConfirming(false)}
           yes={cancel}
         />

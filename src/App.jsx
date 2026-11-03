@@ -18,6 +18,7 @@ import ErrorMenu from "./ErrorMenu";
 import Countdown from "./Countdown";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
+import ConfirmWindow from "./ConfirmWindow";
 import TouchUI from "./TouchUI";
 import Game from "./game";
 import Renderer from "./renderer";
@@ -300,6 +301,13 @@ function App() {
       // Game over menu is on its way
       if (game.gameOver) return;
 
+      // 2P can't pause, the other player plays on
+      // QUIT? instead, the game runs on behind it
+      if (multiplayer) {
+        setMenu("quit");
+        return;
+      }
+
       loopRef.current.stop();
       setMenu("pause");
     }
@@ -356,8 +364,9 @@ function App() {
 
     // Auto-pause when the tab is hidden
     // requestAnimationFrame stops in background tabs
+    // 2P doesn't pause or ask QUIT?, the game just stops until the tab is back
     function handleVisibilityChange() {
-      if (document.hidden) pause();
+      if (document.hidden && !multiplayer) pause();
     }
 
     const stopPress = listenForPress(handleKeydown, handleButtonPress);
@@ -371,7 +380,7 @@ function App() {
       // Leaving play (pause, hidden tab, game over) lets go of everything held
       for (const action of held.values()) game.release(action);
     };
-  }, [menu, game, controlType]);
+  }, [menu, game, controlType, multiplayer]);
 
   // Game over: vibrate then show menu
   useEffect(() => {
@@ -423,6 +432,14 @@ function App() {
             {
               countdown: <Countdown done={endCountdown} />,
               pause: <PauseMenu {...{ resume, quit }} />,
+              quit: (
+                <ConfirmWindow
+                  title="QUIT?"
+                  className="menu-quit"
+                  no={() => setMenu(null)}
+                  yes={quit}
+                />
+              ),
               gameOver: <GameOverMenu {...{ quit }} />,
             }[menu] || null
           }

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { listenForMenuInput, listenForRelease } from "./input";
 import SetupTitle from "./SetupTitle";
-import CancelWindow from "./CancelWindow";
+import ConfirmWindow from "./ConfirmWindow";
 
 // Share sheet on phones, COPY LINK everywhere
 const canShare = typeof navigator.share === "function";
@@ -103,8 +103,9 @@ export default function WaitingMenu({ link, cancel }) {
         })}
       </div>
       {confirming && (
-        <CancelWindow
-          className="over-waiting"
+        <ConfirmWindow
+          title="CANCEL?"
+          className="menu-cancel over-waiting"
           no={() => setConfirming(false)}
           yes={cancel}
         />

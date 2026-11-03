@@ -916,6 +916,19 @@ canvas {
   margin-left: 60px;
 }
 
+/* CANCEL? and QUIT? in 2P (ConfirmWindow.jsx) */
+.menu-confirm {
+  /* NO */
+  > :nth-child(2) {
+    margin-left: 60px;
+  }
+
+  /* YES */
+  > :nth-child(3) {
+    margin-left: 52px;
+  }
+}
+
 /* CANCEL? over the 2P waiting and VS screens */
 /* Centered on the game area like the screen's text, not on the board */
 /* Edge 16px under the letters of WAITING... or VS, which stay in view */
@@ -932,16 +945,11 @@ canvas {
   .menu-title {
     padding-left: 48px;
   }
+}
 
-  /* NO */
-  > :nth-child(2) {
-    margin-left: 60px;
-  }
-
-  /* YES */
-  > :nth-child(3) {
-    margin-left: 52px;
-  }
+/* QUIT? in place of pause in 2P, where pause is */
+.menu-quit .menu-title {
+  padding-left: 64px;
 }
 
 /* Full width gray bar inside the edges */
