@@ -95,7 +95,8 @@ export default class Game {
     this.finished = false;
 
     // Last frame to play (2P), set once the other player's game has ended
-    // Their end + DRAW_FRAMES: nothing after it can change the result
+    // Their end frame: nothing after it can change the result
+    // Ending on it too still counts, it's checked within the frame
     this.lastFrame = null;
 
     // Game frames run so far, the current one included

@@ -4,7 +4,6 @@ import {
   PLAYFIELD_WIDTH,
   PREVIEW_BOX_SIZE,
   TARGET_LINES,
-  DRAW_FRAMES,
 } from "./constants";
 import Stat from "./Stat";
 import OpponentCard from "./OpponentCard";
@@ -216,7 +215,7 @@ function App() {
           if (game && !game.ended) game.receiveGarbage(message.rows);
         }
         // Their game ended
-        // Ours plays on until their end + DRAW_FRAMES at most
+        // Ours plays on until their end frame at most
         // Past that nothing can change the result
         if (message.type === "end" && isEnd(message) && !theirEndRef.current) {
           theirEndRef.current = {
@@ -225,7 +224,7 @@ function App() {
           };
           const game = loopRef.current?.game;
           if (game && !ourEndRef.current) {
-            game.lastFrame = message.frame + DRAW_FRAMES;
+            game.lastFrame = message.frame;
           }
           showResult();
         }
@@ -353,7 +352,7 @@ function App() {
 
     // How our game ended, sent once
     // A finish counts from finishFrame, before its clear plays out
-    // stop: we reached lastFrame, their end + DRAW_FRAMES
+    // stop: we reached lastFrame, their end frame
     const sendEnd = (game) => {
       if (ourEndRef.current) return;
 

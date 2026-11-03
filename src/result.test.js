@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { matchResult, isEnd } from "./result";
-import { DRAW_FRAMES } from "./constants";
 
 const finish = (frame) => ({ frame, reason: "finish" });
 const topOut = (frame) => ({ frame, reason: "topOut" });
@@ -8,7 +7,7 @@ const stop = (frame) => ({ frame, reason: "stop" });
 
 describe("matchResult", () => {
   it("the first to finish wins", () => {
-    expect(matchResult(finish(1000), stop(1000 + DRAW_FRAMES))).toEqual({
+    expect(matchResult(finish(1000), stop(1000))).toEqual({
       outcome: "win",
       who: "you",
       reason: "finish",
@@ -21,7 +20,7 @@ describe("matchResult", () => {
   });
 
   it("the first to top out loses", () => {
-    expect(matchResult(topOut(1000), stop(1000 + DRAW_FRAMES))).toEqual({
+    expect(matchResult(topOut(1000), stop(1000))).toEqual({
       outcome: "lose",
       who: "you",
       reason: "topOut",
@@ -33,21 +32,24 @@ describe("matchResult", () => {
     });
   });
 
-  it("a finish beats a top-out even within DRAW_FRAMES", () => {
-    expect(matchResult(finish(1010), topOut(1000)).outcome).toBe("win");
-    expect(matchResult(topOut(1000), finish(1010)).outcome).toBe("lose");
+  it("a finish beats a top-out on the same frame", () => {
+    expect(matchResult(finish(1000), topOut(1000)).outcome).toBe("win");
     expect(matchResult(topOut(1000), finish(1000)).outcome).toBe("lose");
   });
 
-  it("the same end within DRAW_FRAMES is a draw", () => {
+  it("the same end on the same frame is a draw", () => {
     const draw = (reason) => ({ outcome: "draw", who: "both", reason });
-    expect(matchResult(finish(1000), finish(1000 + DRAW_FRAMES))).toEqual(
-      draw("finish"),
-    );
-    expect(matchResult(topOut(1000 + DRAW_FRAMES), topOut(1000))).toEqual(
-      draw("topOut"),
-    );
-    expect(matchResult(topOut(1000), topOut(1000 + DRAW_FRAMES + 1))).toEqual({
+    expect(matchResult(finish(1000), finish(1000))).toEqual(draw("finish"));
+    expect(matchResult(topOut(1000), topOut(1000))).toEqual(draw("topOut"));
+  });
+
+  it("one frame apart is not a draw", () => {
+    expect(matchResult(finish(1001), finish(1000))).toEqual({
+      outcome: "lose",
+      who: "opponent",
+      reason: "finish",
+    });
+    expect(matchResult(topOut(1000), topOut(1001))).toEqual({
       outcome: "lose",
       who: "you",
       reason: "topOut",
@@ -57,7 +59,7 @@ describe("matchResult", () => {
   it("gives both sides opposite results", () => {
     const opposite = { win: "lose", lose: "win", draw: "draw" };
     const ends = [finish, topOut].flatMap((end) =>
-      [900, 960, 961, 1000, 1040, 1060, 1061].map(end),
+      [900, 999, 1000, 1001, 1100].map(end),
     );
     for (const a of ends) {
       for (const b of ends) {
