@@ -785,16 +785,24 @@ canvas {
   }
 }
 
-/* Title, VS and the other player's name, CANCEL */
-/* The name line is centered when it's known (centeredLeft) */
+/* Title, VS and the other player's name, START GAME, CANCEL */
+/* The name lines are centered when they're known (centeredLeft) */
 .menu-vs {
   top: 116px;
   left: 0;
   row-gap: 40px;
 
-  /* CANCEL, 12px padding */
-  > :last-child {
+  /* Options have 12px padding */
+  .start {
+    margin-left: 220px;
+  }
+  .cancel {
     margin-left: 260px;
+  }
+
+  /* In place of START GAME once pressed */
+  .waiting-for {
+    color: var(--disabled);
   }
 }
 
@@ -1031,4 +1039,18 @@ canvas {
   display: flex;
   column-gap: 12px;
   padding: 12px 12px 8px;
+}
+
+/*****************/
+/*** COUNTDOWN ***/
+/*****************/
+
+/* 3 2 1 at 96px (16px font pixels) over the empty board (2P) */
+/* Digits are 48 x 80 of ink, 2px left and up of the board's center */
+/* From inside the border: ink at 180, 364 from the card's corner */
+.countdown {
+  position: absolute;
+  top: 360px;
+  left: 176px;
+  font-size: 96px;
 }

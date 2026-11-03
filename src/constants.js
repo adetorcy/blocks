@@ -26,6 +26,9 @@ export const OPPONENT_BLOCK_SIZE = 16;
 export const OPPONENT_WIDTH = COLUMNS * OPPONENT_BLOCK_SIZE + BLOCK_GAP;
 export const OPPONENT_HEIGHT = PLAYFIELD_ROWS * OPPONENT_BLOCK_SIZE + BLOCK_GAP;
 
+// Lines to win a 2P game
+export const TARGET_LINES = 100;
+
 // Line clear animation
 export const LINE_CLEAR_STEP_FRAMES = 4;
 

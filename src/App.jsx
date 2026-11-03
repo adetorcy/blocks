@@ -3,6 +3,7 @@ import {
   PLAYFIELD_HEIGHT,
   PLAYFIELD_WIDTH,
   PREVIEW_BOX_SIZE,
+  TARGET_LINES,
 } from "./constants";
 import Stat from "./Stat";
 import OpponentCard from "./OpponentCard";
@@ -14,6 +15,7 @@ import WaitingMenu from "./WaitingMenu";
 import JoiningMenu from "./JoiningMenu";
 import VsMenu from "./VsMenu";
 import ErrorMenu from "./ErrorMenu";
+import Countdown from "./Countdown";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
 import TouchUI from "./TouchUI";
@@ -28,6 +30,7 @@ import { listenForPress, listenForRelease } from "./input";
 import { TYPES, loadControlType, saveControlType } from "./controls";
 import { newRoom, roomLink, readRoomLink, connect } from "./transport";
 import { cleanName } from "./name";
+import { randomSeed, sequence, seededRandom } from "./utils";
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
@@ -99,6 +102,9 @@ function App() {
   const [setupError, setSetupError] = useState(
     openedWithLink && !linkRoom ? "link" : null,
   );
+  // START GAME pressed on our side and on theirs
+  // The creator starts both once both have pressed it
+  const readyRef = useRef({ ours: false, theirs: false });
 
   // Length of the last line clear or tetris sound
   // Level up comes on the same frame and waits for it to end
@@ -151,13 +157,31 @@ function App() {
   // Only the current connection counts
   const connectRoom = (room, name, joining) => {
     const current = () => connectionRef.current === connection;
+    readyRef.current = { ours: false, theirs: false };
     const connection = connect(room, {
       joining,
       onOpen: () => connection.send({ type: "hello", name }),
       onMessage: (message) => {
-        if (!current() || message.type !== "hello") return;
-        setOpponentName(cleanName(message.name) || NO_NAME);
-        setMenu("vs");
+        if (!current()) return;
+        if (message.type === "hello") {
+          setOpponentName(cleanName(message.name) || NO_NAME);
+          setMenu("vs");
+        }
+        // They pressed START GAME
+        if (message.type === "ready") {
+          readyRef.current.theirs = true;
+          if (!joining) startIfBothReady();
+        }
+        // Joiner: the creator's seed, both have pressed START GAME
+        if (
+          message.type === "start" &&
+          joining &&
+          readyRef.current.ours &&
+          Number.isInteger(message.seed)
+        ) {
+          readyRef.current = { ours: false, theirs: false };
+          startMatch(message.seed);
+        }
       },
       // Silence only matters once the match starts
       onSilence: () => {},
@@ -189,11 +213,36 @@ function App() {
     joinRoomRef.current = null;
     showStartMenu();
   };
+  // START GAME on VS
+  // Audio only starts on a user action
+  // The game may start from a message, so audio starts here
+  const ready = () => {
+    resumeAudio();
+    readyRef.current.ours = true;
+    connectionRef.current.send({ type: "ready" });
+    if (side === "create") startIfBothReady();
+  };
+  // Creator: picks the seed once both have pressed START GAME
+  // Sends it and starts its own side
+  // Reset so a repeated ready can't start it twice
+  const startIfBothReady = () => {
+    const { ours, theirs } = readyRef.current;
+    if (!ours || !theirs) return;
+
+    readyRef.current = { ours: false, theirs: false };
+    const seed = randomSeed();
+    connectionRef.current.send({ type: "start", seed });
+    startMatch(seed);
+  };
   // Leave the room, the link stops working
-  const cancelGame = () => {
+  // Back to 1P
+  const leaveRoom = () => {
     connectionRef.current?.leave();
     connectionRef.current = null;
     setOpponentName(null);
+  };
+  const cancelGame = () => {
+    leaveRoom();
     setMenu("start");
   };
   const resume = () => {
@@ -202,23 +251,43 @@ function App() {
     loopRef.current.start();
     setMenu(null);
   };
+  // New game and its loop, not started yet
+  const newGame = (options) => {
+    const game = new Game(handleGameEvent, options);
+    loopRef.current = new Loop(
+      game,
+      new Renderer(boardRef.current, previewRef.current, fpsRef.current),
+    );
+    setGame(game);
+  };
   const start = () => {
     setIntro(false);
     resumeAudio();
-    const newGame = new Game(handleGameEvent);
-    loopRef.current = new Loop(
-      newGame,
-      new Renderer(boardRef.current, previewRef.current, fpsRef.current),
-    );
+    newGame();
     loopRef.current.start();
-    setGame(newGame);
     setMenu(null);
   };
+  // 2P: the same pieces on both sides from the seed
+  // The countdown starts the loop
+  // Nothing is drawn until then, so the board and NEXT stay empty
+  const startMatch = (seed) => {
+    newGame({
+      pieceSequence: sequence(seededRandom(seed)),
+      targetLines: TARGET_LINES,
+    });
+    setMenu("countdown");
+  };
+  const endCountdown = () => {
+    loopRef.current.start();
+    setMenu(null);
+  };
+  // In 2P we leave the room too
   const quit = () => {
     loopRef.current.stop();
     loopRef.current.renderer.clear();
     loopRef.current = null;
     setGame(null);
+    leaveRoom();
     setMenu("start");
   };
 
@@ -340,7 +409,7 @@ function App() {
     <>
       <div
         ref={shellRef}
-        className={`game${menu ? "" : " nocursor"}${home ? " home" : ""}`}
+        className={`game${!menu || menu === "countdown" ? " nocursor" : ""}${home ? " home" : ""}`}
         style={{ "--line": line }}
       >
         <div className="card gamearea">
@@ -352,6 +421,7 @@ function App() {
           {
             // Windows over the board
             {
+              countdown: <Countdown done={endCountdown} />,
               pause: <PauseMenu {...{ resume, quit }} />,
               gameOver: <GameOverMenu {...{ quit }} />,
             }[menu] || null
@@ -419,7 +489,9 @@ function App() {
             ),
             waiting: <WaitingMenu link={link} cancel={cancelGame} />,
             joining: <JoiningMenu cancel={cancelGame} />,
-            vs: <VsMenu name={opponentName} cancel={cancelGame} />,
+            vs: (
+              <VsMenu name={opponentName} ready={ready} cancel={cancelGame} />
+            ),
             setupError: <ErrorMenu reason={setupError} ok={showStartMenu} />,
           }[menu] || null
         }

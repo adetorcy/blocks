@@ -23,6 +23,12 @@ export function seededRandom(seed) {
   };
 }
 
+// A seed for seededRandom, any 32-bit integer
+// The 2P creator picks it and sends it to the joiner
+export function randomSeed() {
+  return Math.floor(Math.random() * 2 ** 32);
+}
+
 // Rough simulation of the piece selection algorithm
 // https://tetrissuomi.wordpress.com/wp-content/uploads/2020/04/nes_tetris_rng.pdf
 // Math.random in 1P, seededRandom in 2P so both players get the same pieces
