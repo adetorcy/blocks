@@ -84,6 +84,7 @@ function App() {
 
   // 2P setup
   // Which side we're on: create, or join from a link
+  // The name screen's OK creates or joins
   const [side, setSide] = useState(openedWithLink ? "join" : "create");
   // The room from the join link, dropped once used
   const joinRoomRef = useRef(linkRoom);
@@ -394,17 +395,14 @@ function App() {
             about: <AboutMenu {...{ showStartMenu }} />,
             name: (
               <NameMenu
-                side={side}
                 confirm={side === "join" ? joinGame : createGame}
                 back={leaveNameMenu}
               />
             ),
             waiting: <WaitingMenu link={link} cancel={cancelGame} />,
             joining: <JoiningMenu cancel={cancelGame} />,
-            vs: <VsMenu side={side} name={opponentName} cancel={cancelGame} />,
-            setupError: (
-              <ErrorMenu side={side} reason={setupError} ok={showStartMenu} />
-            ),
+            vs: <VsMenu name={opponentName} cancel={cancelGame} />,
+            setupError: <ErrorMenu reason={setupError} ok={showStartMenu} />,
           }[menu] || null
         }
       </div>

@@ -656,13 +656,9 @@ canvas {
 /* Labels centered on their ink, rounded up and left to the grid */
 /* Check the offsets when a label changes */
 
-/* CREATE 2P GAME */
+/* 2P GAME */
 .setup-title {
-  margin-left: 204px;
-}
-/* JOIN 2P GAME */
-.setup-title.join {
-  margin-left: 220px;
+  margin-left: 256px;
 }
 
 /* Title, YOUR NAME:, the field and OK */

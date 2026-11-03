@@ -84,7 +84,7 @@ export default function WaitingMenu({ link, cancel }) {
   return (
     <>
       <div className="stack menu menu-waiting">
-        <SetupTitle side="create" />
+        <SetupTitle />
         <div>SEND THE LINK</div>
         <div>TO PLAYER 2</div>
         <div className="waiting">WAITING...</div>

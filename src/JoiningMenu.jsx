@@ -16,7 +16,7 @@ export default function JoiningMenu({ cancel }) {
 
   return (
     <div className="stack menu menu-joining">
-      <SetupTitle side="join" />
+      <SetupTitle />
       <div className="joining">JOINING...</div>
       <div className="menu-option selected" onClick={cancel}>
         CANCEL

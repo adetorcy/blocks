@@ -15,7 +15,7 @@ function submit(name, confirm) {
 // 2P name, asked after CREATE 2P GAME or on opening a join link
 // Prefilled with the saved name so later visits are one OK
 // Enter in the field is OK and Esc goes back (see listenForMenuInput)
-export default function NameMenu({ side, confirm, back }) {
+export default function NameMenu({ confirm, back }) {
   const [name, setName] = useState(loadName);
   const [focused, setFocused] = useState(false);
   const ready = cleanName(name) !== "";
@@ -43,7 +43,7 @@ export default function NameMenu({ side, confirm, back }) {
 
   return (
     <div className="stack menu menu-name">
-      <SetupTitle side={side} />
+      <SetupTitle />
       <div>YOUR NAME:</div>
       <div className="name-field">
         <input

@@ -15,7 +15,7 @@ const MESSAGES = {
 };
 
 // 2P setup error under the screen's title, OK goes home
-export default function ErrorMenu({ side, reason, ok }) {
+export default function ErrorMenu({ reason, ok }) {
   useEffect(() => {
     function handleMenuInput(name, repeat) {
       // OK, or back, both home
@@ -28,7 +28,7 @@ export default function ErrorMenu({ side, reason, ok }) {
 
   return (
     <div className="stack menu menu-error">
-      <SetupTitle side={side} />
+      <SetupTitle />
       <div className={`error-${reason}`}>{MESSAGES[reason]}</div>
       <div className="menu-option selected" onClick={ok}>
         OK

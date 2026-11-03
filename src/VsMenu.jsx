@@ -7,7 +7,7 @@ import CancelWindow from "./CancelWindow";
 // Both players connected, on both sides
 // The other player's name, centered when it's known
 // CANCEL and back always ask first, the other player is right there
-export default function VsMenu({ side, name, cancel }) {
+export default function VsMenu({ name, cancel }) {
   const [confirming, setConfirming] = useState(false);
   const vs = `VS ${name}`;
 
@@ -27,7 +27,7 @@ export default function VsMenu({ side, name, cancel }) {
   return (
     <>
       <div className="stack menu menu-vs">
-        <SetupTitle side={side} />
+        <SetupTitle />
         <div style={{ marginLeft: centeredLeft(vs) }}>{vs}</div>
         <div
           className={confirming ? "menu-option" : "menu-option selected"}
