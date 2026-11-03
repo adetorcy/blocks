@@ -11,10 +11,12 @@ const MAX_ELAPSED = 250;
 // Fixed timestep loop
 // Runs one game frame per 1/60 second
 // Draws once per display refresh
+// afterFrames(game) runs before each draw (2P sends our board to the other player)
 export default class Loop {
-  constructor(game, renderer) {
+  constructor(game, renderer, afterFrames = null) {
     this.game = game;
     this.renderer = renderer;
+    this.afterFrames = afterFrames;
     this.requestID = null;
   }
 
@@ -46,6 +48,8 @@ export default class Loop {
       this.game.frame();
       this.elapsed -= FRAME_DURATION;
     }
+
+    this.afterFrames?.(this.game);
 
     // Single redraw from game state
     this.renderer.render(this.game, now);

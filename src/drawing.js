@@ -6,6 +6,9 @@ import {
   PLAYFIELD_WIDTH,
   PLAYFIELD_HEIGHT,
   PREVIEW_BOX_SIZE,
+  OPPONENT_BLOCK_SIZE,
+  OPPONENT_WIDTH,
+  OPPONENT_HEIGHT,
 } from "./constants";
 import PIECES from "./pieces";
 import { WHITE } from "./colors";
@@ -110,6 +113,25 @@ export function drawBoard(ctx, board) {
         drawBlock(ctx, column * BLOCK_SIZE, row * BLOCK_SIZE);
       }
     }
+  }
+}
+
+// The other player's board in their card (2P), from boardCells()
+// 2/5 scale, plain blocks with no highlight
+export function drawOpponentBoard(ctx, cells) {
+  ctx.clearRect(0, 0, OPPONENT_WIDTH, OPPONENT_HEIGHT);
+
+  for (let i = 0; i < cells.length; i++) {
+    const pieceId = Number(cells[i]);
+    if (!pieceId) continue;
+
+    ctx.fillStyle = colors[pieceId];
+    ctx.fillRect(
+      (i % COLUMNS) * OPPONENT_BLOCK_SIZE + BLOCK_GAP,
+      Math.floor(i / COLUMNS) * OPPONENT_BLOCK_SIZE + BLOCK_GAP,
+      OPPONENT_BLOCK_SIZE - BLOCK_GAP,
+      OPPONENT_BLOCK_SIZE - BLOCK_GAP,
+    );
   }
 }
 

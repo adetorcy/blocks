@@ -32,6 +32,8 @@ import { TYPES, loadControlType, saveControlType } from "./controls";
 import { newRoom, roomLink, readRoomLink, connect } from "./transport";
 import { cleanName } from "./name";
 import { randomSeed, sequence, seededRandom } from "./utils";
+import { boardCells, isBoardState } from "./boardState";
+import { drawOpponentBoard } from "./drawing";
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
@@ -59,6 +61,10 @@ if (openedWithLink) {
 
 // The other player's name when nothing's left of it once cleaned
 const NO_NAME = "PLAYER 2";
+
+// Card border color for a level, white at level 0 only
+const levelLine = (level) =>
+  level ? LEVEL_COLORS[(level - 1) % LEVEL_COLORS.length] : "var(--white)";
 
 function App() {
   // UI
@@ -103,6 +109,10 @@ function App() {
   const [setupError, setSetupError] = useState(
     openedWithLink && !linkRoom ? "link" : null,
   );
+  // The other player's lines and level, their board goes straight to its canvas
+  const [opponentLines, setOpponentLines] = useState(0);
+  const [opponentLevel, setOpponentLevel] = useState(0);
+  const opponentCanvasRef = useRef(null);
   // START GAME pressed on our side and on theirs
   // The creator starts both once both have pressed it
   const readyRef = useRef({ ours: false, theirs: false });
@@ -183,6 +193,13 @@ function App() {
           readyRef.current = { ours: false, theirs: false };
           startMatch(message.seed);
         }
+        // Their board, lines and level for their card
+        if (message.type === "state" && isBoardState(message)) {
+          const canvas = opponentCanvasRef.current;
+          if (canvas) drawOpponentBoard(canvas.getContext("2d"), message.cells);
+          setOpponentLines(message.lines);
+          setOpponentLevel(message.level);
+        }
       },
       // Silence only matters once the match starts
       onSilence: () => {},
@@ -253,11 +270,12 @@ function App() {
     setMenu(null);
   };
   // New game and its loop, not started yet
-  const newGame = (options) => {
+  const newGame = (options, afterFrames) => {
     const game = new Game(handleGameEvent, options);
     loopRef.current = new Loop(
       game,
       new Renderer(boardRef.current, previewRef.current, fpsRef.current),
+      afterFrames,
     );
     setGame(game);
   };
@@ -272,10 +290,32 @@ function App() {
   // The countdown starts the loop
   // Nothing is drawn until then, so the board and NEXT stay empty
   const startMatch = (seed) => {
-    newGame({
-      pieceSequence: sequence(seededRandom(seed)),
-      targetLines: TARGET_LINES,
-    });
+    // Our board, lines and level for the other player's card
+    // Sent after game frames, only when something changed
+    let sent = null;
+    const sendState = (game) => {
+      const cells = boardCells(game);
+      const state = `${cells} ${game.lines} ${game.level}`;
+      if (state === sent) return;
+
+      sent = state;
+      connectionRef.current?.send({
+        type: "state",
+        cells,
+        lines: game.lines,
+        level: game.level,
+      });
+    };
+
+    setOpponentLines(0);
+    setOpponentLevel(0);
+    newGame(
+      {
+        pieceSequence: sequence(seededRandom(seed)),
+        targetLines: TARGET_LINES,
+      },
+      sendState,
+    );
     setMenu("countdown");
   };
   const endCountdown = () => {
@@ -409,11 +449,9 @@ function App() {
     "setupError",
   ].includes(menu);
 
-  // Card borders take the level color, white at level 0 only
+  // Card borders take the level color
   // From the snapshot, so it changes on the level up frame
-  const line = level
-    ? LEVEL_COLORS[(level - 1) % LEVEL_COLORS.length]
-    : "var(--white)";
+  const line = levelLine(level);
 
   return (
     <>
@@ -471,7 +509,12 @@ function App() {
               </div>
             </div>
             {multiplayer && (
-              <OpponentCard name={opponentName} lines={0} line="var(--white)" />
+              <OpponentCard
+                name={opponentName}
+                lines={opponentLines}
+                line={levelLine(opponentLevel)}
+                canvasRef={opponentCanvasRef}
+              />
             )}
           </div>
           <div className="card fps">
