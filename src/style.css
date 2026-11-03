@@ -613,7 +613,7 @@ canvas {
 /*** ABOUT SCREEN ***/
 /********************/
 
-/* BLOCKS and the version at the top, what the game is, OK under it */
+/* BLOCKS and the version at the top, what the game is, the privacy notice, OK under it */
 .menu-about {
   top: 116px;
   left: 0;
@@ -633,19 +633,10 @@ canvas {
   }
 }
 
-/* Centered lines, closer than menu options */
-/* A centered line can fall 2px off the grid, depending on its width */
-/* Check every line when the text changes */
+/* A paragraph, its lines closer than menu options */
+/* Each line is centered by centeredLeft() (text.js) */
 .about-text {
-  align-self: stretch;
-  align-items: center;
   row-gap: 16px;
-
-  /* Centered, both lines would fall half a font pixel off the grid */
-  /* A 4px margin moves them 2px right */
-  > * {
-    margin-left: 4px;
-  }
 }
 
 /************************/

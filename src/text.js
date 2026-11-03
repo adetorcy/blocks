@@ -15,7 +15,8 @@ const PIXEL = 4;
 // Middle of the game area
 const CENTER = 312;
 
-// Left edge of a line centered on the game area, for text only known at runtime
+// Left edge of a line centered on the game area
+// For text only known at runtime, and About's lines
 // Or centered on another middle, like a window's
 // Same rule as the set labels in style.css
 // Centered on its ink (the last spacing column left out)
