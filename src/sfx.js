@@ -25,7 +25,10 @@ import levelUp from "./audio/level-up.wav";
 import stackDrop from "./audio/stack-drop.wav";
 
 // Noise crash then a noise rattle during the board shake
-// Then Eb5 D5 C5 B4 C5, GB wave, vibrato on C5, over a triangle bass C3 Ab2 G2 C3
+import topOut from "./audio/top-out.wav";
+
+// Eb5 D5 C5 B4 C5, GB wave, vibrato on C5, over a triangle bass C3 Ab2 G2 C3
+// Right after top out in 1P, when the GAME OVER window shows
 import gameOver from "./audio/game-over.wav";
 
 // G5 up to C6, GB wave
@@ -45,6 +48,7 @@ const SFX = {
   tetris: [tetris, 1],
   levelUp: [levelUp, 0.85],
   stackDrop: [stackDrop, 1.25],
+  topOut: [topOut, 0.8],
   gameOver: [gameOver, 0.8],
   pause: [pause, 1.2],
   resume: [resume, 1.2],

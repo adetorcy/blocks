@@ -47,7 +47,8 @@ const GAME_EVENT_SFX = {
   tetris: "tetris",
   levelUp: "levelUp",
   stackDrop: "stackDrop",
-  gameOver: "gameOver",
+  // The game over sound comes with its window (1P)
+  gameOver: "topOut",
 };
 
 // Join link: the other player's link opens the game with the room after the #
@@ -553,7 +554,7 @@ function App() {
     return () => window.removeEventListener("pagehide", leave);
   }, []);
 
-  // Game over: vibrate then show menu
+  // Game over: vibrate then show menu, with the game over sound
   // 2P shows the result instead, once both games have ended
   useEffect(() => {
     if (!gameOver) return;
@@ -562,7 +563,9 @@ function App() {
     gameArea.classList.add("vibrate");
     const timeoutID = setTimeout(() => {
       gameArea.classList.remove("vibrate");
-      if (!multiplayer) setMenu("gameOver");
+      if (multiplayer) return;
+      playSound("gameOver");
+      setMenu("gameOver");
     }, 250);
 
     return () => clearTimeout(timeoutID);
