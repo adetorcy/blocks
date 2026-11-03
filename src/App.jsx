@@ -33,6 +33,7 @@ import { newRoom, roomLink, readRoomLink, connect } from "./transport";
 import { cleanName } from "./name";
 import { randomSeed, sequence, seededRandom } from "./utils";
 import { boardCells, isBoardState } from "./boardState";
+import { isGarbage } from "./garbage";
 import { drawOpponentBoard } from "./drawing";
 
 // Sound effect for each game event
@@ -122,7 +123,13 @@ function App() {
   const clearSoundLengthRef = useRef(0);
 
   // Callback to trigger effects not tied to game frames
-  const handleGameEvent = (name) => {
+  const handleGameEvent = (name, rows) => {
+    // 2P: a double, triple or tetris sends rows to the other player
+    // No connection in 1P
+    if (name === "garbage") {
+      connectionRef.current?.send({ type: "garbage", rows });
+    }
+
     // Visual effects
     if (name === "hardDrop") {
       const gameArea = boardRef.current.parentElement;
@@ -192,6 +199,13 @@ function App() {
         ) {
           readyRef.current = { ours: false, theirs: false };
           startMatch(message.seed);
+        }
+        // Their double, triple or tetris
+        // Queued in our game until the next spawn
+        // Dropped if our game is already over
+        if (message.type === "garbage" && isGarbage(message.rows)) {
+          const game = loopRef.current?.game;
+          if (game && !game.ended) game.receiveGarbage(message.rows);
         }
         // Their board, lines and level for their card
         if (message.type === "state" && isBoardState(message)) {
