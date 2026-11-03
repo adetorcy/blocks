@@ -50,7 +50,9 @@ export default function NameMenu({ confirm, back }) {
           value={name}
           maxLength={NAME_LENGTH}
           autoFocus
-          autoComplete="nickname"
+          // No autofill, Chrome shows its suggestions in its own font
+          // The game remembers the name anyway
+          autoComplete="off"
           autoCorrect="off"
           spellCheck={false}
           enterKeyHint="done"
