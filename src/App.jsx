@@ -325,7 +325,8 @@ function App() {
       if (game.gameOver) return;
 
       if (action === "pause") {
-        playSound("pause");
+        // Not for QUIT? in 2P, the game doesn't stop
+        if (!multiplayer) playSound("pause");
         pause();
         return;
       }
