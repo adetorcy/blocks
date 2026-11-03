@@ -140,6 +140,10 @@ function App() {
       connectionRef.current?.send({ type: "garbage", rows });
     }
 
+    // 2P: no sound or slam for frames run in a burst
+    // Either while the page is hidden or when it comes back
+    if (loopRef.current?.catchingUp) return;
+
     // Visual effects
     if (name === "hardDrop") {
       const gameArea = boardRef.current.parentElement;
@@ -343,12 +347,12 @@ function App() {
     setMenu("result");
   };
   // New game and its loop, not started yet
-  const newGame = (options, afterFrames) => {
+  const newGame = (options, loopOptions) => {
     const game = new Game(handleGameEvent, options);
     loopRef.current = new Loop(
       game,
       new Renderer(boardRef.current, previewRef.current, fpsRef.current),
-      afterFrames,
+      loopOptions,
     );
     setGame(game);
   };
@@ -410,16 +414,22 @@ function App() {
         pieceSequence: sequence(seededRandom(seed)),
         targetLines: TARGET_LINES,
       },
-      (game) => {
-        sendState(game);
-        sendEnd(game);
+      {
+        afterFrames: (game) => {
+          sendState(game);
+          sendEnd(game);
+        },
+        // The other player plays on, our game never waits
+        catchUp: true,
       },
     );
     setMenu("countdown");
   };
-  const endCountdown = () => {
+  // The game starts when the countdown was due to end
+  // On a hidden page the countdown ends late, so the game catches up
+  const endCountdown = (startTime) => {
     playingRef.current = true;
-    loopRef.current.start();
+    loopRef.current.start(startTime);
     setMenu(null);
   };
   // Stop and clear the game, the dashboard resets
@@ -488,6 +498,11 @@ function App() {
       if (!isHeld(action)) game.release(action);
     }
 
+    function releaseAll() {
+      for (const action of new Set(held.values())) game.release(action);
+      held.clear();
+    }
+
     function handleKeydown(event) {
       const action = keys[event.code];
       if (!action) return;
@@ -509,9 +524,12 @@ function App() {
 
     // Auto-pause when the tab is hidden
     // requestAnimationFrame stops in background tabs
-    // 2P doesn't pause or ask QUIT?, the game just stops until the tab is back
+    // 2P doesn't pause or ask QUIT?, the game runs on without input
+    // Held keys and buttons are let go, or DAS would keep going
     function handleVisibilityChange() {
-      if (document.hidden && !multiplayer) pause();
+      if (!document.hidden) return;
+      if (multiplayer) releaseAll();
+      else pause();
     }
 
     const stopPress = listenForPress(handleKeydown, handleButtonPress);
@@ -523,7 +541,7 @@ function App() {
       stopRelease();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       // Leaving play (pause, hidden tab, game over) lets go of everything held
-      for (const action of held.values()) game.release(action);
+      releaseAll();
     };
   }, [menu, game, controlType, multiplayer]);
 
