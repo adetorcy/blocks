@@ -94,6 +94,10 @@ export default class Game {
     // Then no piece spawns
     this.finished = false;
 
+    // Last frame to play (2P), set once the other player's game has ended
+    // Their end + DRAW_FRAMES: nothing after it can change the result
+    this.lastFrame = null;
+
     // Game frames run so far, the current one included
     // Events from frame() happen on frame frameCount, game over too
     // 2P results compare frames, not when messages arrive
@@ -137,9 +141,13 @@ export default class Game {
     this.listeners.forEach((callback) => callback());
   }
 
-  // Play has stopped by game over or by finishing (2P)
+  // Play has stopped by game over, by finishing or at lastFrame (2P)
   get ended() {
-    return this.gameOver || this.finished;
+    return (
+      this.gameOver ||
+      this.finished ||
+      (this.lastFrame !== null && this.frameCount >= this.lastFrame)
+    );
   }
 
   // Advance the game by one frame (run 60 times per second by the loop)

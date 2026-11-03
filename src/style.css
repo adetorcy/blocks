@@ -916,6 +916,34 @@ canvas {
   margin-left: 60px;
 }
 
+/* 2P result: YOU WIN!, YOU LOSE or DRAW, what happened, OK */
+/* Wider than pause: REACHED 100 LINES is 244px of ink, a 12 W name 284 */
+/* Centered on the board, 2px left (middle at 204) */
+.menu-result {
+  left: 44px;
+  width: 312px;
+
+  &.win .menu-title {
+    padding-left: 96px;
+  }
+  &.lose .menu-title {
+    padding-left: 92px;
+  }
+  &.draw .menu-title {
+    padding-left: 116px;
+  }
+
+  /* Who then what, centered at runtime (ResultMenu.jsx) */
+  .result-lines {
+    row-gap: 16px;
+  }
+
+  /* OK */
+  > :last-child {
+    margin-left: 112px;
+  }
+}
+
 /* CANCEL? and QUIT? in 2P (ConfirmWindow.jsx) */
 .menu-confirm {
   /* NO */

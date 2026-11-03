@@ -29,6 +29,9 @@ export const OPPONENT_HEIGHT = PLAYFIELD_ROWS * OPPONENT_BLOCK_SIZE + BLOCK_GAP;
 // Lines to win a 2P game
 export const TARGET_LINES = 100;
 
+// 2P: the same end this many frames apart or less is a draw (1 second)
+export const DRAW_FRAMES = 60;
+
 // Line clear animation
 export const LINE_CLEAR_STEP_FRAMES = 4;
 

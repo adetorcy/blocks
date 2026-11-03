@@ -15,4 +15,11 @@ describe("centeredLeft", () => {
     expect(centeredLeft("VS SAM")).toBe(264);
     expect(centeredLeft("VS WWWWWWWWWWWW")).toBe(148);
   });
+
+  // The 2P result window's middle
+  test("another middle", () => {
+    expect(centeredLeft("TOPPED OUT", 204)).toBe(128);
+    expect(centeredLeft("REACHED 100 LINES", 204)).toBe(80);
+    expect(centeredLeft("WWWWWWWWWWWW", 204)).toBe(60);
+  });
 });

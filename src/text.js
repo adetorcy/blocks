@@ -16,12 +16,13 @@ const PIXEL = 4;
 const CENTER = 312;
 
 // Left edge of a line centered on the game area, for text only known at runtime
+// Or centered on another middle, like a window's
 // Same rule as the set labels in style.css
 // Centered on its ink (the last spacing column left out)
 // Then rounded up and left to the 4px grid
-export function centeredLeft(text) {
+export function centeredLeft(text, center = CENTER) {
   let advance = 0;
   for (const char of text) advance += ADVANCES[char] ?? 0;
   const ink = (advance - 1) * PIXEL;
-  return Math.floor((CENTER - ink / 2) / PIXEL) * PIXEL;
+  return Math.floor((center - ink / 2) / PIXEL) * PIXEL;
 }

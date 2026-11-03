@@ -490,6 +490,28 @@ describe("finish", () => {
   });
 });
 
+describe("last frame", () => {
+  it("ends on the last frame", () => {
+    const game = newGame();
+    game.lastFrame = 10;
+
+    const n = framesUntil(game, () => game.ended);
+
+    expect(n).toBe(10);
+    expect(game.gameOver).toBe(false);
+    expect(game.finished).toBe(false);
+  });
+
+  it("ends at once when the last frame has passed", () => {
+    const game = newGame();
+    frames(game, 20);
+
+    game.lastFrame = 10;
+
+    expect(game.ended).toBe(true);
+  });
+});
+
 describe("frame count", () => {
   it("starts at 0 and counts every frame", () => {
     const game = newGame();

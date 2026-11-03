@@ -4,6 +4,7 @@ import {
   PLAYFIELD_WIDTH,
   PREVIEW_BOX_SIZE,
   TARGET_LINES,
+  DRAW_FRAMES,
 } from "./constants";
 import Stat from "./Stat";
 import OpponentCard from "./OpponentCard";
@@ -18,6 +19,7 @@ import ErrorMenu from "./ErrorMenu";
 import Countdown from "./Countdown";
 import PauseMenu from "./PauseMenu";
 import GameOverMenu from "./GameOverMenu";
+import ResultMenu from "./ResultMenu";
 import ConfirmWindow from "./ConfirmWindow";
 import TouchUI from "./TouchUI";
 import Game from "./game";
@@ -34,6 +36,7 @@ import { cleanName } from "./name";
 import { randomSeed, sequence, seededRandom } from "./utils";
 import { boardCells, isBoardState } from "./boardState";
 import { isGarbage } from "./garbage";
+import { matchResult, isEnd } from "./result";
 import { drawOpponentBoard } from "./drawing";
 
 // Sound effect for each game event
@@ -117,6 +120,11 @@ function App() {
   // START GAME pressed on our side and on theirs
   // The creator starts both once both have pressed it
   const readyRef = useRef({ ours: false, theirs: false });
+  // How each side's game ended, { frame, reason } (see matchResult)
+  const ourEndRef = useRef(null);
+  const theirEndRef = useRef(null);
+  // Who won, once both ends are known
+  const [result, setResult] = useState(null);
 
   // Length of the last line clear or tetris sound
   // Level up comes on the same frame and waits for it to end
@@ -207,6 +215,20 @@ function App() {
           const game = loopRef.current?.game;
           if (game && !game.ended) game.receiveGarbage(message.rows);
         }
+        // Their game ended
+        // Ours plays on until their end + DRAW_FRAMES at most
+        // Past that nothing can change the result
+        if (message.type === "end" && isEnd(message) && !theirEndRef.current) {
+          theirEndRef.current = {
+            frame: message.frame,
+            reason: message.reason,
+          };
+          const game = loopRef.current?.game;
+          if (game && !ourEndRef.current) {
+            game.lastFrame = message.frame + DRAW_FRAMES;
+          }
+          showResult();
+        }
         // Their board, lines and level for their card
         if (message.type === "state" && isBoardState(message)) {
           const canvas = opponentCanvasRef.current;
@@ -283,6 +305,14 @@ function App() {
     loopRef.current.start();
     setMenu(null);
   };
+  // 2P result once both ends are known, the same rule on both sides
+  const showResult = () => {
+    const [ours, theirs] = [ourEndRef.current, theirEndRef.current];
+    if (!ours || !theirs) return;
+
+    setResult(matchResult(ours, theirs));
+    setMenu("result");
+  };
   // New game and its loop, not started yet
   const newGame = (options, afterFrames) => {
     const game = new Game(handleGameEvent, options);
@@ -321,6 +351,27 @@ function App() {
       });
     };
 
+    // How our game ended, sent once
+    // A finish counts from finishFrame, before its clear plays out
+    // stop: we reached lastFrame, their end + DRAW_FRAMES
+    const sendEnd = (game) => {
+      if (ourEndRef.current) return;
+
+      let end = null;
+      if (game.gameOver) end = { frame: game.frameCount, reason: "topOut" };
+      else if (game.finishFrame !== null) {
+        end = { frame: game.finishFrame, reason: "finish" };
+      } else if (game.ended) end = { frame: game.frameCount, reason: "stop" };
+      if (!end) return;
+
+      ourEndRef.current = end;
+      connectionRef.current?.send({ type: "end", ...end });
+      showResult();
+    };
+
+    ourEndRef.current = null;
+    theirEndRef.current = null;
+    setResult(null);
     setOpponentLines(0);
     setOpponentLevel(0);
     newGame(
@@ -328,7 +379,10 @@ function App() {
         pieceSequence: sequence(seededRandom(seed)),
         targetLines: TARGET_LINES,
       },
-      sendState,
+      (game) => {
+        sendState(game);
+        sendEnd(game);
+      },
     );
     setMenu("countdown");
   };
@@ -352,8 +406,8 @@ function App() {
     if (menu) return;
 
     function pause() {
-      // Game over menu is on its way
-      if (game.gameOver) return;
+      // Game over menu or 2P result on its way
+      if (game.ended) return;
 
       // 2P can't pause, the other player plays on
       // QUIT? instead, the game runs on behind it
@@ -375,8 +429,8 @@ function App() {
     const isHeld = (action) => [...held.values()].includes(action);
 
     function press(input, action) {
-      // Game over, ignore input until the menu shows
-      if (game.gameOver) return;
+      // Game over or 2P end, ignore input until the menu shows
+      if (game.ended) return;
 
       if (action === "pause") {
         // Not for QUIT? in 2P, the game doesn't stop
@@ -438,6 +492,7 @@ function App() {
   }, [menu, game, controlType, multiplayer]);
 
   // Game over: vibrate then show menu
+  // 2P shows the result instead, once both games have ended
   useEffect(() => {
     if (!gameOver) return;
 
@@ -445,11 +500,11 @@ function App() {
     gameArea.classList.add("vibrate");
     const timeoutID = setTimeout(() => {
       gameArea.classList.remove("vibrate");
-      setMenu("gameOver");
+      if (!multiplayer) setMenu("gameOver");
     }, 250);
 
     return () => clearTimeout(timeoutID);
-  }, [gameOver]);
+  }, [gameOver, multiplayer]);
 
   // The home page and the screens it opens, cards hidden
   const home = [
@@ -494,6 +549,9 @@ function App() {
                 />
               ),
               gameOver: <GameOverMenu {...{ quit }} />,
+              result: result && (
+                <ResultMenu result={result} name={opponentName} ok={quit} />
+              ),
             }[menu] || null
           }
         </div>
