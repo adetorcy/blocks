@@ -438,6 +438,7 @@ export default class Game {
     this.board.set(rows.flat(), BOARD_SIZE - size);
 
     this.garbageHeight = Math.min(ROWS, this.garbageHeight + rows.length);
+    this.onGameEvent("stackRise");
   }
 
   lineClearAnimation() {

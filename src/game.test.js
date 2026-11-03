@@ -291,9 +291,11 @@ describe("garbage in", () => {
 
     game.receiveGarbage([row(0)]);
     expect(game.board.every((id) => id === 0)).toBe(true);
+    expect(game.gameEvents).toEqual([]);
 
     game.press("hardDrop"); // Locks on the bottom 2 rows
     framesUntil(game, () => game.livePiece !== null);
+    expect(game.gameEvents).toEqual(["hardDrop", "lock", "stackRise"]);
 
     // Garbage at the bottom and the O piece one row up
     expect(boardRow(game, BOTTOM)).toEqual(row(0));
@@ -326,7 +328,12 @@ describe("garbage in", () => {
     game.press("hardDrop");
 
     // Score, sound and garbage sent as for any double
-    expect(game.gameEvents).toEqual(["hardDrop", "lineClear", "garbage"]);
+    expect(game.gameEvents).toEqual([
+      "stackRise",
+      "hardDrop",
+      "lineClear",
+      "garbage",
+    ]);
     expect(game.getSnapshot()).toMatchObject({ score: 100, lines: 0 });
     expect(game.garbageHeight).toBe(0);
   });
@@ -368,7 +375,12 @@ describe("garbage in", () => {
     game.receiveGarbage([row(0), row(0)]); // Pushes it into the spawn area
     framesUntil(game, () => game.gameOver);
 
-    expect(game.gameEvents).toEqual(["hardDrop", "lock", "gameOver"]);
+    expect(game.gameEvents).toEqual([
+      "hardDrop",
+      "lock",
+      "stackRise",
+      "gameOver",
+    ]);
   });
 });
 

@@ -24,12 +24,20 @@ import levelUp from "./audio/level-up.wav";
 // Noise thump with a triangle dropping C4 to C3
 import stackDrop from "./audio/stack-drop.wav";
 
+// 2P garbage in: a low square buzz on C2 with a tremolo
+import stackRise from "./audio/stack-rise.wav";
+
 // Noise crash then a noise rattle during the board shake
 import topOut from "./audio/top-out.wav";
 
 // Eb5 D5 C5 B4 C5, GB wave, vibrato on C5, over a triangle bass C3 Ab2 G2 C3
 // Right after top out in 1P, when the GAME OVER window shows
+// Also YOU LOSE in 2P
 import gameOver from "./audio/game-over.wav";
+
+// 2P YOU WIN!: game over turned around, E5 F5 G5 B5 up to C6 with vibrato
+// GB wave over a triangle bass C3 F2 G2 C3
+import win from "./audio/win.wav";
 
 // G5 up to C6, GB wave
 import pause from "./audio/pause.wav";
@@ -38,8 +46,9 @@ import pause from "./audio/pause.wav";
 import resume from "./audio/resume.wav";
 
 // Sound files and their volume
-// Balanced by loudness: tetris on top, then clear, level up and game over
-// Stack drop, pause and resume below, the frequent move, rotate and lock quietest
+// Balanced by loudness: tetris and win on top, then clear, level up and game over
+// Stack drop, stack rise, pause and resume below
+// The frequent move, rotate and lock quietest
 const SFX = {
   move: [move, 1],
   rotate: [rotate, 0.8],
@@ -48,8 +57,10 @@ const SFX = {
   tetris: [tetris, 1],
   levelUp: [levelUp, 0.85],
   stackDrop: [stackDrop, 1.25],
+  stackRise: [stackRise, 1.25],
   topOut: [topOut, 0.8],
   gameOver: [gameOver, 0.8],
+  win: [win, 1],
   pause: [pause, 1.2],
   resume: [resume, 1.2],
 };

@@ -47,9 +47,13 @@ const GAME_EVENT_SFX = {
   tetris: "tetris",
   levelUp: "levelUp",
   stackDrop: "stackDrop",
+  stackRise: "stackRise",
   // The game over sound comes with its window (1P)
   gameOver: "topOut",
 };
+
+// Sound for each 2P result, none for a draw
+const RESULT_SFX = { win: "win", lose: "gameOver" };
 
 // Join link: the other player's link opens the game with the room after the #
 // Read once when the page loads
@@ -129,9 +133,13 @@ function App() {
   // Who won, once both ends are known
   const [result, setResult] = useState(null);
 
-  // Length of the last line clear or tetris sound
-  // Level up comes on the same frame and waits for it to end
-  const clearSoundLengthRef = useRef(0);
+  // When our last line clear, tetris or top-out sound ends (performance.now() time)
+  // Level up comes on the same frame as a clear and waits for it to end
+  // So does the 2P result window, with its sound
+  const soundEndRef = useRef(0);
+  const untilSoundEnd = () =>
+    Math.max(0, soundEndRef.current - performance.now());
+  const resultTimeoutRef = useRef(null);
 
   // Callback to trigger effects not tied to game frames
   const handleGameEvent = (name, rows) => {
@@ -157,10 +165,10 @@ function App() {
     // Sound effects
     const sound = GAME_EVENT_SFX[name];
     if (!sound) return;
-    const delay = name === "levelUp" ? clearSoundLengthRef.current : 0;
+    const delay = name === "levelUp" ? untilSoundEnd() : 0;
     const length = playSound(sound, delay);
-    if (name === "lineClear" || name === "tetris") {
-      clearSoundLengthRef.current = length;
+    if (["lineClear", "tetris", "gameOver"].includes(name)) {
+      soundEndRef.current = performance.now() + length;
     }
   };
 
@@ -266,12 +274,11 @@ function App() {
 
         if (ourEndRef.current && theirEndRef.current) return;
         loopRef.current.stop();
-        setResult(
+        openResult(
           reason === "away"
             ? { outcome: "lose", who: "you", reason: "forfeit" }
             : { outcome: "win", who: "opponent", reason: "forfeit" },
         );
-        setMenu("result");
       },
       onError: (reason) => {
         if (!current()) return;
@@ -344,8 +351,18 @@ function App() {
     const [ours, theirs] = [ourEndRef.current, theirEndRef.current];
     if (!ours || !theirs) return;
 
-    setResult(matchResult(ours, theirs));
-    setMenu("result");
+    openResult(matchResult(ours, theirs));
+  };
+  // The result window and its sound, lose is the game over melody
+  // They wait for our own clear, tetris or top-out sound to end
+  // So a top-out's window comes after the shake, like GAME OVER
+  const openResult = (result) => {
+    resultTimeoutRef.current = setTimeout(() => {
+      setResult(result);
+      setMenu("result");
+      const sound = RESULT_SFX[result.outcome];
+      if (sound) playSound(sound);
+    }, untilSoundEnd());
   };
   // New game and its loop, not started yet
   const newGame = (options, loopOptions) => {
@@ -435,6 +452,7 @@ function App() {
   };
   // Stop and clear the game, the dashboard resets
   const endGame = () => {
+    clearTimeout(resultTimeoutRef.current);
     loopRef.current.stop();
     loopRef.current.renderer.clear();
     loopRef.current = null;
