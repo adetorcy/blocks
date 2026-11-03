@@ -5,6 +5,7 @@ import {
   PREVIEW_BOX_SIZE,
 } from "./constants";
 import Stat from "./Stat";
+import OpponentCard from "./OpponentCard";
 import StartMenu from "./StartMenu";
 import ControlsMenu from "./ControlsMenu";
 import AboutMenu from "./AboutMenu";
@@ -92,6 +93,9 @@ function App() {
   // The link to send, the other player's name and why setup failed
   const [link, setLink] = useState(null);
   const [opponentName, setOpponentName] = useState(null);
+  // 2P once the other player's name has arrived, until we leave
+  // The dashboard's cards are hidden until the game starts
+  const multiplayer = opponentName !== null;
   const [setupError, setSetupError] = useState(
     openedWithLink && !linkRoom ? "link" : null,
   );
@@ -189,6 +193,7 @@ function App() {
   const cancelGame = () => {
     connectionRef.current?.leave();
     connectionRef.current = null;
+    setOpponentName(null);
     setMenu("start");
   };
   const resume = () => {
@@ -352,21 +357,34 @@ function App() {
             }[menu] || null
           }
         </div>
-        <div className="stack dashboard">
+        <div className={`stack dashboard${multiplayer ? " multiplayer" : ""}`}>
           <div className="stack cards">
-            <div className="card stack score">
-              <Stat label="SCORE" value={score} />
-              <Stat label="LINES" value={lines} />
-              <Stat label="LEVEL" value={level} />
-            </div>
+            {multiplayer ? (
+              // Score doesn't decide a 2P game, lines do
+              // One line makes room for the opponent's card
+              <div className="card one-stat">
+                <Stat label="LINES" value={lines} />
+              </div>
+            ) : (
+              <div className="card stack score">
+                <Stat label="SCORE" value={score} />
+                <Stat label="LINES" value={lines} />
+                <Stat label="LEVEL" value={level} />
+              </div>
+            )}
             <div className="card stack preview">
               <div>NEXT</div>
-              <canvas
-                ref={previewRef}
-                height={PREVIEW_BOX_SIZE}
-                width={PREVIEW_BOX_SIZE}
-              ></canvas>
+              <div className="preview-box">
+                <canvas
+                  ref={previewRef}
+                  height={PREVIEW_BOX_SIZE}
+                  width={PREVIEW_BOX_SIZE}
+                ></canvas>
+              </div>
             </div>
+            {multiplayer && (
+              <OpponentCard name={opponentName} lines={0} line="var(--white)" />
+            )}
           </div>
           <div className="card fps">
             <div ref={fpsRef}>0</div>

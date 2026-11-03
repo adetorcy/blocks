@@ -972,6 +972,61 @@ canvas {
   padding: 12px;
 }
 
+.preview-box {
+  overflow: hidden;
+
+  canvas {
+    display: block;
+  }
+}
+
+/*** 2P DASHBOARD ***/
+
+/* LINES and the count on one line, the height of FPS */
+.one-stat {
+  padding: 12px 8px 8px 12px;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .digits {
+    margin-top: 0;
+  }
+}
+
+/* NEXT cropped to rows 1 and 2 of its 4x4 box, where every piece is drawn */
+.multiplayer .preview-box {
+  height: 84px;
+
+  canvas {
+    margin-top: -40px;
+  }
+}
+
+/* Name, line count and board 8px apart */
+/* Lines 8px apart rather than the stats' -4px, since a name can be anything */
+.opponent {
+  padding: 12px;
+  row-gap: 8px;
+}
+
+/* One line cut with an ellipsis (… in the font) */
+/* Set to the board's width, or a long name would widen the dashboard */
+.opponent-name {
+  width: 164px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Right edge 8px from the border like the stats */
+.opponent-lines {
+  margin-right: -4px;
+  text-align: end;
+}
+
 .fps {
   display: flex;
   column-gap: 12px;

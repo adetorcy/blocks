@@ -20,6 +20,12 @@ export const PLAYFIELD_WIDTH = COLUMNS * BLOCK_SIZE + BLOCK_GAP;
 // Preview box
 export const PREVIEW_BOX_SIZE = 4 * BLOCK_SIZE + BLOCK_GAP;
 
+// Opponent's board in their card (2P), 2/5 scale
+// As wide as the preview box, so the dashboard keeps its width
+export const OPPONENT_BLOCK_SIZE = 16;
+export const OPPONENT_WIDTH = COLUMNS * OPPONENT_BLOCK_SIZE + BLOCK_GAP;
+export const OPPONENT_HEIGHT = PLAYFIELD_ROWS * OPPONENT_BLOCK_SIZE + BLOCK_GAP;
+
 // Line clear animation
 export const LINE_CLEAR_STEP_FRAMES = 4;
 
