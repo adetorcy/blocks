@@ -834,6 +834,10 @@ canvas {
   .error-failed {
     margin-left: 220px;
   }
+  /* CONNECTION LOST */
+  .error-lost {
+    margin-left: 204px;
+  }
 
   /* OK */
   > :last-child {

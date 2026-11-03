@@ -4,8 +4,10 @@ import { centeredLeft } from "./text";
 import SetupTitle from "./SetupTitle";
 
 // What went wrong for each setup error, one terse line
-// link is ours (a link we can't read), the rest come from the transport
-// Only failed reaches the creator
+// link: a link we can't read
+// lost: our page was frozen too long (a hidden page on a phone)
+// The rest are join errors from the transport, only failed reaches the creator
+// left (SAM LEFT) is built below
 const MESSAGES = {
   link: "INVALID LINK",
   password: "INVALID LINK",
@@ -13,6 +15,7 @@ const MESSAGES = {
   full: "GAME FULL",
   version: "VERSION MISMATCH",
   failed: "CAN'T CONNECT",
+  lost: "CONNECTION LOST",
 };
 
 // 2P setup error under the screen's title, OK goes home

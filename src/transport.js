@@ -29,6 +29,11 @@ const BEAT_INTERVAL = 1000;
 // So silence doesn't mean they left
 const SILENCE_TIMEOUT = 3000;
 
+// Silent this long: they're gone and forfeit
+// Long enough to glance at another app and come back
+// A phone freezes a hidden page, so its own timers stop too
+const GONE_TIMEOUT = 30000;
+
 // Time for the bye to go out before the room closes
 const BYE_DELAY = 200;
 
@@ -113,7 +118,10 @@ function joinErrorReason(error) {
 //   onOpen() once the opponent is connected
 //   onMessage(message) for each game message from them
 //   onSilence(silent) when they go silent and when they're heard again
-//   onLeave() when they leave the room, ours then closes too
+//   onClose(reason) when the room closes for good, after the opponent was in
+//     left: they left
+//     gone: they were silent for GONE_TIMEOUT
+//     away: we were (our page was frozen that long, or they said so)
 //   onError(reason) if joining fails: full, version, password, timeout or failed
 // The creator only gets failed (Trystero didn't load)
 // Other join errors are the joiner's and the creator keeps waiting
@@ -121,7 +129,7 @@ function joinErrorReason(error) {
 // Trystero loads in the background
 export function connect(
   room,
-  { joining, onOpen, onMessage, onSilence, onLeave, onError },
+  { joining, onOpen, onMessage, onSilence, onClose, onError },
 ) {
   // Opponent's peer ID: the first one through the handshake
   // Kept when they drop so they can come back
@@ -132,6 +140,7 @@ export function connect(
   let sendBeat = null;
   let sendBye = null;
   let lastHeard = 0;
+  let lastBeat = 0;
   let silent = false;
   let left = false;
   let beatTimer = null;
@@ -159,8 +168,29 @@ export function connect(
 
   // Send a heartbeat and check for silence
   function beat() {
+    const now = performance.now();
+
+    // A late beat means our page was frozen (a hidden page on a phone)
+    // So we were the silent one, not them
+    const frozen = now - lastBeat;
+    lastBeat = now;
+    if (frozen >= GONE_TIMEOUT) {
+      close();
+      onClose("away");
+      return;
+    }
+    // Frozen a little: their silence may be ours, start counting again
+    if (frozen > SILENCE_TIMEOUT) lastHeard = now;
+
+    if (now - lastHeard >= GONE_TIMEOUT) {
+      // Tell them in case they're back, so both agree on who forfeits
+      leave("gone");
+      onClose("gone");
+      return;
+    }
+
     sendBeat(0, { target: opponent }).catch(dropped);
-    if (!silent && performance.now() - lastHeard > SILENCE_TIMEOUT) {
+    if (!silent && now - lastHeard > SILENCE_TIMEOUT) {
       silent = true;
       onSilence(true);
     }
@@ -217,11 +247,12 @@ export function connect(
       if (peerId === opponent) heard();
     };
 
-    // They left: nobody else can join, so the room is done
+    // They left, or they say we were gone too long
+    // Nobody else can join, so the room is done
     byeAction.onMessage = (data, { peerId }) => {
       if (peerId !== opponent || left) return;
       close();
-      onLeave();
+      onClose(data === "gone" ? "away" : "left");
     };
 
     trysteroRoom.onPeerJoin = (peerId) => {
@@ -233,7 +264,7 @@ export function connect(
 
       opponent = peerId;
       clearTimeout(joinTimer);
-      lastHeard = performance.now();
+      lastHeard = lastBeat = performance.now();
       beatTimer = setInterval(beat, BEAT_INTERVAL);
       onOpen();
     };
@@ -258,8 +289,9 @@ export function connect(
   }
 
   // Tell the opponent we're leaving, then close
+  // gone: we're leaving because they were silent too long
   // Closing at once could drop the bye
-  function leave() {
+  function leave(reason = "left") {
     if (left) return;
     if (!opponent) {
       close();
@@ -268,7 +300,7 @@ export function connect(
 
     left = true;
     clearInterval(beatTimer);
-    sendBye(0, { target: opponent })
+    sendBye(reason, { target: opponent })
       .catch(dropped)
       .finally(() => setTimeout(close, BYE_DELAY));
   }

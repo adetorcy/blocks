@@ -115,6 +115,7 @@ function App() {
   // The other player's lines and level, their board goes straight to its canvas
   const [opponentLines, setOpponentLines] = useState(0);
   const [opponentLevel, setOpponentLevel] = useState(0);
+  const [opponentAway, setOpponentAway] = useState(false);
   const opponentCanvasRef = useRef(null);
   // START GAME pressed on our side and on theirs
   // The creator starts both once both have pressed it
@@ -239,24 +240,32 @@ function App() {
         }
       },
       // Silence only matters once the match starts
-      onSilence: () => {},
-      // They left the room, ours is closed too
-      // Before the game (the countdown included): SAM LEFT
-      // During it they forfeit, unless the result is already known
-      onLeave: () => {
+      // AWAY in their card while they're silent
+      onSilence: (silent) => {
+        if (current()) setOpponentAway(silent);
+      },
+      // The room is closed: they left, or one of us went silent too long
+      // Before the game (countdown included): SAM LEFT, or CONNECTION LOST if it was us
+      // During the game: the silent one or the one who left forfeits
+      // Unless the result is already known
+      onClose: (reason) => {
         if (!current()) return;
         connectionRef.current = null;
 
         if (!playingRef.current) {
           if (loopRef.current) endGame();
-          setSetupError("left");
+          setSetupError(reason === "away" ? "lost" : "left");
           setMenu("setupError");
           return;
         }
 
         if (ourEndRef.current && theirEndRef.current) return;
         loopRef.current.stop();
-        setResult({ outcome: "win", who: "opponent", reason: "forfeit" });
+        setResult(
+          reason === "away"
+            ? { outcome: "lose", who: "you", reason: "forfeit" }
+            : { outcome: "win", who: "opponent", reason: "forfeit" },
+        );
         setMenu("result");
       },
       onError: (reason) => {
@@ -395,6 +404,7 @@ function App() {
     setResult(null);
     setOpponentLines(0);
     setOpponentLevel(0);
+    setOpponentAway(false);
     newGame(
       {
         pieceSequence: sequence(seededRandom(seed)),
@@ -618,6 +628,7 @@ function App() {
               <OpponentCard
                 name={opponentName}
                 lines={opponentLines}
+                away={opponentAway}
                 line={levelLine(opponentLevel)}
                 canvasRef={opponentCanvasRef}
               />
