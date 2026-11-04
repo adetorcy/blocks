@@ -118,6 +118,9 @@ export function drawBoard(ctx, board) {
 
 // The other player's board in their card (2P), from boardCells()
 // 2/5 scale, plain blocks with no highlight
+// No gap between blocks, a 4px gap looked too sparse at this size
+// Blocks still start BLOCK_GAP in, as on the other canvases
+// So the last ones reach the canvas's right and bottom edges
 export function drawOpponentBoard(ctx, cells) {
   ctx.clearRect(0, 0, OPPONENT_WIDTH, OPPONENT_HEIGHT);
 
@@ -129,8 +132,8 @@ export function drawOpponentBoard(ctx, cells) {
     ctx.fillRect(
       (i % COLUMNS) * OPPONENT_BLOCK_SIZE + BLOCK_GAP,
       Math.floor(i / COLUMNS) * OPPONENT_BLOCK_SIZE + BLOCK_GAP,
-      OPPONENT_BLOCK_SIZE - BLOCK_GAP,
-      OPPONENT_BLOCK_SIZE - BLOCK_GAP,
+      OPPONENT_BLOCK_SIZE,
+      OPPONENT_BLOCK_SIZE,
     );
   }
 }
