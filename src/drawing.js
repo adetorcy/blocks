@@ -11,11 +11,14 @@ import {
   OPPONENT_HEIGHT,
 } from "./constants";
 import PIECES from "./pieces";
-import { WHITE } from "./colors";
+import { WHITE, GRAY } from "./colors";
+import { JAMMED } from "./boardState";
 
-const colors = Object.fromEntries(
-  PIECES.map((piece) => [piece.id, piece.color]),
-);
+// Piece colors by id, and gray for the opponent's jammed piece (2P)
+const colors = Object.fromEntries([
+  ...PIECES.map((piece) => [piece.id, piece.color]),
+  [JAMMED, GRAY],
+]);
 
 // Draw a single block
 function drawBlock(ctx, x, y) {

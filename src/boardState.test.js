@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import Game from "./game";
 import PIECES from "./pieces";
 import { COLUMNS, PLAYFIELD_ROWS } from "./constants";
-import { boardCells, isBoardState } from "./boardState";
+import { boardCells, isBoardState, JAMMED } from "./boardState";
 
 // Endless O pieces
 function* repeatO() {
@@ -53,6 +53,30 @@ describe("boardCells", () => {
     ]);
     expect(cells.at(-5)).toBe(String(O_ID));
   });
+
+  it("shows the piece that topped out as jammed", () => {
+    const game = new Game(() => {}, { pieceSequence: repeatO() });
+
+    // O pieces stack up in the middle until one can't spawn
+    for (let i = 0; i < 1000 && !game.gameOver; i++) {
+      if (game.livePiece) game.press("hardDrop");
+      game.frame();
+    }
+    const cells = boardCells(game);
+
+    // The jammed O sits on the top 2 visible rows, over the stack
+    expect(game.gameOver).toBe(true);
+    for (const [x, row] of [
+      [4, 0],
+      [5, 0],
+      [4, 1],
+      [5, 1],
+    ]) {
+      expect(cells[row * COLUMNS + x]).toBe(String(JAMMED));
+    }
+    expect(cells[2 * COLUMNS + 4]).toBe(String(O_ID));
+    expect(isBoardState({ cells, lines: 0, level: 0 })).toBe(true);
+  });
 });
 
 describe("isBoardState", () => {
@@ -67,7 +91,7 @@ describe("isBoardState", () => {
       false,
     );
     expect(
-      isBoardState({ cells: cells.slice(1) + "8", lines: 0, level: 0 }),
+      isBoardState({ cells: cells.slice(1) + "9", lines: 0, level: 0 }),
     ).toBe(false);
     expect(isBoardState({ cells: [...cells], lines: 0, level: 0 })).toBe(false);
     expect(isBoardState({ cells, lines: -1, level: 0 })).toBe(false);
