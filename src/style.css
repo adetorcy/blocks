@@ -112,7 +112,7 @@ body {
 
 /* The home page and the screens it opens use the whole game area */
 /* The cards stay laid out, so starting a game shows them at their size */
-.game.home > :is(.gamearea, .dashboard) {
+.game.home > :is(.playfield, .dashboard) {
   visibility: hidden;
 }
 
@@ -227,15 +227,19 @@ body {
   flex-direction: column;
 }
 
-/* Game over: the board shakes one virtual pixel side to side */
+/* Effects on the whole game, board and dashboard, the touch controls stay still */
+/* A transform on .game would replace its scale */
+/* So App adds the classes to .game, and the playfield and dashboard get the animation */
+
+/* Game over: the game shakes one virtual pixel side to side */
 /* 5 steps of 50ms (3 frames), no easing so every frame stays on the grid */
-.vibrate {
+.vibrate > :is(.playfield, .dashboard) {
   animation: vibrate 250ms step-end;
 }
 
-/* Hard drop: the board jumps down one virtual pixel, then back */
+/* Hard drop: the game jumps down one virtual pixel, then back */
 /* No easing, so every frame stays on the grid */
-.slam {
+.slam > :is(.playfield, .dashboard) {
   animation: slam 0.2s step-end;
 }
 
@@ -473,7 +477,7 @@ body {
 /*** PLAYFIELD ***/
 /*****************/
 
-.gamearea {
+.playfield {
   position: relative;
 }
 
@@ -840,18 +844,11 @@ canvas {
 /*** PAUSE AND GAME OVER ***/
 /***************************/
 
-/* Pause and game over: a raised window over the board, opaque to hide the stack */
-/* Only overlays are raised, everything else is flat */
-/* Lit from the top left like the blocks: 4px edges, white top and left, shaded right and bottom */
-/* Inset shadows, since two border colors meet on a diagonal at the corners */
-/* Where the white and shaded edges meet, a gray square in between (see below) */
-/* The 4px page-color outline keeps the edges off the blocks next to it */
-/* Own compositing layer: Chrome then draws its text in grayscale */
-/* In the page layer the opaque window gave it color fringes (see .card) */
-/* Same size and place for pause and game over */
-/* 212px wide with the outline, centered across the board */
-/* One top for both, the taller pause window is centered (rounded up) */
-/* Same colors whatever the level */
+/* Pause and game over: a raised window over the board, lit from the top left like the blocks */
+/* Inset shadows, since borders would meet on a diagonal at the corners */
+/* The black outline keeps its edges off the blocks next to it */
+/* will-change puts it on its own layer, where Chrome draws text without color fringes (see .card) */
+/* Both windows open at the same spot (pause is vertically centered, game over slightly high of center) */
 .menu-box {
   top: 300px;
   left: 100px;

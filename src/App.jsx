@@ -155,10 +155,10 @@ function App() {
 
     // Visual effects
     if (name === "hardDrop") {
-      const gameArea = boardRef.current.parentElement;
-      gameArea.classList.add("slam");
+      const shell = shellRef.current;
+      shell.classList.add("slam");
       setTimeout(() => {
-        gameArea.classList.remove("slam");
+        shell.classList.remove("slam");
       }, 200);
     }
 
@@ -577,10 +577,10 @@ function App() {
   useEffect(() => {
     if (!gameOver) return;
 
-    const gameArea = boardRef.current.parentElement;
-    gameArea.classList.add("vibrate");
+    const shell = shellRef.current;
+    shell.classList.add("vibrate");
     const timeoutID = setTimeout(() => {
-      gameArea.classList.remove("vibrate");
+      shell.classList.remove("vibrate");
       if (multiplayer) return;
       playSound("gameOver");
       setMenu("gameOver");
@@ -612,7 +612,7 @@ function App() {
         className={`game${!menu || menu === "countdown" ? " nocursor" : ""}${home ? " home" : ""}`}
         style={{ "--line": line }}
       >
-        <div className="card gamearea">
+        <div className="card playfield">
           <canvas
             ref={boardRef}
             height={PLAYFIELD_HEIGHT}
