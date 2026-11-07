@@ -1,38 +1,22 @@
 # blocks
 
-[Play it live](https://adetorcy.github.io/blocks/)
+[Try it](https://adetorcy.github.io/blocks/)
 
-Unofficial Tetris clone for the browser, mostly based on NES rules
+Old-school Tetris remake for the browser. Loosely based on the NES version.
 
-## What's borrowed from the NES version (NTSC)
+Serverless 2 player mode is built on top of [Trystero](https://github.com/dmotz/trystero). See [src/transport.js](src/transport.js).
 
-- 60 game frames per second (a faster display doesn't speed up the game)
-- Gravity: from 48 frames per row at level 0 to 1 frame per row at level 29
+
+## Game Specs
+
+- 60 game frames per second (display FPS can be higher)
+- Well: 10x22 with the top 2 rows hidden
 - Right-handed Nintendo Rotation System
-- Entry delay (ARE): 10 to 18 frames depending on how high the piece locks
-- Randomizer: one reroll on repeats, no 7-piece bag (droughts can happen)
-- Scoring: 40 / 100 / 300 / 1200 × (level + 1)
-- Level up every 10 lines
-
-## What differs
-
-- Faster DAS: 15 frames then a shift every 2 (NES: 16 then every 6)
-- Soft drop at 1/3 G like the Game Boy (NES: 1/2 G)
-- No pushdown points
-- A-type game only, start at level 0
-
-## Modern additions
-
+- NES gravity table (NTSC)
+- NES Randomizer
+- DAS: 15 frames then a shift every 2 frames
+- Spawn delay: 10 to 18 frames
+- Soft drop speed: 1 row every 3 frames
+- Nintendo scoring system (without pushdown points)
 - Hard drop
 - Ghost piece
-
-## Controls
-
-- Keyboard (arrows or WASD)
-- Touch buttons
-
-## Built with
-
-- Vite, React (UI) and plain JavaScript (game)
-- Canvas, Web Audio API
-- Claude Code from version 0.4.0 onward
