@@ -83,24 +83,26 @@ export default function WaitingMenu({ link, cancel }) {
 
   return (
     <>
-      <div className="stack menu menu-waiting">
+      <div className="stack menu menu-setup menu-waiting">
         <SetupTitle />
         <div>SEND THE LINK</div>
         <div>TO PLAYER 2</div>
-        <div className="waiting">WAITING...</div>
-        {options.map(([callback, label, className], i) => {
-          const selected = i === selectedIndex && !confirming;
-          return (
-            <div
-              key={className}
-              ref={i === selectedIndex ? selectedRef : null}
-              className={`menu-option ${className}${selected ? " selected" : ""}`}
-              onClick={callback}
-            >
-              {label}
-            </div>
-          );
-        })}
+        <div className="setup-status">WAITING...</div>
+        <div className="stack setup-options">
+          {options.map(([callback, label, className], i) => {
+            const selected = i === selectedIndex && !confirming;
+            return (
+              <div
+                key={className}
+                ref={i === selectedIndex ? selectedRef : null}
+                className={`menu-option ${className}${selected ? " selected" : ""}`}
+                onClick={callback}
+              >
+                {label}
+              </div>
+            );
+          })}
+        </div>
       </div>
       {confirming && (
         <ConfirmWindow

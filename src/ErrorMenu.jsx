@@ -20,8 +20,8 @@ const MESSAGES = {
 
 // 2P setup error under the screen's title, OK goes home
 // left: the other player left before the game, SAM LEFT centered at runtime
-export default function ErrorMenu({ reason, name, ok }) {
-  const text = reason === "left" ? `${name} LEFT` : MESSAGES[reason];
+export default function ErrorMenu({ reason, opponentName, ok }) {
+  const text = reason === "left" ? `${opponentName} LEFT` : MESSAGES[reason];
 
   useEffect(() => {
     function handleMenuInput(name, repeat) {
@@ -34,7 +34,7 @@ export default function ErrorMenu({ reason, name, ok }) {
   }, [ok]);
 
   return (
-    <div className="stack menu menu-error">
+    <div className="stack menu menu-setup menu-error">
       <SetupTitle />
       <div
         className={`error-${reason}`}
@@ -42,8 +42,10 @@ export default function ErrorMenu({ reason, name, ok }) {
       >
         {text}
       </div>
-      <div className="menu-option selected" onClick={ok}>
-        OK
+      <div className="stack setup-options">
+        <div className="menu-option ok selected" onClick={ok}>
+          OK
+        </div>
       </div>
     </div>
   );

@@ -108,7 +108,8 @@ function App() {
   // The room from the join link, dropped once used
   const joinRoomRef = useRef(linkRoom);
   const connectionRef = useRef(null);
-  // The link to send, the other player's name and why setup failed
+  // Our name and the link to send, the other player's name and why setup failed
+  const [ownName, setOwnName] = useState(null);
   const [link, setLink] = useState(null);
   const [opponentName, setOpponentName] = useState(null);
   // 2P once the other player's name has arrived, until we leave
@@ -291,6 +292,7 @@ function App() {
   };
   // A new room, waiting for the other player to open its link
   const createGame = (name) => {
+    setOwnName(name);
     const room = newRoom();
     connectRoom(room, name, false);
     setLink(roomLink(room, location.href));
@@ -299,6 +301,7 @@ function App() {
   // Into the room from the join link
   // The link works once, CANCEL or an error drops it
   const joinGame = (name) => {
+    setOwnName(name);
     connectRoom(joinRoomRef.current, name, true);
     joinRoomRef.current = null;
     setMenu("joining");
@@ -633,7 +636,11 @@ function App() {
               ),
               gameOver: <GameOverMenu {...{ quit }} />,
               result: result && (
-                <ResultMenu result={result} name={opponentName} ok={quit} />
+                <ResultMenu
+                  result={result}
+                  opponentName={opponentName}
+                  ok={quit}
+                />
               ),
             }[menu] || null
           }
@@ -707,12 +714,17 @@ function App() {
             waiting: <WaitingMenu link={link} cancel={cancelGame} />,
             joining: <JoiningMenu cancel={cancelGame} />,
             vs: (
-              <VsMenu name={opponentName} ready={ready} cancel={cancelGame} />
+              <VsMenu
+                ownName={ownName}
+                opponentName={opponentName}
+                ready={ready}
+                cancel={cancelGame}
+              />
             ),
             setupError: (
               <ErrorMenu
                 reason={setupError}
-                name={opponentName}
+                opponentName={opponentName}
                 ok={cancelGame}
               />
             ),

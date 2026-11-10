@@ -648,33 +648,75 @@ canvas {
 /************************/
 
 /* Name, waiting, joining, VS and error screens, centered on the game area like About */
+/* The title on top, what to do and the status under it, then the options */
 /* Labels centered on their ink, rounded up and left to the grid */
 /* Check the offsets when a label changes */
-
-/* 2P GAME */
-.setup-title {
-  margin-left: 256px;
-}
-
-/* Title, YOUR NAME:, the field and OK */
-.menu-name {
+.menu-setup {
   top: 116px;
   left: 0;
   row-gap: 40px;
 
+  /* Options have 12px padding */
+  .ok {
+    margin-left: 284px;
+  }
+  .cancel {
+    margin-left: 260px;
+  }
+}
+
+/* 2P GAME between two rules on the middle row of its letters */
+/* 24px from the letters, out to 60px from the edges */
+/* The screen's text starts 96px under it */
+.setup-title {
+  position: relative;
+  margin-left: 256px;
+  margin-bottom: 32px;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    width: 172px;
+    height: 4px;
+    background-color: var(--white);
+  }
+  &::before {
+    left: -196px;
+  }
+  &::after {
+    left: 136px;
+  }
+}
+
+/* WAITING..., JOINING..., WAITING FOR SAM */
+.setup-status {
+  color: var(--disabled);
+}
+
+/* 96px under the last line (top to top), more than the 64px between groups so they stand apart */
+/* Options 64px apart as in the start menu */
+.setup-options {
+  margin-top: 32px;
+  align-items: flex-start;
+  row-gap: 40px;
+}
+
+/* YOUR NAME:, the field 16px under its letters */
+.menu-name {
   /* YOUR NAME: */
   > :nth-child(2) {
     margin-left: 236px;
   }
-  /* The field, 16px under the letters of YOUR NAME: */
+  /* The field */
   > :nth-child(3) {
     margin-top: -28px;
     margin-left: 148px;
   }
-  /* OK, 64px under the field */
-  > :nth-child(4) {
-    margin-top: 24px;
-    margin-left: 284px;
+  /* OK 76px under the field, as under the letters of a line */
+  .setup-options {
+    margin-top: 36px;
   }
 }
 
@@ -726,13 +768,9 @@ canvas {
   }
 }
 
-/* Title, SEND THE LINK TO PLAYER 2, WAITING..., the options */
-/* Options 64px apart as in the start menu, SHARE LINK only with a share sheet */
+/* SEND THE LINK TO PLAYER 2 on two lines, WAITING... under it */
+/* SHARE LINK only with a share sheet */
 .menu-waiting {
-  top: 116px;
-  left: 0;
-  row-gap: 40px;
-
   /* SEND THE LINK */
   > :nth-child(2) {
     margin-left: 220px;
@@ -743,12 +781,10 @@ canvas {
     margin-left: 232px;
   }
 
-  .waiting {
+  .setup-status {
     margin-left: 248px;
-    color: var(--disabled);
   }
 
-  /* Options have 12px padding */
   .share {
     margin-left: 228px;
   }
@@ -758,56 +794,29 @@ canvas {
   .copied {
     margin-left: 228px;
   }
-  .cancel {
-    margin-left: 260px;
-  }
 }
 
-/* Title, JOINING..., CANCEL */
-.menu-joining {
-  top: 116px;
-  left: 0;
-  row-gap: 40px;
-
-  .joining {
-    margin-left: 252px;
-    color: var(--disabled);
-  }
-
-  /* CANCEL, 12px padding */
-  > :last-child {
-    margin-left: 260px;
-  }
+/* JOINING... */
+.menu-joining .setup-status {
+  margin-left: 252px;
 }
 
-/* Title, VS and the other player's name, START GAME, CANCEL */
-/* The name lines are centered when they're known (centeredLeft) */
+/* Our name, VS and theirs, 40px apart, centered when they're known (centeredLeft) */
+/* WAITING FOR SAM under them once START GAME is pressed */
 .menu-vs {
-  top: 116px;
-  left: 0;
-  row-gap: 40px;
+  /* VS and their name */
+  > :nth-child(3),
+  > :nth-child(4) {
+    margin-top: -24px;
+  }
 
-  /* Options have 12px padding */
   .start {
     margin-left: 220px;
   }
-  .cancel {
-    margin-left: 260px;
-  }
-
-  /* In place of START GAME once pressed */
-  .waiting-for {
-    color: var(--disabled);
-  }
 }
 
-/* Title, what went wrong, OK */
-/* OK where CANCEL is on the joining screen */
+/* What went wrong, one line */
 .menu-error {
-  top: 116px;
-  left: 0;
-  row-gap: 40px;
-
   /* INVALID LINK */
   .error-link,
   .error-password {
@@ -832,11 +841,6 @@ canvas {
   /* CONNECTION LOST */
   .error-lost {
     margin-left: 204px;
-  }
-
-  /* OK */
-  > :last-child {
-    margin-left: 284px;
   }
 }
 
@@ -951,15 +955,19 @@ canvas {
 
 /* CANCEL? over the 2P waiting and VS screens */
 /* Centered on the game area like the screen's text, not on the board */
-/* Edge 16px under the letters of WAITING... or VS, which stay in view */
+/* Over the options, its top 24px above the first one, the text above stays in view */
 .menu-cancel {
   left: 208px;
 
   &.over-waiting {
-    top: 320px;
+    top: 388px;
   }
   &.over-vs {
-    top: 216px;
+    top: 364px;
+  }
+  /* START GAME pressed, CANCEL under WAITING FOR SAM */
+  &.over-vs.ready {
+    top: 428px;
   }
 
   .menu-title {

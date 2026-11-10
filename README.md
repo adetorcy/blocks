@@ -6,7 +6,6 @@ Old-school Tetris remake for the browser. Loosely based on the NES version.
 
 Serverless 2 player mode is built on top of [Trystero](https://github.com/dmotz/trystero). See [src/transport.js](src/transport.js).
 
-
 ## Game Specs
 
 - 60 game frames per second (display FPS can be higher)

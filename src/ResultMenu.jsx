@@ -27,11 +27,11 @@ const WIN_BAR = [...LEVEL_COLORS.slice(0, 7), YELLOW].map((color) => ({
 
 // 2P result over the board, OK goes home
 // What happened, with who did it unless it was you (the title says so)
-export default function ResultMenu({ result, name, ok }) {
+export default function ResultMenu({ result, opponentName, ok }) {
   const titleRef = useRef(null);
   const { outcome, who, reason } = result;
   const lines = [
-    { you: null, opponent: name, both: "BOTH" }[who],
+    { you: null, opponent: opponentName, both: "BOTH" }[who],
     REASONS[reason],
   ].filter(Boolean);
 

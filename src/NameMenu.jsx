@@ -42,7 +42,7 @@ export default function NameMenu({ confirm, back }) {
   }
 
   return (
-    <div className="stack menu menu-name">
+    <div className="stack menu menu-setup menu-name">
       <SetupTitle />
       <div>YOUR NAME:</div>
       <div className="name-field">
@@ -73,11 +73,13 @@ export default function NameMenu({ confirm, back }) {
           )
         }
       </div>
-      <div
-        className={ready ? "menu-option selected" : "menu-option disabled"}
-        onClick={() => submit(name, confirm)}
-      >
-        OK
+      <div className="stack setup-options">
+        <div
+          className={`menu-option ok ${ready ? "selected" : "disabled"}`}
+          onClick={() => submit(name, confirm)}
+        >
+          OK
+        </div>
       </div>
     </div>
   );

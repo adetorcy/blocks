@@ -15,11 +15,13 @@ export default function JoiningMenu({ cancel }) {
   }, [cancel]);
 
   return (
-    <div className="stack menu menu-joining">
+    <div className="stack menu menu-setup menu-joining">
       <SetupTitle />
-      <div className="joining">JOINING...</div>
-      <div className="menu-option selected" onClick={cancel}>
-        CANCEL
+      <div className="setup-status">JOINING...</div>
+      <div className="stack setup-options">
+        <div className="menu-option cancel selected" onClick={cancel}>
+          CANCEL
+        </div>
       </div>
     </div>
   );
