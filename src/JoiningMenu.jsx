@@ -19,7 +19,7 @@ export default function JoiningMenu({ cancel }) {
       <SetupTitle />
       <div className="setup-status">JOINING...</div>
       <div className="stack setup-options">
-        <div className="menu-option cancel selected" onClick={cancel}>
+        <div className="menu-option selected" onClick={cancel}>
           CANCEL
         </div>
       </div>

@@ -498,6 +498,7 @@ canvas {
 /* Centered content of the wrong size would land between virtual pixels */
 /* Offsets look centered, rounded up and left to the 4px grid */
 /* Labels are centered on their ink, without the spacing column after the last glyph */
+/* Options are a left-aligned column, centered with the cursor (12px of it, 12px gap) */
 /* Check them when a label changes */
 .menu {
   position: absolute;
@@ -506,6 +507,7 @@ canvas {
 }
 
 .menu-option {
+  position: relative;
   padding: 0 12px;
   cursor: pointer;
 }
@@ -520,6 +522,32 @@ canvas {
   animation: blinker 0.6s step-start infinite;
 }
 
+/* Cursor before the selected option, 12px from its text */
+/* 3 by 5 font pixels, as tall as the letters, blinks with them (currentColor) */
+.menu-option.selected::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -12px;
+  width: 12px;
+  height: 20px;
+  background-color: currentColor;
+  clip-path: polygon(
+    0 0,
+    4px 0,
+    4px 4px,
+    8px 4px,
+    8px 8px,
+    12px 8px,
+    12px 12px,
+    8px 12px,
+    8px 16px,
+    4px 16px,
+    4px 20px,
+    0 20px
+  );
+}
+
 @keyframes blinker {
   50% {
     /* RED in colors.js */
@@ -531,25 +559,11 @@ canvas {
 /*** START MENU ***/
 /******************/
 
-/* Options under the title, centered on the game area */
-/* Left edge at the widest, CREATE 2P GAME, the others 2px left of center */
+/* Options under the title, centered on the game area with the cursor */
 .menu-start {
   top: 356px;
-  left: 192px;
+  left: 204px;
   row-gap: 40px;
-
-  /* START 1P GAME */
-  > :nth-child(1) {
-    margin-left: 4px;
-  }
-  /* CONTROLS */
-  > :nth-child(3) {
-    margin-left: 48px;
-  }
-  /* ABOUT */
-  > :nth-child(4) {
-    margin-left: 68px;
-  }
 }
 
 /***********************/
@@ -564,10 +578,10 @@ canvas {
   left: 68px;
   row-gap: 72px;
 
-  /* OK centered, lower */
+  /* OK centered with the cursor, lower */
   > :last-child {
     margin-top: 28px;
-    margin-left: 216px;
+    margin-left: 228px;
   }
 }
 
@@ -581,6 +595,11 @@ canvas {
 /* Types not picked, gray but still clickable */
 .control-type:not(.current) {
   color: var(--disabled);
+}
+
+/* The types are tabs, not a column: no cursor, the underline marks the picked one */
+.control-type.selected::before {
+  content: none;
 }
 
 /* The picked type underlined under its ink, 4px below the line */
@@ -633,7 +652,7 @@ canvas {
 
   /* OK */
   > :last-child {
-    margin-left: 284px;
+    margin-left: 296px;
   }
 }
 
@@ -655,14 +674,6 @@ canvas {
   top: 116px;
   left: 0;
   row-gap: 40px;
-
-  /* Options have 12px padding */
-  .ok {
-    margin-left: 284px;
-  }
-  .cancel {
-    margin-left: 260px;
-  }
 }
 
 /* 2P GAME between two rules on the middle row of its letters */
@@ -697,6 +708,7 @@ canvas {
 
 /* 96px under the last line (top to top), more than the 64px between groups so they stand apart */
 /* Options 64px apart as in the start menu */
+/* One column per screen (margin-left), sized for every label it shows */
 .setup-options {
   margin-top: 32px;
   align-items: flex-start;
@@ -717,6 +729,7 @@ canvas {
   /* OK 76px under the field, as under the letters of a line */
   .setup-options {
     margin-top: 36px;
+    margin-left: 296px;
   }
 }
 
@@ -785,20 +798,21 @@ canvas {
     margin-left: 248px;
   }
 
-  .share {
-    margin-left: 228px;
-  }
-  .copy {
+  /* Sized for LINK COPIED, so the column stays put once the link is copied */
+  /* The same with or without SHARE LINK */
+  .setup-options {
     margin-left: 240px;
-  }
-  .copied {
-    margin-left: 228px;
   }
 }
 
-/* JOINING... */
-.menu-joining .setup-status {
-  margin-left: 252px;
+/* JOINING..., CANCEL */
+.menu-joining {
+  .setup-status {
+    margin-left: 252px;
+  }
+  .setup-options {
+    margin-left: 272px;
+  }
 }
 
 /* Our name, VS and theirs, 40px apart, centered when they're known (centeredLeft) */
@@ -810,8 +824,9 @@ canvas {
     margin-top: -24px;
   }
 
-  .start {
-    margin-left: 220px;
+  /* Sized for START GAME, so CANCEL stays put once it's gone */
+  .setup-options {
+    margin-left: 232px;
   }
 }
 
@@ -841,6 +856,11 @@ canvas {
   /* CONNECTION LOST */
   .error-lost {
     margin-left: 204px;
+  }
+
+  /* OK */
+  .setup-options {
+    margin-left: 296px;
   }
 }
 
@@ -890,26 +910,21 @@ canvas {
   left: 0;
 }
 
-/* Titles and options centered on the board, as in the start menu */
+/* Titles centered on the board, options a column centered with the cursor, as in the start menu */
 .menu-pause {
   .menu-title {
     padding-left: 60px;
   }
 
-  /* CONTINUE, 2px left of center */
-  > :nth-child(2) {
-    margin-left: 16px;
-  }
-
-  /* QUIT */
-  > :nth-child(3) {
-    margin-left: 48px;
+  /* CONTINUE and QUIT */
+  > .menu-option {
+    margin-left: 28px;
   }
 }
 
 /* OK */
 .menu-game-over > :nth-child(2) {
-  margin-left: 60px;
+  margin-left: 72px;
 }
 
 /* 2P result: YOU WIN!, YOU LOSE or DRAW, what happened, OK */
@@ -936,21 +951,14 @@ canvas {
 
   /* OK */
   > :last-child {
-    margin-left: 112px;
+    margin-left: 124px;
   }
 }
 
 /* CANCEL? and QUIT? in 2P (ConfirmWindow.jsx) */
-.menu-confirm {
-  /* NO */
-  > :nth-child(2) {
-    margin-left: 60px;
-  }
-
-  /* YES */
-  > :nth-child(3) {
-    margin-left: 52px;
-  }
+/* NO and YES, the same column over the board or the game area */
+.menu-confirm > .menu-option {
+  margin-left: 64px;
 }
 
 /* CANCEL? over the 2P waiting and VS screens */

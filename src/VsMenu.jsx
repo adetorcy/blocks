@@ -39,7 +39,7 @@ export default function VsMenu({ ownName, opponentName, ready, cancel }) {
   });
 
   const className = (option) =>
-    `menu-option ${option}${selected === option && !confirming ? " selected" : ""}`;
+    selected === option && !confirming ? "menu-option selected" : "menu-option";
 
   return (
     <>

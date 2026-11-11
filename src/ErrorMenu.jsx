@@ -43,7 +43,7 @@ export default function ErrorMenu({ reason, opponentName, ok }) {
         {text}
       </div>
       <div className="stack setup-options">
-        <div className="menu-option ok selected" onClick={ok}>
+        <div className="menu-option selected" onClick={ok}>
           OK
         </div>
       </div>

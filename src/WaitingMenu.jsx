@@ -44,7 +44,7 @@ export default function WaitingMenu({ link, cancel }) {
     else cancel();
   }
 
-  // Callback-label pairs, SHARE LINK only where there's a share sheet
+  // Callback, label and key, SHARE LINK only where there's a share sheet
   const options = [
     ...(canShare ? [[share, "SHARE LINK", "share"]] : []),
     [copy, copied ? "LINK COPIED" : "COPY LINK", copied ? "copied" : "copy"],
@@ -89,13 +89,13 @@ export default function WaitingMenu({ link, cancel }) {
         <div>TO PLAYER 2</div>
         <div className="setup-status">WAITING...</div>
         <div className="stack setup-options">
-          {options.map(([callback, label, className], i) => {
+          {options.map(([callback, label, key], i) => {
             const selected = i === selectedIndex && !confirming;
             return (
               <div
-                key={className}
+                key={key}
                 ref={i === selectedIndex ? selectedRef : null}
-                className={`menu-option ${className}${selected ? " selected" : ""}`}
+                className={selected ? "menu-option selected" : "menu-option"}
                 onClick={callback}
               >
                 {label}
