@@ -5,7 +5,7 @@ import { listenForMenuInput } from "./input";
 // CANCEL? over the waiting and VS screens, QUIT? over the board in a game
 // NO comes first and is selected, so a double press doesn't leave
 // Back means NO
-export default function ConfirmWindow({ title, className, no, yes }) {
+export default function ConfirmWindow({ title, className, style, no, yes }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selectedRef = useRef(null);
 
@@ -29,7 +29,10 @@ export default function ConfirmWindow({ title, className, no, yes }) {
   ];
 
   return (
-    <div className={`stack menu menu-box menu-confirm ${className}`}>
+    <div
+      className={`stack menu menu-box menu-confirm ${className}`}
+      style={style}
+    >
       <div className="menu-title">{title}</div>
       {options.map(([callback, label], i) => {
         const selected = i === selectedIndex;

@@ -27,3 +27,25 @@ export function centeredLeft(text, center = CENTER) {
   const ink = (advance - 1) * PIXEL;
   return Math.floor((center - ink / 2) / PIXEL) * PIXEL;
 }
+
+// Lines of text filled to a width in px, cut anywhere
+// For the join link, which has no spaces to break at
+// Each line's ink fits the width
+export function filledLines(text, width) {
+  const lines = [];
+  let line = "";
+  let advance = 0;
+  for (const char of text) {
+    const next = advance + (ADVANCES[char] ?? 0);
+    if (line && (next - 1) * PIXEL > width) {
+      lines.push(line);
+      line = char;
+      advance = ADVANCES[char] ?? 0;
+    } else {
+      line += char;
+      advance = next;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}

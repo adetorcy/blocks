@@ -2,9 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { listenForMenuInput, listenForRelease } from "./input";
 import SetupTitle from "./SetupTitle";
 import ConfirmWindow from "./ConfirmWindow";
+import { filledLines } from "./text";
 
-// Share sheet on phones, COPY LINK everywhere
+// SHARE LINK where the browser can share (most phones), COPY LINK everywhere
 const canShare = typeof navigator.share === "function";
+
+// Inside of the link field, out to the title's rules
+const FIELD_WIDTH = 464;
 
 // 2P creator waiting for the opponent to open the link
 // Sharing and copying need a user action (browser rule)
@@ -44,13 +48,15 @@ export default function WaitingMenu({ link, cancel }) {
     else cancel();
   }
 
-  // Callback, label and key, SHARE LINK only where there's a share sheet
+  // Callback, label and key, SHARE LINK only where the browser can share
   const options = [
     ...(canShare ? [[share, "SHARE LINK", "share"]] : []),
     [copy, copied ? "LINK COPIED" : "COPY LINK", copied ? "copied" : "copy"],
     [requestCancel, "CANCEL", "cancel"],
   ];
   const count = options.length;
+  // The whole link, lines filled to the field (3 for any real link)
+  const lines = filledLines(link, FIELD_WIDTH);
 
   useEffect(() => {
     if (confirming) return;
@@ -85,9 +91,13 @@ export default function WaitingMenu({ link, cancel }) {
     <>
       <div className="stack menu menu-setup menu-waiting">
         <SetupTitle />
-        <div>SEND THE LINK</div>
-        <div>TO PLAYER 2</div>
-        <div className="setup-status">WAITING...</div>
+        <div className="setup-status">WAITING FOR PLAYER 2...</div>
+        <div>SEND THEM THIS LINK:</div>
+        <div className="stack link-field">
+          {lines.map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
+        </div>
         <div className="stack setup-options">
           {options.map(([callback, label, key], i) => {
             const selected = i === selectedIndex && !confirming;
@@ -108,6 +118,7 @@ export default function WaitingMenu({ link, cancel }) {
         <ConfirmWindow
           title="CANCEL?"
           className="menu-cancel over-waiting"
+          style={{ "--link-lines": lines.length }}
           no={() => setConfirming(false)}
           yes={cancel}
         />
