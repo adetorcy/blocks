@@ -141,6 +141,11 @@ export function drawOpponentBoard(ctx, cells) {
   }
 }
 
+// Their board between matches, empty until their first state
+export function clearOpponentBoard(ctx) {
+  ctx.clearRect(0, 0, OPPONENT_WIDTH, OPPONENT_HEIGHT);
+}
+
 export function clearBoard(ctx) {
   ctx.clearRect(0, 0, PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
 }

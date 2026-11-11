@@ -36,7 +36,7 @@ import { randomSeed, sequence, seededRandom } from "./utils";
 import { boardCells, isBoardState } from "./boardState";
 import { isGarbage } from "./garbage";
 import { matchResult, isEnd } from "./result";
-import { drawOpponentBoard } from "./drawing";
+import { clearOpponentBoard, drawOpponentBoard } from "./drawing";
 
 // Sound effect for each game event
 const GAME_EVENT_SFX = {
@@ -133,6 +133,10 @@ function App() {
   const playingRef = useRef(false);
   // Who won, once both ends are known
   const [result, setResult] = useState(null);
+  // Matches won on each side for as long as the room lasts
+  const [wins, setWins] = useState({ ours: 0, theirs: 0 });
+  // The room closed once the result was known: SAM LEFT after the result window
+  const leftAfterResultRef = useRef(null);
 
   // When our last line clear, tetris or top-out sound ends (performance.now() time)
   // Level up comes on the same frame as a clear and waits for it to end
@@ -200,6 +204,7 @@ function App() {
   const connectRoom = (room, name, joining) => {
     const current = () => connectionRef.current === connection;
     readyRef.current = { ours: false, theirs: false };
+    setWins({ ours: 0, theirs: 0 });
     const connection = connect(room, {
       joining,
       onOpen: () => connection.send({ type: "hello", name }),
@@ -210,6 +215,7 @@ function App() {
           setMenu("vs");
         }
         // They pressed START GAME
+        // Counts even while we're still on the result window
         if (message.type === "ready") {
           readyRef.current.theirs = true;
           if (!joining) startIfBothReady();
@@ -261,7 +267,7 @@ function App() {
       // The room is closed: they left, or one of us went silent too long
       // Before the game (countdown included): SAM LEFT, or CONNECTION LOST if it was us
       // During the game: the silent one or the one who left forfeits
-      // Unless the result is already known
+      // Once the result is known: SAM LEFT after the result window
       onClose: (reason) => {
         if (!current()) return;
         connectionRef.current = null;
@@ -273,7 +279,10 @@ function App() {
           return;
         }
 
-        if (ourEndRef.current && theirEndRef.current) return;
+        if (ourEndRef.current && theirEndRef.current) {
+          leftAfterResultRef.current = reason === "away" ? "lost" : "left";
+          return;
+        }
         loopRef.current.stop();
         openResult(
           reason === "away"
@@ -359,7 +368,14 @@ function App() {
   // The result window and its sound, lose is the game over melody
   // They wait for our own clear, tetris or top-out sound to end
   // So a top-out's window comes after the shake, like GAME OVER
+  // The score on VS counts it, a draw counts for no one
   const openResult = (result) => {
+    if (result.outcome === "win") {
+      setWins(({ ours, theirs }) => ({ ours: ours + 1, theirs }));
+    }
+    if (result.outcome === "lose") {
+      setWins(({ ours, theirs }) => ({ ours, theirs: theirs + 1 }));
+    }
     resultTimeoutRef.current = setTimeout(() => {
       setResult(result);
       setMenu("result");
@@ -423,13 +439,17 @@ function App() {
       showResult();
     };
 
+    // Nothing left from the last match, their board included
     ourEndRef.current = null;
     theirEndRef.current = null;
+    leftAfterResultRef.current = null;
     playingRef.current = false;
     setResult(null);
     setOpponentLines(0);
     setOpponentLevel(0);
     setOpponentAway(false);
+    const canvas = opponentCanvasRef.current;
+    if (canvas) clearOpponentBoard(canvas.getContext("2d"));
     newGame(
       {
         pieceSequence: sequence(seededRandom(seed)),
@@ -466,6 +486,20 @@ function App() {
     endGame();
     leaveRoom();
     setMenu("start");
+  };
+  // OK on the 2P result window
+  // Back to VS for another match while the room is open
+  // SAM LEFT if they left after the result, home after a forfeit
+  const closeResult = () => {
+    playingRef.current = false;
+    if (connectionRef.current) {
+      endGame();
+      setMenu("vs");
+    } else if (leftAfterResultRef.current) {
+      endGame();
+      setSetupError(leftAfterResultRef.current);
+      setMenu("setupError");
+    } else quit();
   };
 
   // Listen for keys, touch buttons and tab visibility
@@ -639,7 +673,7 @@ function App() {
                 <ResultMenu
                   result={result}
                   opponentName={opponentName}
-                  ok={quit}
+                  ok={closeResult}
                 />
               ),
             }[menu] || null
@@ -717,6 +751,7 @@ function App() {
               <VsMenu
                 ownName={ownName}
                 opponentName={opponentName}
+                wins={wins}
                 ready={ready}
                 cancel={cancelGame}
               />

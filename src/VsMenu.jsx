@@ -4,12 +4,13 @@ import { centeredLeft } from "./text";
 import SetupTitle from "./SetupTitle";
 import ConfirmWindow from "./ConfirmWindow";
 
-// Both players connected, on both sides
+// Both players connected, on both sides, and between matches
 // Our name on top, VS, then theirs, each line centered on its ink
+// Each name with its matches won, 0 for both until a match ends
 // START GAME first, the countdown starts once both have pressed it
 // Once pressed, START GAME goes away and WAITING FOR SAM shows in gray
 // CANCEL and back always ask first, the other player is right there
-export default function VsMenu({ ownName, opponentName, ready, cancel }) {
+export default function VsMenu({ ownName, opponentName, wins, ready, cancel }) {
   const [waiting, setWaiting] = useState(false);
   const [selected, setSelected] = useState("start");
   const [confirming, setConfirming] = useState(false);
@@ -45,7 +46,11 @@ export default function VsMenu({ ownName, opponentName, ready, cancel }) {
     <>
       <div className="stack menu menu-setup menu-vs">
         <SetupTitle />
-        {[ownName, "VS", opponentName].map((line, i) => (
+        {[
+          `${ownName}: ${wins.ours}`,
+          "VS",
+          `${opponentName}: ${wins.theirs}`,
+        ].map((line, i) => (
           <div key={i} style={{ marginLeft: centeredLeft(line) }}>
             {line}
           </div>

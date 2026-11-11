@@ -25,7 +25,7 @@ const WIN_BAR = [...LEVEL_COLORS.slice(0, 7), YELLOW].map((color) => ({
   easing: "step-end",
 }));
 
-// 2P result over the board, OK goes home
+// 2P result over the board, OK goes back to VS for another match
 // What happened, with who did it unless it was you (the title says so)
 export default function ResultMenu({ result, opponentName, ok }) {
   const titleRef = useRef(null);
