@@ -123,7 +123,7 @@ function App() {
   const [opponentLevel, setOpponentLevel] = useState(0);
   const [opponentAway, setOpponentAway] = useState(false);
   const opponentCanvasRef = useRef(null);
-  // START GAME pressed on our side and on theirs
+  // START pressed on our side and on theirs
   // The creator starts both once both have pressed it
   const readyRef = useRef({ ours: false, theirs: false });
   // How each side's game ended, { frame, reason } (see matchResult)
@@ -214,13 +214,13 @@ function App() {
           setOpponentName(cleanName(message.name) || NO_NAME);
           setMenu("vs");
         }
-        // They pressed START GAME
+        // They pressed START
         // Counts even while we're still on the result window
         if (message.type === "ready") {
           readyRef.current.theirs = true;
           if (!joining) startIfBothReady();
         }
-        // Joiner: the creator's seed, both have pressed START GAME
+        // Joiner: the creator's seed, both have pressed START
         if (
           message.type === "start" &&
           joining &&
@@ -320,7 +320,7 @@ function App() {
     joinRoomRef.current = null;
     showStartMenu();
   };
-  // START GAME on VS
+  // START on VS
   // Audio only starts on a user action
   // The game may start from a message, so audio starts here
   const ready = () => {
@@ -329,7 +329,7 @@ function App() {
     connectionRef.current.send({ type: "ready" });
     if (side === "create") startIfBothReady();
   };
-  // Creator: picks the seed once both have pressed START GAME
+  // Creator: picks the seed once both have pressed START
   // Sends it and starts its own side
   // Reset so a repeated ready can't start it twice
   const startIfBothReady = () => {

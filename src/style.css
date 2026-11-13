@@ -827,7 +827,7 @@ canvas {
 }
 
 /* Our name, VS and theirs, 40px apart, centered when they're known (centeredLeft) */
-/* WAITING FOR SAM under them once START GAME is pressed */
+/* WAITING FOR SAM under them once START is pressed */
 .menu-vs {
   /* VS and their name */
   > :nth-child(3),
@@ -835,9 +835,9 @@ canvas {
     margin-top: -24px;
   }
 
-  /* Sized for START GAME, so CANCEL stays put once it's gone */
+  /* Sized for CANCEL, the wider label, so it stays put once START is gone */
   .setup-options {
-    margin-left: 232px;
+    margin-left: 272px;
   }
 }
 
@@ -985,7 +985,7 @@ canvas {
   &.over-vs {
     top: 364px;
   }
-  /* START GAME pressed, CANCEL under WAITING FOR SAM */
+  /* START pressed, CANCEL under WAITING FOR SAM */
   &.over-vs.ready {
     top: 428px;
   }

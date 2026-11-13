@@ -7,8 +7,8 @@ import ConfirmWindow from "./ConfirmWindow";
 // Both players connected, on both sides, and between matches
 // Our name on top, VS, then theirs, each line centered on its ink
 // Each name with its matches won, 0 for both until a match ends
-// START GAME first, the countdown starts once both have pressed it
-// Once pressed, START GAME goes away and WAITING FOR SAM shows in gray
+// START first, the countdown starts once both have pressed it
+// Once pressed, START goes away and WAITING FOR SAM shows in gray
 // CANCEL and back always ask first, the other player is right there
 export default function VsMenu({ ownName, opponentName, wins, ready, cancel }) {
   const [waiting, setWaiting] = useState(false);
@@ -66,7 +66,7 @@ export default function VsMenu({ ownName, opponentName, wins, ready, cancel }) {
         <div className="stack setup-options">
           {!waiting && (
             <div className={className("start")} onClick={startGame}>
-              START GAME
+              START
             </div>
           )}
           <div
