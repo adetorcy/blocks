@@ -102,13 +102,17 @@ export function isMessage(data) {
   );
 }
 
-// Why a join failed from Trystero's error text
-// Our own handshake throws "full" or "version"
-function joinErrorReason(error) {
-  if (error === "full" || error === "version") return error;
-  if (error.includes("password")) return "password";
-  return "failed";
-}
+// Why a join failed from a Trystero error code
+// room-full: the other side already has two players
+// decrypt-failed: the password doesn't match
+// relay-failed: no relay answered at all
+// Others are left to the join timeout
+const JOIN_ERRORS = {
+  "room-full": "full",
+  "decrypt-failed": "password",
+  "relay-failed": "failed",
+  "identity-failed": "failed",
+};
 
 /**
  * Connection
@@ -131,7 +135,7 @@ export function connect(
   room,
   { joining, onOpen, onMessage, onSilence, onClose, onError },
 ) {
-  // Opponent's peer ID: the first one through the handshake
+  // Opponent's user ID: the first one in with our version
   // Kept when they drop so they can come back
   let opponent = null;
 
@@ -196,38 +200,32 @@ export function connect(
     }
   }
 
-  // Both sides send their version and whether they're full
-  // Then each checks the other's
-  // Thrown errors end up in onJoinError on that side
-  async function handshake(peerId, send, receive) {
-    // Two players only
-    // The same opponent can come back after a drop
-    const full = opponent !== null && opponent !== peerId;
-    await send({ version, full });
-    if (full) throw new Error("full");
-
-    const { data } = await receive();
-    if (data?.full) throw new Error("full");
-    if (data?.version !== version) throw new Error("version");
-  }
-
   function join({ joinRoom }) {
     if (left) return;
 
+    // Two players only (maxUsers)
+    // Identity none: a fresh user ID per page, nothing stored
+    // By default every page of one browser shares an ID, tabs and windows alike
+    // So the link opened twice there would be the same player twice
+    // With none the second page is a third player and gets GAME FULL
     trysteroRoom = joinRoom(
       {
         appId: APP_ID,
         password: room.password,
+        identity: "none",
+        maxUsers: 2,
         maxReceiveBytes: MAX_MESSAGE_BYTES,
       },
       room.roomId,
-      {
-        onPeerHandshake: handshake,
-        onJoinError: ({ error }) => {
-          if (joining) fail(joinErrorReason(error));
-        },
-      },
     );
+
+    trysteroRoom.onError(({ code }) => {
+      if (joining && JOIN_ERRORS[code]) fail(JOIN_ERRORS[code]);
+    });
+
+    // Our version, already there for the other side when they see us join
+    const profile = trysteroRoom.makeUserState("profile", null);
+    profile.set({ version }).catch(dropped);
 
     const game = trysteroRoom.makeAction("game");
     const beatAction = trysteroRoom.makeAction("beat");
@@ -237,37 +235,42 @@ export function connect(
     sendBye = byeAction.send;
 
     // Only the opponent's messages count
-    game.onMessage = (data, { peerId }) => {
-      if (peerId !== opponent) return;
+    game.onMessage((data, { userId }) => {
+      if (userId !== opponent) return;
       heard();
       if (isMessage(data)) onMessage(data);
-    };
+    });
 
-    beatAction.onMessage = (data, { peerId }) => {
-      if (peerId === opponent) heard();
-    };
+    beatAction.onMessage((data, { userId }) => {
+      if (userId === opponent) heard();
+    });
 
     // They left, or they say we were gone too long
     // Nobody else can join, so the room is done
-    byeAction.onMessage = (data, { peerId }) => {
-      if (peerId !== opponent || left) return;
+    byeAction.onMessage((data, { userId }) => {
+      if (userId !== opponent || left) return;
       close();
       onClose(data === "gone" ? "away" : "left");
-    };
+    });
 
-    trysteroRoom.onPeerJoin = (peerId) => {
+    trysteroRoom.onUserJoin(({ userId }) => {
       // Back after a drop
       // Silence ends with their next message
-      if (peerId === opponent) return;
-      // A third peer that slipped through the handshake at the same time
+      if (userId === opponent) return;
+      // A third player that got past maxUsers at the same time
       if (opponent) return;
+      // Another version: the joiner gives up, the creator keeps waiting
+      if (profile.get(userId)?.version !== version) {
+        if (joining) fail("version");
+        return;
+      }
 
-      opponent = peerId;
+      opponent = userId;
       clearTimeout(joinTimer);
       lastHeard = lastBeat = performance.now();
       beatTimer = setInterval(beat, BEAT_INTERVAL);
       onOpen();
-    };
+    });
 
     if (joining) {
       joinTimer = setTimeout(() => fail("timeout"), JOIN_TIMEOUT);
@@ -305,8 +308,8 @@ export function connect(
       .finally(() => setTimeout(close, BYE_DELAY));
   }
 
-  // Offline or the chunk failed to load
-  import("trystero").then(join, () => fail("failed"));
+  // Offline, the chunk failed to load, or joinRoom threw
+  import("trystero").then(join).catch(() => fail("failed"));
 
   return { send, leave };
 }
