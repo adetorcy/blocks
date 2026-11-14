@@ -118,8 +118,8 @@ const JOIN_ERRORS = {
  * Connection
  **/
 
-// Joins the room and calls back
-//   onOpen() once the opponent is connected
+// Joins the room with our name and calls back
+//   onOpen(name) once the opponent is connected, with their name as they sent it
 //   onMessage(message) for each game message from them
 //   onSilence(silent) when they go silent and when they're heard again
 //   onClose(reason) when the room closes for good, after the opponent was in
@@ -133,7 +133,7 @@ const JOIN_ERRORS = {
 // Trystero loads in the background
 export function connect(
   room,
-  { joining, onOpen, onMessage, onSilence, onClose, onError },
+  { name, joining, onOpen, onMessage, onSilence, onClose, onError },
 ) {
   // Opponent's user ID: the first one in with our version
   // Kept when they drop so they can come back
@@ -223,9 +223,9 @@ export function connect(
       if (joining && JOIN_ERRORS[code]) fail(JOIN_ERRORS[code]);
     });
 
-    // Our version, already there for the other side when they see us join
+    // Our version and name, already there for the other side when they see us join
     const profile = trysteroRoom.makeUserState("profile", null);
-    profile.set({ version }).catch(dropped);
+    profile.set({ version, name }).catch(dropped);
 
     const game = trysteroRoom.makeAction("game");
     const beatAction = trysteroRoom.makeAction("beat");
@@ -260,7 +260,8 @@ export function connect(
       // A third player that got past maxUsers at the same time
       if (opponent) return;
       // Another version: the joiner gives up, the creator keeps waiting
-      if (profile.get(userId)?.version !== version) {
+      const theirs = profile.get(userId);
+      if (theirs?.version !== version) {
         if (joining) fail("version");
         return;
       }
@@ -269,7 +270,7 @@ export function connect(
       clearTimeout(joinTimer);
       lastHeard = lastBeat = performance.now();
       beatTimer = setInterval(beat, BEAT_INTERVAL);
-      onOpen();
+      onOpen(theirs.name);
     });
 
     if (joining) {

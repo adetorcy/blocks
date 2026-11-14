@@ -112,7 +112,7 @@ function App() {
   const [ownName, setOwnName] = useState(null);
   const [link, setLink] = useState(null);
   const [opponentName, setOpponentName] = useState(null);
-  // 2P once the other player's name has arrived, until we leave
+  // 2P once the other player is in, until we leave
   // The dashboard's cards are hidden until the game starts
   const multiplayer = opponentName !== null;
   const [setupError, setSetupError] = useState(
@@ -197,8 +197,7 @@ function App() {
     setMenu("name");
   };
   // Both sides connect the same way
-  // Each sends its name once connected
-  // Receiving the other player's name shows VS and their name
+  // Our name goes with the join, theirs comes with the connection and shows VS
   // A room left with CANCEL can still call back on its way out
   // Only the current connection counts
   const connectRoom = (room, name, joining) => {
@@ -206,14 +205,15 @@ function App() {
     readyRef.current = { ours: false, theirs: false };
     setWins({ ours: 0, theirs: 0 });
     const connection = connect(room, {
+      name,
       joining,
-      onOpen: () => connection.send({ type: "hello", name }),
+      onOpen: (theirName) => {
+        if (!current()) return;
+        setOpponentName(cleanName(theirName) || NO_NAME);
+        setMenu("vs");
+      },
       onMessage: (message) => {
         if (!current()) return;
-        if (message.type === "hello") {
-          setOpponentName(cleanName(message.name) || NO_NAME);
-          setMenu("vs");
-        }
         // They pressed START
         // Counts even while we're still on the result window
         if (message.type === "ready") {
