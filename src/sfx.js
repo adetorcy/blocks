@@ -14,11 +14,11 @@ import lock from "./audio/lock.wav";
 // C5 E5 G5 B5 D6 G6 arpeggio, GB wave
 import clear from "./audio/clear.wav";
 
-// Four coins zigzagging to C5 C6 E5 C6, short note then long
-// Square, low-passed at 5 kHz, echo darker on every repeat
+// C5 E5 tapped twice, 100 ms apart, then E5 G5 ringing with a light wobble
+// GB wave and square together, square low-passed at 5 kHz
 import tetris from "./audio/tetris.wav";
 
-// C6 E6 G6 B6 arpeggio cycling every 60 ms and fading, GB wave
+// C6 beeped twice, 100 ms apart, GB wave
 import levelUp from "./audio/level-up.wav";
 
 // Noise thump with a triangle dropping C4 to C3
