@@ -66,7 +66,10 @@ export default class Renderer {
     this.fpsElement.textContent = 0;
   }
 
-  // Very rough FPS counter that only updates about once per second
+  // Rough FPS counter that only updates about once per second
+  // The counter only checks the time on a frame, so its window ends a little past 1 s
+  // It shows the frames in that window divided by its real length, rounded
+  // 60 Hz then shows 60, whether the display runs a hair fast or slow
   fpsCounter(now) {
     if (!this.fpsCounterStart) {
       this.fpsCounterStart = now;
@@ -74,12 +77,14 @@ export default class Renderer {
       return;
     }
 
-    if (now - this.fpsCounterStart >= 1000) {
-      this.fpsElement.textContent = this.fpsCount;
+    this.fpsCount++;
+    const elapsed = now - this.fpsCounterStart;
+    if (elapsed >= 1000) {
+      this.fpsElement.textContent = Math.round(
+        (this.fpsCount * 1000) / elapsed,
+      );
       this.fpsCount = 0;
       this.fpsCounterStart = now;
-    } else {
-      this.fpsCount++;
     }
   }
 }
