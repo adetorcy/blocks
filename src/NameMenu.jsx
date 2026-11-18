@@ -75,7 +75,7 @@ export default function NameMenu({ confirm, back }) {
       </div>
       <div className="stack setup-options">
         <div
-          className={`menu-option ${ready ? "selected" : "disabled"}`}
+          className={`menu-option selected${ready ? "" : " disabled"}`}
           onClick={() => submit(name, confirm)}
         >
           OK

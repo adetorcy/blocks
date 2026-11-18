@@ -85,7 +85,7 @@ export default function ResultMenu({ result, opponentName, ok }) {
         ))}
       </div>
       <div
-        className={`menu-option ${ready ? "selected" : "disabled"}`}
+        className={`menu-option selected${ready ? "" : " disabled"}`}
         onClick={ready ? ok : undefined}
       >
         OK

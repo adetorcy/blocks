@@ -28,7 +28,7 @@ export default function GameOverMenu({ quit }) {
     <div className="stack menu menu-box menu-game-over">
       <div className="menu-title">GAME OVER</div>
       <div
-        className={`menu-option ${ready ? "selected" : "disabled"}`}
+        className={`menu-option selected${ready ? "" : " disabled"}`}
         onClick={ready ? quit : undefined}
       >
         OK
