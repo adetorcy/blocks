@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { listenForMenuInput } from "./input";
 import { centeredLeft } from "./text";
 import { LEVEL_COLORS, YELLOW } from "./colors";
-import { TARGET_LINES } from "./constants";
+import { OK_DELAY, TARGET_LINES } from "./constants";
 
 const TITLES = { win: "YOU WIN!", lose: "YOU LOSE", draw: "DRAW" };
 const REASONS = {
@@ -27,8 +27,12 @@ const WIN_BAR = [...LEVEL_COLORS.slice(0, 7), YELLOW].map((color) => ({
 
 // 2P result over the board, OK goes back to VS for another match
 // What happened, with who did it unless it was you (the title says so)
+// Wait a bit before showing OK and calling ok()
+// So we don't accidentally hit OK before we've
+// had the chance to see the result
 export default function ResultMenu({ result, opponentName, ok }) {
   const titleRef = useRef(null);
+  const [ready, setReady] = useState(false);
   const { outcome, who, reason } = result;
   const lines = [
     { you: null, opponent: opponentName, both: "BOTH" }[who],
@@ -36,13 +40,20 @@ export default function ResultMenu({ result, opponentName, ok }) {
   ].filter(Boolean);
 
   useEffect(() => {
+    const timeoutID = setTimeout(() => setReady(true), OK_DELAY);
+    return () => clearTimeout(timeoutID);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+
     function handleMenuInput(input, repeat) {
       // Ignore auto-repeat from a held key
       if (input === "confirm" && !repeat) ok();
     }
 
     return listenForMenuInput(handleMenuInput);
-  }, [ok]);
+  }, [ok, ready]);
 
   useEffect(() => {
     if (outcome !== "win") return;
@@ -73,7 +84,10 @@ export default function ResultMenu({ result, opponentName, ok }) {
           </div>
         ))}
       </div>
-      <div className="menu-option selected" onClick={ok}>
+      <div
+        className={`menu-option ${ready ? "selected" : "disabled"}`}
+        onClick={ready ? ok : undefined}
+      >
         OK
       </div>
     </div>

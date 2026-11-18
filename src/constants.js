@@ -57,3 +57,6 @@ export const GARBAGE_ROWS = [0, 0, 1, 2, 4];
 
 // Soft drop is 1/3 G
 export const SOFT_DROP_FRAMES = 3;
+
+// How long before we can click out of GAME OVER menu (ms)
+export const OK_DELAY = 2000;
